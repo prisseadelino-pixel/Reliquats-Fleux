@@ -1269,7 +1269,7 @@
       btnEnregistrer.disabled = true;
       btnEnregistrer.textContent = "Enregistrement...";
 
-      // SÉCURITÉ ANTI-BLOCAGE : Remet le bouton en état normal après 6 secondes si Firebase ne répond pas
+      // SÉCURITÉ ANTI-BLOCAGE
       const timerSecurite = setTimeout(() => {
         if (btnEnregistrer.disabled) {
           btnEnregistrer.disabled = false;
@@ -1280,23 +1280,20 @@
 
       effectuerSauvegardeSecurite();
 
-      let updatesCatalogue = {};
+      // Mise à jour propre du catalogue sans bloquer l'écriture Firebase
       if (ref1) {
-        updatesCatalogue[encodeURIComponent(ref1)] = {
+        db.ref('catalogue_photos/' + ref1).update({
           photo: imageCaptureeData1 || (catalogueArticles[ref1] ? catalogueArticles[ref1].photo : ""),
           fournisseur: fournisseur1,
           remarque: notes
-        };
+        });
       }
       if (ref2) {
-        updatesCatalogue[encodeURIComponent(ref2)] = {
+        db.ref('catalogue_photos/' + ref2).update({
           photo: imageCaptureeData2 || (catalogueArticles[ref2] ? catalogueArticles[ref2].photo : ""),
           fournisseur: fournisseur2,
           remarque: notes
-        };
-      }
-      if (Object.keys(updatesCatalogue).length > 0) {
-        db.ref('catalogue_photos').update(updatesCatalogue);
+        });
       }
 
       const idObjet = modeEditionId !== null ? modeEditionId : Date.now();
@@ -1318,7 +1315,7 @@
 
       db.ref('commandes/' + idObjet).set(commandeData)
         .then(() => {
-          clearTimeout(timerSecurite); // Annule la sécurité si c'est réussi
+          clearTimeout(timerSecurite);
           reinitialiserFormulaire();
           btnEnregistrer.disabled = false;
         })
