@@ -931,17 +931,6 @@
     const ADMIN_PASSWORD = "1234";
     let estAdmin = false;
 
-    // 🛡️ SAUVEGARDE AUTOMATIQUE DE SECOURS
-    function effectuerSauvegardeSecurite() {
-      db.ref('commandes').once('value').then(snapshot => {
-        const currentData = snapshot.val();
-        if (currentData) {
-          const dateBackup = new Date().toISOString().replace(/[:.]/g, '-');
-          db.ref('sauvegarde_securite_commandes/' + dateBackup).set(currentData);
-        }
-      });
-    }
-
     const homeScreen = document.getElementById('home-screen');
     const appScreen = document.getElementById('app-screen');
     const btnCommencer = document.getElementById('btnCommencer');
@@ -1269,18 +1258,6 @@
       btnEnregistrer.disabled = true;
       btnEnregistrer.textContent = "Enregistrement...";
 
-      // SÉCURITÉ ANTI-BLOCAGE
-      const timerSecurite = setTimeout(() => {
-        if (btnEnregistrer.disabled) {
-          btnEnregistrer.disabled = false;
-          btnEnregistrer.textContent = "Enregistrer les reliquats";
-          alert("⚠️ L'enregistrement prend trop de temps. Vérifiez votre connexion internet.");
-        }
-      }, 6000);
-
-      effectuerSauvegardeSecurite();
-
-      // Mise à jour propre du catalogue sans bloquer l'écriture Firebase
       if (ref1) {
         db.ref('catalogue_photos/' + ref1).update({
           photo: imageCaptureeData1 || (catalogueArticles[ref1] ? catalogueArticles[ref1].photo : ""),
@@ -1315,12 +1292,10 @@
 
       db.ref('commandes/' + idObjet).set(commandeData)
         .then(() => {
-          clearTimeout(timerSecurite);
           reinitialiserFormulaire();
           btnEnregistrer.disabled = false;
         })
         .catch((error) => {
-          clearTimeout(timerSecurite);
           btnEnregistrer.disabled = false;
           btnEnregistrer.textContent = "Enregistrer les reliquats";
           alert("❌ ÉCHEC FIREBASE : " + error.message);
@@ -1442,8 +1417,6 @@
       if (!item) return;
 
       if (confirm(`Voulez-vous vraiment supprimer le reliquat ${item.numero} ?`)) {
-        effectuerSauvegardeSecurite();
-
         db.ref('commandes/' + id).remove()
           .then(() => {
             if (modeEditionId === id) reinitialiserFormulaire();
@@ -1468,8 +1441,6 @@
       }
 
       if (confirm("Voulez-vous vraiment effacer TOUT l'historique de la base de données ?")) {
-        effectuerSauvegardeSecurite();
-
         db.ref('commandes').remove()
           .then(() => {
             reinitialiserFormulaire();
@@ -1609,8 +1580,6 @@
         db.ref('commandes').once('value').then(snapshot => {
           const existingData = snapshot.val() || {};
 
-          effectuerSauvegardeSecurite();
-
           let groupCommandes = {};
 
           Object.keys(existingData).forEach(key => {
@@ -1694,7 +1663,7 @@
             return;
           }
 
-          if (confirm(`Voulez-vous importer et fusionner ces commandes ? (${newAddedCount} nouvelle(s) commande(s) détectée(s))\n\n(Une sauvegarde de sécurité a été créée sur Firebase au cas où).`)) {
+          if (confirm(`Voulez-vous importer et fusionner ces commandes ? (${newAddedCount} nouvelle(s) commande(s) détectée(s))`)) {
             let updates = {};
             keys.forEach(num => {
               const cmd = groupCommandes[num];
