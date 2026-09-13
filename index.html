@@ -279,24 +279,6 @@
       border-color: var(--primary);
     }
 
-    .ref-input-row {
-      display: flex;
-      gap: 0.5rem;
-      align-items: center;
-    }
-
-    .btn-autofill {
-      background-color: #0284c7;
-      color: white;
-      border: none;
-      padding: 0.75rem 1rem;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-      white-space: nowrap;
-      font-size: 0.9rem;
-    }
-
     .photo-preview-wrapper {
       position: relative;
       margin-bottom: 0.75rem;
@@ -832,10 +814,7 @@
 
         <div class="form-group" style="margin-bottom: 0;">
           <label for="ref1">Référence article (Photo 1)</label>
-          <div class="ref-input-row">
-            <input type="text" id="ref1" placeholder="Ex: QM6214" autocomplete="off">
-            <button type="button" class="btn-autofill" id="btnRemplir1">🔍 Charger</button>
-          </div>
+          <input type="text" id="ref1" placeholder="Ex: QM6214" autocomplete="off">
         </div>
       </div>
 
@@ -873,10 +852,7 @@
 
         <div class="form-group" style="margin-bottom: 0;">
           <label for="ref2">Référence article (Photo 2)</label>
-          <div class="ref-input-row">
-            <input type="text" id="ref2" placeholder="Ex: Ytr-9812" autocomplete="off">
-            <button type="button" class="btn-autofill" id="btnRemplir2">🔍 Charger</button>
-          </div>
+          <input type="text" id="ref2" placeholder="Ex: Ytr-9812" autocomplete="off">
         </div>
       </div>
 
@@ -1014,10 +990,8 @@
     const inputNumero = document.getElementById('numeroCommande');
     const inputFournisseur1 = document.getElementById('fournisseur1');
     const inputRef1 = document.getElementById('ref1');
-    const btnRemplir1 = document.getElementById('btnRemplir1');
     const inputFournisseur2 = document.getElementById('fournisseur2');
     const inputRef2 = document.getElementById('ref2');
-    const btnRemplir2 = document.getElementById('btnRemplir2');
     const inputNotes = document.getElementById('notes');
     const btnNouvelleCommande = document.getElementById('btnNouvelleCommande');
     
@@ -1061,9 +1035,7 @@
     const modalNotes = document.getElementById('modalNotes');
     const closeModal = document.getElementById('closeModal');
 
-    // Chargement intelligent combinant le catalogue ET l'historique des commandes pour ne jamais rater une photo
     function chargerToutesLesDonnees() {
-      // 1. Charger le catalogue
       db.ref('catalogue_photos').once('value').then((snapshot) => {
         const data = snapshot.val() || {};
         Object.keys(data).forEach(cle => {
@@ -1078,7 +1050,6 @@
         });
       });
 
-      // 2. Parcourir aussi l'historique des commandes pour récupérer les photos existantes au cas où
       db.ref('commandes').once('value').then((snapshot) => {
         const data = snapshot.val() || {};
         Object.keys(data).forEach(key => {
@@ -1115,15 +1086,18 @@
 
     function appliquerAutocomple(refInput, fournisseurInput, previewEl, wrapperEl, isPhoto1 = true) {
       const ref = refInput.value.trim();
-      if (!ref) return;
+      if (!ref) {
+        if (isPhoto1) imageCaptureeData1 = "";
+        else imageCaptureeData2 = "";
+        previewEl.src = "";
+        wrapperEl.style.display = 'none';
+        return;
+      }
 
       const cleNorm = "REF_" + ref.replace(/[.#$\/\[\]]/g, "_");
-      
-      // Cherche dans le catalogue ou directement dans l'historique des commandes existantes
       let item = catalogueArticles[ref] || catalogueArticles[cleNorm] || catalogueArticles["REF_" + ref];
 
       if (!item) {
-        // Recherche de secours dans la liste globale des commandes chargées
         const found = commandes.find(c => c.ref1 === ref || c.ref2 === ref);
         if (found) {
           item = {
@@ -1134,32 +1108,35 @@
         }
       }
 
-      if (item) {
-        if (item.photo) {
-          if (isPhoto1) {
-            imageCaptureeData1 = item.photo;
-          } else {
-            imageCaptureeData2 = item.photo;
-          }
-          previewEl.src = item.photo;
-          wrapperEl.style.display = 'block';
+      if (item && item.photo) {
+        if (isPhoto1) {
+          imageCaptureeData1 = item.photo;
+        } else {
+          imageCaptureeData2 = item.photo;
         }
-        if (item.fournisseur && !fournisseurInput.value.trim()) {
-          fournisseurInput.value = item.fournisseur;
-        }
-        if (item.remarque && !inputNotes.value.trim() && isPhoto1) {
-          inputNotes.value = item.remarque;
-        }
+        previewEl.src = item.photo;
+        wrapperEl.style.display = 'block';
       } else {
-        alert("Aucun article trouvé pour la référence : " + ref);
+        if (isPhoto1) imageCaptureeData1 = "";
+        else imageCaptureeData2 = "";
+        previewEl.src = "";
+        wrapperEl.style.display = 'none';
+      }
+
+      if (item && item.fournisseur && !fournisseurInput.value.trim()) {
+        fournisseurInput.value = item.fournisseur;
+      }
+      if (item && item.remarque && !inputNotes.value.trim() && isPhoto1) {
+        inputNotes.value = item.remarque;
       }
     }
 
+    // Autocomplétion dynamique en temps réel (frappe ou scan direct)
+    inputRef1.addEventListener('input', () => appliquerAutocomple(inputRef1, inputFournisseur1, photoPreview1, previewWrapper1, true));
     inputRef1.addEventListener('blur', () => appliquerAutocomple(inputRef1, inputFournisseur1, photoPreview1, previewWrapper1, true));
-    btnRemplir1.addEventListener('click', () => appliquerAutocomple(inputRef1, inputFournisseur1, photoPreview1, previewWrapper1, true));
 
+    inputRef2.addEventListener('input', () => appliquerAutocomple(inputRef2, inputFournisseur2, photoPreview2, previewWrapper2, false));
     inputRef2.addEventListener('blur', () => appliquerAutocomple(inputRef2, inputFournisseur2, photoPreview2, previewWrapper2, false));
-    btnRemplir2.addEventListener('click', () => appliquerAutocomple(inputRef2, inputFournisseur2, photoPreview2, previewWrapper2, false));
 
     btnAfficherArticle2.addEventListener('click', () => {
       blocArticle2.style.display = 'block';
@@ -1290,7 +1267,6 @@
       btnEnregistrer.disabled = true;
       btnEnregistrer.textContent = "Enregistrement...";
 
-      // Recherche de la photo (écran -> catalogue -> ou ancienne commande existante)
       let photo1Final = imageCaptureeData1;
       if (!photo1Final && ref1) {
         const found = commandes.find(c => c.ref1 === ref1 || c.ref2 === ref1);
@@ -1311,7 +1287,6 @@
         }
       }
 
-      // Enregistrement systématique dans le catalogue central Firebase
       if (ref1 && photo1Final) {
         const cle1 = "REF_" + ref1.replace(/[.#$\/\[\]]/g, "_");
         db.ref('catalogue_photos/' + cle1).update({
