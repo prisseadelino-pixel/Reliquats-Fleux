@@ -90,7 +90,7 @@
     /* --- APPLICATION --- */
     #app-screen {
       display: none;
-      max-width: 1400px; /* Élargi pour supporter les deux colonnes sur PC */
+      max-width: 1400px;
       margin: 0 auto;
       padding: 1rem;
     }
@@ -498,7 +498,7 @@
       cursor: pointer;
     }
 
-    /* COMPTEUR DE RELIQUATS */
+    /* COMPTEUR DE RELIQUATS AGRANDI EN HAUT À DROITE */
     .section-header-flex {
       display: flex;
       align-items: center;
@@ -508,11 +508,11 @@
     .badge-count {
       background: rgba(255, 107, 0, 0.15);
       color: var(--primary);
-      border: 1px solid rgba(255, 107, 0, 0.3);
-      padding: 0.2rem 0.6rem;
-      border-radius: 20px;
-      font-size: 0.85rem;
-      font-weight: bold;
+      border: 1px solid rgba(255, 107, 0, 0.4);
+      padding: 0.35rem 0.9rem;
+      border-radius: 30px;
+      font-size: 1.1rem;
+      font-weight: 800;
     }
 
     /* --- MISE EN PAGE BUREAU (DISPOSITION 2 COLONNES) --- */
@@ -1528,14 +1528,23 @@
 
       db.ref('/').once('value').then(snapshot => {
         const fullData = snapshot.val() || {};
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(fullData, null, 2));
+        const jsonString = JSON.stringify(fullData, null, 2);
+        
+        const blob = new Blob([jsonString], { type: "application/json;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
         const downloadAnchor = document.createElement('a');
-        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.href = url;
+        
         const dateJour = new Date().toISOString().slice(0, 10);
-        downloadAnchor.setAttribute("download", `sauvegarde_reliquats_fleux_${dateJour}.json`);
+        downloadAnchor.download = `sauvegarde_reliquats_fleux_${dateJour}.json`;
+        
         document.body.appendChild(downloadAnchor);
         downloadAnchor.click();
-        downloadAnchor.remove();
+        
+        setTimeout(() => {
+          document.body.removeChild(downloadAnchor);
+          URL.revokeObjectURL(url);
+        }, 100);
       });
     });
 
@@ -1961,11 +1970,7 @@
   </script>
   <script>
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-          .then(() => console.log("Service Worker enregistré avec succès !"))
-          .catch((err) => console.log("Erreur Service Worker : ", err));
-      });
+      window.serviceWorker.register('./sw.js').catch(() => {});
     }
   </script>
 
