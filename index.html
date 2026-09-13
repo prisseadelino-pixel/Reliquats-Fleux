@@ -1035,24 +1035,9 @@
     const modalNotes = document.getElementById('modalNotes');
     const closeModal = document.getElementById('closeModal');
 
-    // Fonction de nettoyage sécurisée pour les clés Firebase (évite les bugs avec les chiffres/symboles)
-    function formaterCleFirebase(ref) {
-      if (!ref) return "";
-      return "REF_" + ref.trim().replace(/[.#$\/\[\]]/g, "_");
-    }
-
     // ÉCOUTE DU CATALOGUE CENTRAL DANS FIREBASE
     db.ref('catalogue_photos').on('value', (snapshot) => {
-      const data = snapshot.val() || {};
-      catalogueArticles = {};
-      // Normalisation pour récupérer les articles par leur vraie référence
-      Object.keys(data).forEach(cle => {
-        const item = data[cle];
-        if (item && item.refOriginale) {
-          catalogueArticles[item.refOriginale] = item;
-        }
-        catalogueArticles[cle] = item;
-      });
+      catalogueArticles = snapshot.val() || {};
     });
 
     // AUTO-REMPLISSAGE QUAND ON SAISIT LA RÉFÉRENCE
@@ -1220,24 +1205,20 @@
       btnEnregistrer.disabled = true;
       btnEnregistrer.textContent = "Enregistrement...";
 
-      // Enregistrement sécurisé dans le catalogue central Firebase avec clé formatée
-      if (ref1) {
-        const cleFirebase1 = formaterCleFirebase(ref1);
-        db.ref('catalogue_photos/' + cleFirebase1).update({
-          refOriginale: ref1,
-          photo: imageCaptureeData1 || (catalogueArticles[ref1] ? catalogueArticles[ref1].photo : ""),
+      // MISE À JOUR DU CATALOGUE SANS BLOQUER SI LA PHOTO EST ABSENTE
+      if (ref1 && imageCaptureeData1) {
+        db.ref('catalogue_photos/' + ref1).update({
+          photo: imageCaptureeData1,
           fournisseur: fournisseur1,
           remarque: notes
-        });
+        }).catch(() => {});
       }
-      if (ref2) {
-        const cleFirebase2 = formaterCleFirebase(ref2);
-        db.ref('catalogue_photos/' + cleFirebase2).update({
-          refOriginale: ref2,
-          photo: imageCaptureeData2 || (catalogueArticles[ref2] ? catalogueArticles[ref2].photo : ""),
+      if (ref2 && imageCaptureeData2) {
+        db.ref('catalogue_photos/' + ref2).update({
+          photo: imageCaptureeData2,
           fournisseur: fournisseur2,
           remarque: notes
-        });
+        }).catch(() => {});
       }
 
       const idObjet = modeEditionId !== null ? modeEditionId : Date.now();
