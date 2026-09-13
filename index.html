@@ -931,7 +931,7 @@
     const ADMIN_PASSWORD = "1234";
     let estAdmin = false;
 
-    // 🛡️ FONCTION UTILITAIRE DE SAUVEGARDE AUTOMATIQUE DE SECOURS
+    // 🛡️ SAUVEGARDE AUTOMATIQUE DE SECOURS
     function effectuerSauvegardeSecurite() {
       db.ref('commandes').once('value').then(snapshot => {
         const currentData = snapshot.val();
@@ -1109,7 +1109,8 @@
       const ref = inputRef1.value.trim();
       if (ref && catalogueArticles[ref]) {
         const item = catalogueArticles[ref];
-        if (item.photo && !imageCaptureeData1) {
+        // AUTO-AFFICHE LA PHOTO SI ELLE EXISTE DANS LE CATALOGUE
+        if (item.photo) {
           imageCaptureeData1 = item.photo;
           photoPreview1.src = imageCaptureeData1;
           previewWrapper1.style.display = 'block';
@@ -1127,7 +1128,8 @@
       const ref = inputRef2.value.trim();
       if (ref && catalogueArticles[ref]) {
         const item = catalogueArticles[ref];
-        if (item.photo && !imageCaptureeData2) {
+        // AUTO-AFFICHE LA PHOTO 2 SI ELLE EXISTE DANS LE CATALOGUE
+        if (item.photo) {
           imageCaptureeData2 = item.photo;
           photoPreview2.src = imageCaptureeData2;
           previewWrapper2.style.display = 'block';
@@ -1480,7 +1482,6 @@
         return numMatch || f1Match || ref1Match || f2Match || ref2Match;
       });
 
-      // Met à jour le compteur dynamique
       badgeCount.textContent = liste.length;
 
       if (liste.length === 0) {
