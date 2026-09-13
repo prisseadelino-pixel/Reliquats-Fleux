@@ -917,9 +917,13 @@
             <div class="export-actions-row">
               <input type="date" id="dateFiltreExport" class="input-date-custom">
               <button class="btn-pdf" id="btnExportPDF">📄 Exporter PDF</button>
-              <button class="btn-sheets" id="btnExportSheets">🟢 Google Sheets</button>
-              <input type="file" id="fileImportCSV" accept=".csv,.txt" style="display: none;">
-              <button class="btn-import" id="btnImportSheets">📥 Importer CSV</button>
+              
+              <!-- BOUTONS GOOGLE SHEETS ET IMPORTER CSV MASQUÉS PAR DÉFAUT -->
+              <span id="adminExportOptions" style="display: none; display: contents;">
+                <button class="btn-sheets" id="btnExportSheets">🟢 Google Sheets</button>
+                <input type="file" id="fileImportCSV" accept=".csv,.txt" style="display: none;">
+                <button class="btn-import" id="btnImportSheets">📥 Importer CSV</button>
+              </span>
             </div>
           </div>
 
@@ -974,6 +978,7 @@
     const dropdownMenu = document.getElementById('dropdownMenu');
     const btnToggleAdmin = document.getElementById('btnToggleAdmin');
     const adminMenuOptions = document.getElementById('adminMenuOptions');
+    const adminExportOptions = document.getElementById('adminExportOptions');
     const badgeCount = document.getElementById('badgeCount');
 
     btnMenu.addEventListener('click', (e) => {
@@ -994,6 +999,7 @@
           btnToggleAdmin.innerHTML = "🔓 Mode Admin : ON";
           btnToggleAdmin.style.color = "#16a34a";
           adminMenuOptions.style.display = "block";
+          adminExportOptions.style.display = "inline-flex";
           alert("✅ Mode Administrateur activé !");
           afficherGalerie(inputRecherche.value);
         } else if (mdp !== null) {
@@ -1004,6 +1010,7 @@
         btnToggleAdmin.innerHTML = "🔒 Mode Admin : OFF";
         btnToggleAdmin.style.color = "var(--text)";
         adminMenuOptions.style.display = "none";
+        adminExportOptions.style.display = "none";
         alert("🔒 Mode Administrateur désactivé.");
         afficherGalerie(inputRecherche.value);
       }
@@ -1444,6 +1451,7 @@
           btnToggleAdmin.innerHTML = "🔓 Mode Admin : ON";
           btnToggleAdmin.style.color = "#16a34a";
           adminMenuOptions.style.display = "block";
+          adminExportOptions.style.display = "inline-flex";
         } else {
           if (mdp !== null) alert("❌ Code incorrect !");
           return;
@@ -1505,6 +1513,7 @@
           btnToggleAdmin.innerHTML = "🔓 Mode Admin : ON";
           btnToggleAdmin.style.color = "#16a34a";
           adminMenuOptions.style.display = "block";
+          adminExportOptions.style.display = "inline-flex";
         } else {
           if (mdp !== null) alert("❌ Code incorrect !");
           return;
@@ -1534,6 +1543,7 @@
         btnToggleAdmin.innerHTML = "🔓 Mode Admin : ON";
         btnToggleAdmin.style.color = "#16a34a";
         adminMenuOptions.style.display = "block";
+        adminExportOptions.style.display = "inline-flex";
       }
 
       db.ref('/').once('value').then(snapshot => {
@@ -1570,6 +1580,7 @@
         btnToggleAdmin.innerHTML = "🔓 Mode Admin : ON";
         btnToggleAdmin.style.color = "#16a34a";
         adminMenuOptions.style.display = "block";
+        adminExportOptions.style.display = "inline-flex";
       }
       fileRestoreJson.click();
     });
@@ -1614,6 +1625,7 @@
           btnToggleAdmin.innerHTML = "🔓 Mode Admin : ON";
           btnToggleAdmin.style.color = "#16a34a";
           adminMenuOptions.style.display = "block";
+          adminExportOptions.style.display = "inline-flex";
         } else {
           if (mdp !== null) alert("❌ Code incorrect !");
           return;
