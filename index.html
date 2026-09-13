@@ -1109,7 +1109,6 @@
       const ref = inputRef1.value.trim();
       if (ref && catalogueArticles[ref]) {
         const item = catalogueArticles[ref];
-        // AUTO-AFFICHE LA PHOTO SI ELLE EXISTE DANS LE CATALOGUE
         if (item.photo) {
           imageCaptureeData1 = item.photo;
           photoPreview1.src = imageCaptureeData1;
@@ -1128,7 +1127,6 @@
       const ref = inputRef2.value.trim();
       if (ref && catalogueArticles[ref]) {
         const item = catalogueArticles[ref];
-        // AUTO-AFFICHE LA PHOTO 2 SI ELLE EXISTE DANS LE CATALOGUE
         if (item.photo) {
           imageCaptureeData2 = item.photo;
           photoPreview2.src = imageCaptureeData2;
@@ -1271,6 +1269,15 @@
       btnEnregistrer.disabled = true;
       btnEnregistrer.textContent = "Enregistrement...";
 
+      // SÉCURITÉ ANTI-BLOCAGE : Remet le bouton en état normal après 6 secondes si Firebase ne répond pas
+      const timerSecurite = setTimeout(() => {
+        if (btnEnregistrer.disabled) {
+          btnEnregistrer.disabled = false;
+          btnEnregistrer.textContent = "Enregistrer les reliquats";
+          alert("⚠️ L'enregistrement prend trop de temps. Vérifiez votre connexion internet.");
+        }
+      }, 6000);
+
       effectuerSauvegardeSecurite();
 
       let updatesCatalogue = {};
@@ -1311,10 +1318,12 @@
 
       db.ref('commandes/' + idObjet).set(commandeData)
         .then(() => {
+          clearTimeout(timerSecurite); // Annule la sécurité si c'est réussi
           reinitialiserFormulaire();
           btnEnregistrer.disabled = false;
         })
         .catch((error) => {
+          clearTimeout(timerSecurite);
           btnEnregistrer.disabled = false;
           btnEnregistrer.textContent = "Enregistrer les reliquats";
           alert("❌ ÉCHEC FIREBASE : " + error.message);
