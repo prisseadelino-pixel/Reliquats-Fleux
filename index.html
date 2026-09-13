@@ -994,7 +994,7 @@
       homeScreen.style.display = 'none';
       appScreen.style.display = 'block';
       reinitialiserFormulaire();
-      chargerCatalogueDirect();
+      chargerToutesLesDonnees();
     });
 
     btnRetourAccueil.addEventListener('click', () => {
@@ -1061,10 +1061,11 @@
     const modalNotes = document.getElementById('modalNotes');
     const closeModal = document.getElementById('closeModal');
 
-    function chargerCatalogueDirect() {
+    // Chargement intelligent combinant le catalogue ET l'historique des commandes pour ne jamais rater une photo
+    function chargerToutesLesDonnees() {
+      // 1. Charger le catalogue
       db.ref('catalogue_photos').once('value').then((snapshot) => {
         const data = snapshot.val() || {};
-        catalogueArticles = {};
         Object.keys(data).forEach(cle => {
           const item = data[cle];
           if (item) {
@@ -1076,11 +1077,30 @@
           }
         });
       });
+
+      // 2. Parcourir aussi l'historique des commandes pour récupérer les photos existantes au cas où
+      db.ref('commandes').once('value').then((snapshot) => {
+        const data = snapshot.val() || {};
+        Object.keys(data).forEach(key => {
+          const cmd = data[key];
+          if (cmd) {
+            if (cmd.ref1 && cmd.photo) {
+              if (!catalogueArticles[cmd.ref1]) catalogueArticles[cmd.ref1] = {};
+              catalogueArticles[cmd.ref1].photo = cmd.photo;
+              if (cmd.fournisseur1) catalogueArticles[cmd.ref1].fournisseur = cmd.fournisseur1;
+            }
+            if (cmd.ref2 && cmd.photo2) {
+              if (!catalogueArticles[cmd.ref2]) catalogueArticles[cmd.ref2] = {};
+              catalogueArticles[cmd.ref2].photo = cmd.photo2;
+              if (cmd.fournisseur2) catalogueArticles[cmd.ref2].fournisseur = cmd.fournisseur2;
+            }
+          }
+        });
+      });
     }
 
     db.ref('catalogue_photos').on('value', (snapshot) => {
       const data = snapshot.val() || {};
-      catalogueArticles = {};
       Object.keys(data).forEach(cle => {
         const item = data[cle];
         if (item) {
@@ -1098,7 +1118,21 @@
       if (!ref) return;
 
       const cleNorm = "REF_" + ref.replace(/[.#$\/\[\]]/g, "_");
-      const item = catalogueArticles[ref] || catalogueArticles[cleNorm] || catalogueArticles["REF_" + ref];
+      
+      // Cherche dans le catalogue ou directement dans l'historique des commandes existantes
+      let item = catalogueArticles[ref] || catalogueArticles[cleNorm] || catalogueArticles["REF_" + ref];
+
+      if (!item) {
+        // Recherche de secours dans la liste globale des commandes chargées
+        const found = commandes.find(c => c.ref1 === ref || c.ref2 === ref);
+        if (found) {
+          item = {
+            photo: found.ref1 === ref ? found.photo : found.photo2,
+            fournisseur: found.ref1 === ref ? found.fournisseur1 : found.fournisseur2,
+            remarque: found.notes
+          };
+        }
+      }
 
       if (item) {
         if (item.photo) {
@@ -1117,7 +1151,7 @@
           inputNotes.value = item.remarque;
         }
       } else {
-        alert("Aucun article trouvé dans le catalogue pour la référence : " + ref);
+        alert("Aucun article trouvé pour la référence : " + ref);
       }
     }
 
@@ -1256,44 +1290,44 @@
       btnEnregistrer.disabled = true;
       btnEnregistrer.textContent = "Enregistrement...";
 
-      // Récupération intelligente de la photo (depuis l'écran OU depuis le catalogue si déjà existante)
+      // Recherche de la photo (écran -> catalogue -> ou ancienne commande existante)
       let photo1Final = imageCaptureeData1;
       if (!photo1Final && ref1) {
+        const found = commandes.find(c => c.ref1 === ref1 || c.ref2 === ref1);
+        if (found) photo1Final = (found.ref1 === ref1 ? found.photo : found.photo2);
         const cle1 = "REF_" + ref1.replace(/[.#$\/\[\]]/g, "_");
-        const catalogItem1 = catalogueArticles[ref1] || catalogueArticles[cle1] || catalogueArticles["REF_" + ref1];
-        if (catalogItem1 && catalogItem1.photo) {
-          photo1Final = catalogItem1.photo;
+        if (!photo1Final && catalogueArticles[cle1] && catalogueArticles[cle1].photo) {
+          photo1Final = catalogueArticles[cle1].photo;
         }
       }
 
       let photo2Final = imageCaptureeData2;
       if (!photo2Final && ref2) {
+        const found = commandes.find(c => c.ref1 === ref2 || c.ref2 === ref2);
+        if (found) photo2Final = (found.ref1 === ref2 ? found.photo : found.photo2);
         const cle2 = "REF_" + ref2.replace(/[.#$\/\[\]]/g, "_");
-        const catalogItem2 = catalogueArticles[ref2] || catalogueArticles[cle2] || catalogueArticles["REF_" + ref2];
-        if (catalogItem2 && catalogItem2.photo) {
-          photo2Final = catalogItem2.photo;
+        if (!photo2Final && catalogueArticles[cle2] && catalogueArticles[cle2].photo) {
+          photo2Final = catalogueArticles[cle2].photo;
         }
       }
 
-      // Enregistrement / Mise à jour dans le catalogue central Firebase
-      if (ref1) {
+      // Enregistrement systématique dans le catalogue central Firebase
+      if (ref1 && photo1Final) {
         const cle1 = "REF_" + ref1.replace(/[.#$\/\[\]]/g, "_");
-        const existant1 = catalogueArticles[ref1] || catalogueArticles[cle1] || {};
         db.ref('catalogue_photos/' + cle1).update({
           refOriginale: ref1,
-          photo: photo1Final || existant1.photo || "",
-          fournisseur: fournisseur1 || existant1.fournisseur || "",
-          remarque: notes || existant1.remarque || ""
+          photo: photo1Final,
+          fournisseur: fournisseur1,
+          remarque: notes
         }).catch(() => {});
       }
-      if (ref2) {
+      if (ref2 && photo2Final) {
         const cle2 = "REF_" + ref2.replace(/[.#$\/\[\]]/g, "_");
-        const existant2 = catalogueArticles[ref2] || catalogueArticles[cle2] || {};
         db.ref('catalogue_photos/' + cle2).update({
           refOriginale: ref2,
-          photo: photo2Final || existant2.photo || "",
-          fournisseur: fournisseur2 || existant2.fournisseur || "",
-          remarque: notes || existant2.remarque || ""
+          photo: photo2Final,
+          fournisseur: fournisseur2,
+          remarque: notes
         }).catch(() => {});
       }
 
@@ -1630,9 +1664,14 @@
               let remarqueFinale = designation || "";
 
               const cleNorm = "REF_" + ref.replace(/[.#$\/\[\]]/g, "_");
-              const catalogItem = catalogueArticles[ref] || catalogueArticles[cleNorm] || catalogueArticles["REF_" + ref];
+              let catalogItem = catalogueArticles[ref] || catalogueArticles[cleNorm] || catalogueArticles["REF_" + ref];
 
-              if (ref && catalogItem) {
+              if (!catalogItem) {
+                const found = commandes.find(c => c.ref1 === ref || c.ref2 === ref);
+                if (found) {
+                  photoAuto = (found.ref1 === ref ? found.photo : found.photo2);
+                }
+              } else {
                 if (catalogItem.photo) photoAuto = catalogItem.photo;
                 if (catalogItem.fournisseur) fournisseurFinal = catalogItem.fournisseur;
                 if (catalogItem.remarque && !remarqueFinale) remarqueFinale = catalogItem.remarque;
@@ -1665,11 +1704,7 @@
                 } else if (!cmd.ref2 && cmd.ref1 !== ref) {
                   cmd.fournisseur2 = fournisseurFinal;
                   cmd.ref2 = ref;
-                  let photoAuto2 = "";
-                  const catalogItem2 = catalogueArticles[ref] || catalogueArticles[cleNorm] || catalogueArticles["REF_" + ref];
-                  if (ref && catalogItem2 && catalogItem2.photo) {
-                    photoAuto2 = catalogItem2.photo;
-                  }
+                  let photoAuto2 = photoAuto;
                   if (!cmd.photo2 && photoAuto2) cmd.photo2 = photoAuto2;
                   if (remarqueFinale && cmd.notes && !cmd.notes.includes(remarqueFinale)) {
                     cmd.notes = cmd.notes + " / " + remarqueFinale;
