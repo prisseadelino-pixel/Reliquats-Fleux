@@ -178,7 +178,7 @@
       border-radius: 10px;
       box-shadow: 0 10px 25px rgba(0,0,0,0.5);
       z-index: 100;
-      min-width: 240px;
+      min-width: 200px;
       overflow: hidden;
       margin-top: 0.4rem;
     }
@@ -205,10 +205,6 @@
 
     .dropdown-item.danger {
       color: #f43f5e;
-    }
-
-    .dropdown-item.warning {
-      color: #eab308;
     }
 
     .dropdown-item:hover {
@@ -768,9 +764,6 @@
           <button class="dropdown-item" id="btnToggleAdmin">
             🔒 Mode Admin : OFF
           </button>
-          <button class="dropdown-item warning" id="btnRestaurerBackup" style="display: none;">
-            📥 Restaurer une sauvegarde
-          </button>
           <button class="dropdown-item danger" id="btnViderHistorique">
             🗑️ Vider l'historique
           </button>
@@ -940,7 +933,6 @@
     const btnMenu = document.getElementById('btnMenu');
     const dropdownMenu = document.getElementById('dropdownMenu');
     const btnToggleAdmin = document.getElementById('btnToggleAdmin');
-    const btnRestaurerBackup = document.getElementById('btnRestaurerBackup');
     const badgeCount = document.getElementById('badgeCount');
 
     btnMenu.addEventListener('click', (e) => {
@@ -961,7 +953,6 @@
           estAdmin = true;
           btnToggleAdmin.innerHTML = "🔓 Mode Admin : ON";
           btnToggleAdmin.style.color = "#16a34a";
-          btnRestaurerBackup.style.display = "flex";
           alert("✅ Mode Administrateur activé !");
           afficherGalerie(inputRecherche.value);
         } else if (mdp !== null) {
@@ -971,53 +962,9 @@
         estAdmin = false;
         btnToggleAdmin.innerHTML = "🔒 Mode Admin : OFF";
         btnToggleAdmin.style.color = "var(--text)";
-        btnRestaurerBackup.style.display = "none";
         alert("🔒 Mode Administrateur désactivé.");
         afficherGalerie(inputRecherche.value);
       }
-    });
-
-    // RESTAURATION D'UNE SAUVEGARDE DE SECOURS
-    btnRestaurerBackup.addEventListener('click', () => {
-      dropdownMenu.classList.remove('show');
-      if (!estAdmin) return;
-
-      db.ref('sauvegarde_securite_commandes').once('value').then(snapshot => {
-        const backups = snapshot.val();
-        if (!backups) {
-          alert("❌ Aucune sauvegarde de sécurité n'a été trouvée sur Firebase.");
-          return;
-        }
-
-        const keys = Object.keys(backups).sort().reverse();
-        let message = "📋 Sauvegardes disponibles (plus récentes en premier) :\n\n";
-        keys.forEach((key, index) => {
-          message += `${index + 1} - ${key.replace(/-/g, ':').replace('T', ' à ')}\n`;
-        });
-        message += "\nEntrez le numéro de la sauvegarde à restaurer (ex: 1) :";
-
-        const choix = prompt(message);
-        if (choix !== null) {
-          const indexChoisi = parseInt(choix) - 1;
-          if (indexChoisi >= 0 && indexChoisi < keys.length) {
-            const cleBackupChoisie = keys[indexChoisi];
-            const donneesRestaurees = backups[cleBackupChoisie];
-
-            if (confirm(`Voulez-vous vraiment restaurer l'historique du ${cleBackupChoisie.replace(/-/g, ':').replace('T', ' à ')} ? Cela remplacera l'historique actuel.`)) {
-              db.ref('commandes').set(donneesRestaurees)
-                .then(() => {
-                  alert("✅ Restauration réussie avec succès !");
-                  reinitialiserFormulaire();
-                })
-                .catch(err => {
-                  alert("❌ Erreur lors de la restauration : " + err.message);
-                });
-            }
-          } else {
-            alert("❌ Numéro invalide.");
-          }
-        }
-      });
     });
 
     btnCommencer.addEventListener('click', () => {
@@ -1093,7 +1040,7 @@
       catalogueArticles = snapshot.val() || {};
     });
 
-    // AUTO-REMPLISSAGE (PHOTO, FOURNISSEUR, REMARQUE) QUAND ON SAISIT LA RÉFÉRENCE
+    // AUTO-REMPLISSAGE QUAND ON SAISIT LA RÉFÉRENCE
     inputRef1.addEventListener('blur', () => {
       const ref = inputRef1.value.trim();
       if (ref && catalogueArticles[ref]) {
@@ -1146,7 +1093,7 @@
       containerBtnAjoutArticle.style.display = 'block';
     });
 
-    // ÉCOUTE FIREBASE FIABLE POUR LES COMMANDES
+    // ÉCOUTE FIREBASE POUR LES COMMANDES
     db.ref('commandes').on('value', (snapshot) => {
       const data = snapshot.val();
       commandes = [];
@@ -1258,6 +1205,7 @@
       btnEnregistrer.disabled = true;
       btnEnregistrer.textContent = "Enregistrement...";
 
+      // Enregistrement dans le catalogue central Firebase
       if (ref1) {
         db.ref('catalogue_photos/' + ref1).update({
           photo: imageCaptureeData1 || (catalogueArticles[ref1] ? catalogueArticles[ref1].photo : ""),
@@ -1344,7 +1292,6 @@
           estAdmin = true;
           btnToggleAdmin.innerHTML = "🔓 Mode Admin : ON";
           btnToggleAdmin.style.color = "#16a34a";
-          btnRestaurerBackup.style.display = "flex";
         } else {
           if (mdp !== null) alert("❌ Code incorrect !");
           return;
@@ -1406,7 +1353,6 @@
           estAdmin = true;
           btnToggleAdmin.innerHTML = "🔓 Mode Admin : ON";
           btnToggleAdmin.style.color = "#16a34a";
-          btnRestaurerBackup.style.display = "flex";
         } else {
           if (mdp !== null) alert("❌ Code incorrect !");
           return;
@@ -1433,7 +1379,6 @@
           estAdmin = true;
           btnToggleAdmin.innerHTML = "🔓 Mode Admin : ON";
           btnToggleAdmin.style.color = "#16a34a";
-          btnRestaurerBackup.style.display = "flex";
         } else {
           if (mdp !== null) alert("❌ Code incorrect !");
           return;
