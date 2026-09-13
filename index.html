@@ -1988,7 +1988,6 @@
     });
 
     btnExportPDF.addEventListener('click', () => {
-      // Récupérer les éléments cochés
       const checkboxesCochees = document.querySelectorAll('.commande-select-checkbox:checked');
       let listeAExporter = [];
       let titreExport = "Historique Reliquats";
@@ -2056,7 +2055,10 @@
       html += `</div>`;
       printArea.innerHTML = html;
 
-      window.print();
+      // Délai de sécurité pour laisser le temps aux images de s'afficher correctement du premier coup
+      setTimeout(() => {
+        window.print();
+      }, 300);
     });
   </script>
   <script>
