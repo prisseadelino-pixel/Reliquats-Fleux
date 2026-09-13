@@ -448,10 +448,19 @@
       padding: 0.75rem 1rem;
       cursor: pointer;
       transition: background 0.2s ease;
+      gap: 0.75rem;
     }
 
     .commande-item-compact:hover {
       background: rgba(128,128,128,0.08);
+    }
+
+    .commande-select-checkbox {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: var(--primary);
+      flex-shrink: 0;
     }
 
     .commande-main-btn {
@@ -938,7 +947,7 @@
           </div>
 
           <div class="export-filter-container">
-            <span class="export-filter-label">📅 Filtrer par date pour l'export (Optionnel) :</span>
+            <span class="export-filter-label">📅 Filtrer par date ou sélection pour l'export :</span>
             <div class="export-actions-row">
               <input type="date" id="dateFiltreExport" class="input-date-custom">
               <button class="btn-pdf" id="btnExportPDF">📄 Exporter PDF</button>
@@ -1711,7 +1720,6 @@
       liste.forEach(cmd => {
         const item = document.createElement('div');
         item.className = 'commande-item-compact';
-        item.onclick = () => ouvrirModal(cmd);
         
         let count = 0;
         if (cmd.photo || cmd.ref1) count++;
@@ -1721,7 +1729,8 @@
         const newBadgeHtml = cmd.isNew ? `<span class="badge-news">🔥 NEW</span>` : '';
 
         item.innerHTML = `
-          <div class="commande-main-btn">
+          <input type="checkbox" class="commande-select-checkbox" data-id="${cmd.id}" onclick="event.stopPropagation()">
+          <div class="commande-main-btn" onclick="ouvrirModal(${JSON.stringify(cmd).replace(/"/g, '&quot;')})">
             <span>${nbPhotosText}</span>
             <div>
               <div class="commande-num-badge">N° ${cmd.numero} ${newBadgeHtml}</div>
@@ -1979,25 +1988,33 @@
     });
 
     btnExportPDF.addEventListener('click', () => {
-      const dateSelect = dateFiltreExport.value;
-      let listeAExporter = commandes;
+      // Récupérer les éléments cochés
+      const checkboxesCochees = document.querySelectorAll('.commande-select-checkbox:checked');
+      let listeAExporter = [];
       let titreExport = "Historique Reliquats";
 
-      if (dateSelect) {
-        const parts = dateSelect.split('-');
-        const dateFormatee = `${parts[2]}/${parts[1]}/${parts[0]}`;
-        
-        listeAExporter = commandes.filter(cmd => cmd.date.startsWith(dateFormatee));
-        titreExport = `Historique Reliquats - Date : ${dateFormatee}`;
-
-        if (listeAExporter.length === 0) {
-          alert(`Aucun reliquat trouvé pour la date du ${dateFormatee}.`);
-          return;
-        }
+      if (checkboxesCochees.length > 0) {
+        const idsCoches = Array.from(checkboxesCochees).map(cb => Number(cb.getAttribute('data-id')));
+        listeAExporter = commandes.filter(cmd => idsCoches.includes(cmd.id));
+        titreExport = "Sélection de Reliquats";
       } else {
-        if (commandes.length === 0) {
-          alert("L'historique est vide, aucun document à exporter.");
-          return;
+        const dateSelect = dateFiltreExport.value;
+        if (dateSelect) {
+          const parts = dateSelect.split('-');
+          const dateFormatee = `${parts[2]}/${parts[1]}/${parts[0]}`;
+          listeAExporter = commandes.filter(cmd => cmd.date.startsWith(dateFormatee));
+          titreExport = `Historique Reliquats - Date : ${dateFormatee}`;
+
+          if (listeAExporter.length === 0) {
+            alert(`Aucun reliquat trouvé pour la date du ${dateFormatee}.`);
+            return;
+          }
+        } else {
+          if (commandes.length === 0) {
+            alert("L'historique est vide, aucun document à exporter.");
+            return;
+          }
+          listeAExporter = commandes;
         }
       }
 
