@@ -1035,16 +1035,37 @@
     const modalNotes = document.getElementById('modalNotes');
     const closeModal = document.getElementById('closeModal');
 
+    // Fonction pour nettoyer les clés Firebase (supporte les chiffres comme 002378)
+    function normaliserCle(ref) {
+      if (!ref) return "";
+      return "REF_" + ref.trim().replace(/[.#$\/\[\]]/g, "_");
+    }
+
     // ÉCOUTE DU CATALOGUE CENTRAL DANS FIREBASE
     db.ref('catalogue_photos').on('value', (snapshot) => {
-      catalogueArticles = snapshot.val() || {};
+      const data = snapshot.val() || {};
+      catalogueArticles = {};
+      Object.keys(data).forEach(cle => {
+        const item = data[cle];
+        if (item) {
+          if (item.refOriginale) {
+            catalogueArticles[item.refOriginale] = item;
+          }
+          catalogueArticles[cle] = item;
+          if (cle.startsWith("REF_")) {
+            catalogueArticles[cle.replace("REF_", "")] = item;
+          }
+        }
+      });
     });
 
-    // AUTO-REMPLISSAGE QUAND ON SAISIT LA RÉFÉRENCE
+    // AUTO-REMPLISSAGE (PHOTO, FOURNISSEUR, REMARQUE) QUAND ON SAISIT LA RÉFÉRENCE
     inputRef1.addEventListener('blur', () => {
       const ref = inputRef1.value.trim();
-      if (ref && catalogueArticles[ref]) {
-        const item = catalogueArticles[ref];
+      const cleNorm = normaliserCle(ref);
+      const item = catalogueArticles[ref] || catalogueArticles[cleNorm] || catalogueArticles["REF_" + ref];
+      
+      if (ref && item) {
         if (item.photo) {
           imageCaptureeData1 = item.photo;
           photoPreview1.src = imageCaptureeData1;
@@ -1061,8 +1082,10 @@
 
     inputRef2.addEventListener('blur', () => {
       const ref = inputRef2.value.trim();
-      if (ref && catalogueArticles[ref]) {
-        const item = catalogueArticles[ref];
+      const cleNorm = normaliserCle(ref);
+      const item = catalogueArticles[ref] || catalogueArticles[cleNorm] || catalogueArticles["REF_" + ref];
+      
+      if (ref && item) {
         if (item.photo) {
           imageCaptureeData2 = item.photo;
           photoPreview2.src = imageCaptureeData2;
@@ -1205,19 +1228,25 @@
       btnEnregistrer.disabled = true;
       btnEnregistrer.textContent = "Enregistrement...";
 
-      // MISE À JOUR DU CATALOGUE SANS BLOQUER SI LA PHOTO EST ABSENTE
-      if (ref1 && imageCaptureeData1) {
-        db.ref('catalogue_photos/' + ref1).update({
-          photo: imageCaptureeData1,
-          fournisseur: fournisseur1,
-          remarque: notes
+      // Enregistrement / Mise à jour dans le catalogue Firebase
+      if (ref1) {
+        const cle1 = normaliserCle(ref1);
+        const existant1 = catalogueArticles[ref1] || catalogueArticles[cle1] || {};
+        db.ref('catalogue_photos/' + cle1).update({
+          refOriginale: ref1,
+          photo: imageCaptureeData1 || existant1.photo || "",
+          fournisseur: fournisseur1 || existant1.fournisseur || "",
+          remarque: notes || existant1.remarque || ""
         }).catch(() => {});
       }
-      if (ref2 && imageCaptureeData2) {
-        db.ref('catalogue_photos/' + ref2).update({
-          photo: imageCaptureeData2,
-          fournisseur: fournisseur2,
-          remarque: notes
+      if (ref2) {
+        const cle2 = normaliserCle(ref2);
+        const existant2 = catalogueArticles[ref2] || catalogueArticles[cle2] || {};
+        db.ref('catalogue_photos/' + cle2).update({
+          refOriginale: ref2,
+          photo: imageCaptureeData2 || existant2.photo || "",
+          fournisseur: fournisseur2 || existant2.fournisseur || "",
+          remarque: notes || existant2.remarque || ""
         }).catch(() => {});
       }
 
@@ -1227,10 +1256,10 @@
       const commandeData = {
         id: idObjet,
         numero: numero,
-        photo: imageCaptureeData1,
+        photo: imageCaptureeData1 || (existingCmd ? existingCmd.photo : ""),
         fournisseur1: fournisseur1,
         ref1: ref1,
-        photo2: imageCaptureeData2,
+        photo2: imageCaptureeData2 || (existingCmd ? existingCmd.photo2 : ""),
         fournisseur2: fournisseur2,
         ref2: ref2,
         notes: notes,
@@ -1554,8 +1583,10 @@
               let fournisseurFinal = fournisseurCSV;
               let remarqueFinale = designation || "";
 
-              if (ref && catalogueArticles[ref]) {
-                const catalogItem = catalogueArticles[ref];
+              const cleNorm = normaliserCle(ref);
+              const catalogItem = catalogueArticles[ref] || catalogueArticles[cleNorm] || catalogueArticles["REF_" + ref];
+
+              if (ref && catalogItem) {
                 if (catalogItem.photo) photoAuto = catalogItem.photo;
                 if (catalogItem.fournisseur) fournisseurFinal = catalogItem.fournisseur;
                 if (catalogItem.remarque && !remarqueFinale) remarqueFinale = catalogItem.remarque;
@@ -1589,8 +1620,9 @@
                   cmd.fournisseur2 = fournisseurFinal;
                   cmd.ref2 = ref;
                   let photoAuto2 = "";
-                  if (ref && catalogueArticles[ref] && catalogueArticles[ref].photo) {
-                    photoAuto2 = catalogueArticles[ref].photo;
+                  const catalogItem2 = catalogueArticles[ref] || catalogueArticles[cleNorm] || catalogueArticles["REF_" + ref];
+                  if (ref && catalogItem2 && catalogItem2.photo) {
+                    photoAuto2 = catalogItem2.photo;
                   }
                   if (!cmd.photo2 && photoAuto2) cmd.photo2 = photoAuto2;
                   if (remarqueFinale && cmd.notes && !cmd.notes.includes(remarqueFinale)) {
