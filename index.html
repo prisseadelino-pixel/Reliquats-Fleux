@@ -742,17 +742,19 @@
       }
       .print-photos-flex {
         display: flex;
+        flex-wrap: wrap;
         gap: 8px;
       }
       .print-photo-print-item {
-        width: 50%;
+        width: 48%;
         display: flex;
         flex-direction: column;
         gap: 3px;
+        margin-bottom: 8px;
       }
       .print-photos-flex img {
         width: 100%;
-        height: 120px;
+        height: 110px;
         object-fit: cover;
         border-radius: 6px;
         border: 1px solid #e2e8f0;
@@ -860,69 +862,14 @@
             <input type="text" id="numeroCommande" name="no_autofill_cmd" autocomplete="off" placeholder="Ex: S-103567">
           </div>
 
-          <!-- PHOTO 1 (TOUJOURS PRÉSENTE) -->
-          <div class="photo-box-container">
-            <label>📸 Photo 1 (Article manquant)</label>
-            <div id="previewWrapper1" class="photo-preview-wrapper">
-              <img id="photoPreview1" class="photo-preview" alt="Aperçu Photo 1">
-              <button type="button" id="btnSupprPhoto1" class="btn-suppr-photo-interne">❌ Supprimer cette photo</button>
-            </div>
-            
-            <input type="file" id="fileGallery1" accept="image/*" style="display: none;">
-            <input type="file" id="fileCamera1" accept="image/*" capture="environment" style="display: none;">
-            
-            <div class="camera-controls">
-              <button type="button" class="btn-secondary" id="btnGalerie1">📁 Galerie 1</button>
-              <button type="button" class="btn-secondary" id="btnPhotoDirecte1">📸 Photo 1</button>
-            </div>
+          <!-- CONTENEUR DYNAMIQUE DES ARTICLES -->
+          <div id="articlesContainer"></div>
 
-            <div class="form-group" style="margin-top: 0.75rem; margin-bottom: 0.75rem;">
-              <label for="fournisseur1">Fournisseur (Photo 1)</label>
-              <input type="text" id="fournisseur1" placeholder="Ex: Nom du fournisseur" autocomplete="off">
-            </div>
-
-            <div class="form-group" style="margin-bottom: 0;">
-              <label for="ref1">Référence article (Photo 1)</label>
-              <input type="text" id="ref1" placeholder="Ex: QM6214" autocomplete="off">
-            </div>
-          </div>
-
-          <!-- BOUTON AJOUTER UN DEUXIÈME ARTICLE (MASQUÉ PAR DÉFAUT) -->
-          <div id="containerBtnAjoutArticle" style="margin-bottom: 1rem; text-align: center;">
-            <button type="button" id="btnAfficherArticle2" style="background: transparent; border: 2px dashed var(--border); color: var(--primary); padding: 0.75rem; border-radius: 10px; font-weight: 700; width: 100%; cursor: pointer; transition: all 0.2s;">
-              ➕ Ajouter un deuxième article pour cette commande
+          <!-- BOUTON AJOUTER UN ARTICLE -->
+          <div style="margin-bottom: 1rem; text-align: center;">
+            <button type="button" id="btnAjouterArticle" style="background: transparent; border: 2px dashed var(--border); color: var(--primary); padding: 0.75rem; border-radius: 10px; font-weight: 700; width: 100%; cursor: pointer; transition: all 0.2s;">
+              ➕ Ajouter un article pour cette commande
             </button>
-          </div>
-
-          <!-- PHOTO 2 (MASQUÉE PAR DÉFAUT, S'ACTIVE AVEC LE BOUTON +) -->
-          <div class="photo-box-container" id="blocArticle2" style="display: none;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-              <label style="margin-bottom: 0;">📸 Photo 2 (Deuxième article)</label>
-              <button type="button" id="btnRetirerArticle2" style="background: rgba(244, 63, 94, 0.2); border: none; color: #f43f5e; padding: 0.2rem 0.5rem; border-radius: 6px; font-size: 0.75rem; font-weight: bold; cursor: pointer;">🗑️ Retirer cet article</button>
-            </div>
-
-            <div id="previewWrapper2" class="photo-preview-wrapper">
-              <img id="photoPreview2" class="photo-preview" alt="Aperçu Photo 2">
-              <button type="button" id="btnSupprPhoto2" class="btn-suppr-photo-interne">❌ Supprimer cette photo</button>
-            </div>
-            
-            <input type="file" id="fileGallery2" accept="image/*" style="display: none;">
-            <input type="file" id="fileCamera2" accept="image/*" capture="environment" style="display: none;">
-            
-            <div class="camera-controls">
-              <button type="button" class="btn-secondary" id="btnGalerie2">📁 Galerie 2</button>
-              <button type="button" class="btn-secondary" id="btnPhotoDirecte2">📸 Photo 2</button>
-            </div>
-
-            <div class="form-group" style="margin-top: 0.75rem; margin-bottom: 0.75rem;">
-              <label for="fournisseur2">Fournisseur (Photo 2)</label>
-              <input type="text" id="fournisseur2" placeholder="Ex: Nom du fournisseur" autocomplete="off">
-            </div>
-
-            <div class="form-group" style="margin-bottom: 0;">
-              <label for="ref2">Référence article (Photo 2)</label>
-              <input type="text" id="ref2" placeholder="Ex: Ytr-9812" autocomplete="off">
-            </div>
           </div>
 
           <div class="form-group">
@@ -1091,38 +1038,13 @@
 
     let commandes = [];
     let catalogueArticles = {};
-    let imageCaptureeData1 = "";
-    let imageCaptureeData2 = "";
     let modeEditionId = null;
 
     const inputNumero = document.getElementById('numeroCommande');
-    const inputFournisseur1 = document.getElementById('fournisseur1');
-    const inputRef1 = document.getElementById('ref1');
-    const inputFournisseur2 = document.getElementById('fournisseur2');
-    const inputRef2 = document.getElementById('ref2');
     const inputNotes = document.getElementById('notes');
     const btnNouvelleCommande = document.getElementById('btnNouvelleCommande');
-    
-    const blocArticle2 = document.getElementById('blocArticle2');
-    const btnAfficherArticle2 = document.getElementById('btnAfficherArticle2');
-    const btnRetirerArticle2 = document.getElementById('btnRetirerArticle2');
-    const containerBtnAjoutArticle = document.getElementById('containerBtnAjoutArticle');
-
-    const photoPreview1 = document.getElementById('photoPreview1');
-    const previewWrapper1 = document.getElementById('previewWrapper1');
-    const btnSupprPhoto1 = document.getElementById('btnSupprPhoto1');
-    const fileGallery1 = document.getElementById('fileGallery1');
-    const fileCamera1 = document.getElementById('fileCamera1');
-    const btnGalerie1 = document.getElementById('btnGalerie1');
-    const btnPhotoDirecte1 = document.getElementById('btnPhotoDirecte1');
-
-    const photoPreview2 = document.getElementById('photoPreview2');
-    const previewWrapper2 = document.getElementById('previewWrapper2');
-    const btnSupprPhoto2 = document.getElementById('btnSupprPhoto2');
-    const fileGallery2 = document.getElementById('fileGallery2');
-    const fileCamera2 = document.getElementById('fileCamera2');
-    const btnGalerie2 = document.getElementById('btnGalerie2');
-    const btnPhotoDirecte2 = document.getElementById('btnPhotoDirecte2');
+    const articlesContainer = document.getElementById('articlesContainer');
+    const btnAjouterArticle = document.getElementById('btnAjouterArticle');
 
     const btnEnregistrer = document.getElementById('btnEnregistrer');
     const btnAnnulerEdit = document.getElementById('btnAnnulerEdit');
@@ -1165,17 +1087,14 @@
         const data = snapshot.val() || {};
         Object.keys(data).forEach(key => {
           const cmd = data[key];
-          if (cmd) {
-            if (cmd.ref1 && cmd.photo) {
-              if (!catalogueArticles[cmd.ref1]) catalogueArticles[cmd.ref1] = {};
-              catalogueArticles[cmd.ref1].photo = cmd.photo;
-              if (cmd.fournisseur1) catalogueArticles[cmd.ref1].fournisseur = cmd.fournisseur1;
-            }
-            if (cmd.ref2 && cmd.photo2) {
-              if (!catalogueArticles[cmd.ref2]) catalogueArticles[cmd.ref2] = {};
-              catalogueArticles[cmd.ref2].photo = cmd.photo2;
-              if (cmd.fournisseur2) catalogueArticles[cmd.ref2].fournisseur = cmd.fournisseur2;
-            }
+          if (cmd && cmd.articles) {
+            cmd.articles.forEach(art => {
+              if (art.ref && art.photo) {
+                if (!catalogueArticles[art.ref]) catalogueArticles[art.ref] = {};
+                catalogueArticles[art.ref].photo = art.photo;
+                if (art.fournisseur) catalogueArticles[art.ref].fournisseur = art.fournisseur;
+              }
+            });
           }
         });
       });
@@ -1193,91 +1112,6 @@
           }
         }
       });
-    });
-
-    function appliquerAutocomple(refInput, fournisseurInput, previewEl, wrapperEl, isPhoto1 = true) {
-      const ref = refInput.value.trim();
-      if (!ref) {
-        if (isPhoto1) imageCaptureeData1 = "";
-        else imageCaptureeData2 = "";
-        previewEl.src = "";
-        wrapperEl.style.display = 'none';
-        return;
-      }
-
-      const cleNorm = "REF_" + ref.replace(/[.#$\/\[\]]/g, "_");
-      let item = catalogueArticles[ref] || catalogueArticles[cleNorm] || catalogueArticles["REF_" + ref];
-
-      if (!item) {
-        const found = commandes.find(c => c.ref1 === ref || c.ref2 === ref);
-        if (found) {
-          item = {
-            photo: found.ref1 === ref ? found.photo : found.photo2,
-            fournisseur: found.ref1 === ref ? found.fournisseur1 : found.fournisseur2,
-            remarque: found.notes
-          };
-        }
-      }
-
-      if (item && item.photo) {
-        if (isPhoto1) {
-          imageCaptureeData1 = item.photo;
-        } else {
-          imageCaptureeData2 = item.photo;
-        }
-        previewEl.src = item.photo;
-        wrapperEl.style.display = 'block';
-      } else {
-        if (isPhoto1) imageCaptureeData1 = "";
-        else imageCaptureeData2 = "";
-        previewEl.src = "";
-        wrapperEl.style.display = 'none';
-      }
-
-      if (item && item.fournisseur && !fournisseurInput.value.trim()) {
-        fournisseurInput.value = item.fournisseur;
-      }
-      if (item && item.remarque && !inputNotes.value.trim() && isPhoto1) {
-        inputNotes.value = item.remarque;
-      }
-    }
-
-    inputRef1.addEventListener('input', () => appliquerAutocomple(inputRef1, inputFournisseur1, photoPreview1, previewWrapper1, true));
-    inputRef1.addEventListener('blur', () => appliquerAutocomple(inputRef1, inputFournisseur1, photoPreview1, previewWrapper1, true));
-
-    inputRef2.addEventListener('input', () => appliquerAutocomple(inputRef2, inputFournisseur2, photoPreview2, previewWrapper2, false));
-    inputRef2.addEventListener('blur', () => appliquerAutocomple(inputRef2, inputFournisseur2, photoPreview2, previewWrapper2, false));
-
-    btnAfficherArticle2.addEventListener('click', () => {
-      blocArticle2.style.display = 'block';
-      containerBtnAjoutArticle.style.display = 'none';
-    });
-
-    btnRetirerArticle2.addEventListener('click', () => {
-      imageCaptureeData2 = "";
-      photoPreview2.src = "";
-      previewWrapper2.style.display = 'none';
-      fileGallery2.value = "";
-      fileCamera2.value = "";
-      inputFournisseur2.value = "";
-      inputRef2.value = "";
-
-      blocArticle2.style.display = 'none';
-      containerBtnAjoutArticle.style.display = 'block';
-    });
-
-    db.ref('commandes').on('value', (snapshot) => {
-      const data = snapshot.val();
-      commandes = [];
-      if (data) {
-        Object.keys(data).forEach(key => {
-          commandes.push(data[key]);
-        });
-        commandes.sort((a, b) => b.id - a.id);
-      }
-      afficherGalerie(inputRecherche.value);
-    }, (error) => {
-      alert("Erreur de lecture Firebase : " + error.message);
     });
 
     function compresserImage(dataUrl, callback) {
@@ -1305,138 +1139,222 @@
       img.src = dataUrl;
     }
 
-    btnGalerie1.addEventListener('click', () => fileGallery1.click());
-    btnPhotoDirecte1.addEventListener('click', () => fileCamera1.click());
+    function ajouterBlocArticle(dataArticle = null) {
+      const index = articlesContainer.children.length + 1;
+      const bloc = document.createElement('div');
+      bloc.className = 'photo-box-container article-block';
+      
+      const photoInit = dataArticle ? (dataArticle.photo || "") : "";
+      const fournisseurInit = dataArticle ? (dataArticle.fournisseur || "") : "";
+      const refInit = dataArticle ? (dataArticle.ref || "") : "";
 
-    function chargerFichier1(e) {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          compresserImage(event.target.result, (imageCompressée) => {
-            imageCaptureeData1 = imageCompressée;
-            photoPreview1.src = imageCaptureeData1;
-            previewWrapper1.style.display = 'block';
-            
-            const ref1 = inputRef1.value.trim();
-            if (ref1) {
-              const cle1 = "REF_" + ref1.replace(/[.#$\/\[\]]/g, "_");
-              db.ref('catalogue_photos/' + cle1).update({
-                refOriginale: ref1,
-                photo: imageCaptureeData1,
-                fournisseur: inputFournisseur1.value.trim(),
-                remarque: inputNotes.value.trim()
-              }).catch(() => {});
+      bloc.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+          <label style="margin-bottom: 0;">📸 Article n°<span class="article-index">${index}</span></label>
+          <button type="button" class="btn-retirer-article" style="background: rgba(244, 63, 94, 0.2); border: none; color: #f43f5e; padding: 0.2rem 0.5rem; border-radius: 6px; font-size: 0.75rem; font-weight: bold; cursor: pointer;">🗑️ Retirer</button>
+        </div>
+
+        <div class="previewWrapper" style="position: relative; margin-bottom: 0.75rem; display: ${photoInit ? 'block' : 'none'};">
+          <img class="photoPreview" src="${photoInit}" alt="Aperçu Photo" style="width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border); display: block;">
+          <button type="button" class="btn-suppr-photo-interne" style="position: absolute; top: 8px; right: 8px; background: rgba(244, 63, 94, 0.9); color: white; border: none; padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: bold; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.3);">❌ Supprimer cette photo</button>
+        </div>
+        
+        <input type="file" class="fileGallery" accept="image/*" style="display: none;">
+        <input type="file" class="fileCamera" accept="image/*" capture="environment" style="display: none;">
+        
+        <div class="camera-controls">
+          <button type="button" class="btn-secondary btn-galerie">📁 Galerie</button>
+          <button type="button" class="btn-secondary btn-photo-directe">📸 Photo</button>
+        </div>
+
+        <div class="form-group" style="margin-top: 0.75rem; margin-bottom: 0.75rem;">
+          <label>Fournisseur</label>
+          <input type="text" class="input-fournisseur" placeholder="Ex: Nom du fournisseur" autocomplete="off" value="${fournisseurInit}">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+          <label>Référence article</label>
+          <input type="text" class="input-ref" placeholder="Ex: QM6214" autocomplete="off" value="${refInit}">
+        </div>
+      `;
+
+      // Éléments du bloc
+      const inputRef = bloc.querySelector('.input-ref');
+      const inputFournisseur = bloc.querySelector('.input-fournisseur');
+      const previewWrapper = bloc.querySelector('.previewWrapper');
+      const photoPreview = bloc.querySelector('.photoPreview');
+      const btnSupprPhoto = bloc.querySelector('.btn-suppr-photo-interne');
+      const fileGallery = bloc.querySelector('.fileGallery');
+      const fileCamera = bloc.querySelector('.fileCamera');
+      const btnGalerie = bloc.querySelector('.btn-galerie');
+      const btnPhotoDirecte = bloc.querySelector('.btn-photo-directe');
+      const btnRetirer = bloc.querySelector('.btn-retirer-article');
+
+      let photoData = photoInit;
+
+      // Autocomplétion sur la référence
+      function verifierAutocompletion() {
+        const ref = inputRef.value.trim();
+        if (!ref) return;
+
+        const cleNorm = "REF_" + ref.replace(/[.#$\/\[\]]/g, "_");
+        let item = catalogueArticles[ref] || catalogueArticles[cleNorm] || catalogueArticles["REF_" + ref];
+
+        if (!item) {
+          for (let c of commandes) {
+            if (c.articles) {
+              const foundArt = c.articles.find(a => a.ref === ref);
+              if (foundArt) {
+                item = { photo: foundArt.photo, fournisseur: foundArt.fournisseur };
+                break;
+              }
             }
-          });
-        };
-        reader.readAsDataURL(file);
-      }
-    }
-    fileGallery1.addEventListener('change', chargerFichier1);
-    fileCamera1.addEventListener('change', chargerFichier1);
+          }
+        }
 
-    btnSupprPhoto1.addEventListener('click', () => {
-      imageCaptureeData1 = "";
-      photoPreview1.src = "";
-      previewWrapper1.style.display = 'none';
-      fileGallery1.value = "";
-      fileCamera1.value = "";
+        if (item && item.photo && !photoData) {
+          photoData = item.photo;
+          photoPreview.src = photoData;
+          previewWrapper.style.display = 'block';
+        }
+        if (item && item.fournisseur && !inputFournisseur.value.trim()) {
+          inputFournisseur.value = item.fournisseur;
+        }
+      }
+
+      inputRef.addEventListener('input', verifierAutocompletion);
+      inputRef.addEventListener('blur', verifierAutocompletion);
+
+      btnGalerie.addEventListener('click', () => fileGallery.click());
+      btnPhotoDirecte.addEventListener('click', () => fileCamera.click());
+
+      function chargerFichiersArticle(e) {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            compresserImage(event.target.result, (imageCompressee) => {
+              photoData = imageCompressee;
+              photoPreview.src = photoData;
+              previewWrapper.style.display = 'block';
+
+              const ref = inputRef.value.trim();
+              if (ref) {
+                const cle = "REF_" + ref.replace(/[.#$\/\[\]]/g, "_");
+                db.ref('catalogue_photos/' + cle).update({
+                  refOriginale: ref,
+                  photo: photoData,
+                  fournisseur: inputFournisseur.value.trim(),
+                  remarque: inputNotes.value.trim()
+                }).catch(() => {});
+              }
+            });
+          };
+          reader.readAsDataURL(file);
+        }
+      }
+
+      fileGallery.addEventListener('change', chargerFichiersArticle);
+      fileCamera.addEventListener('change', chargerFichiersArticle);
+
+      btnSupprPhoto.addEventListener('click', () => {
+        photoData = "";
+        photoPreview.src = "";
+        previewWrapper.style.display = 'none';
+        fileGallery.value = "";
+        fileCamera.value = "";
+      });
+
+      btnRetirer.addEventListener('click', () => {
+        bloc.remove();
+        mettreAJourIndiceArticles();
+      });
+
+      bloc.getArticleData = () => {
+        return {
+          photo: photoData,
+          fournisseur: inputFournisseur.value.trim(),
+          ref: inputRef.value.trim()
+        };
+      };
+
+      articlesContainer.appendChild(bloc);
+      mettreAJourIndiceArticles();
+    }
+
+    function mettreAJourIndiceArticles() {
+      const blocs = articlesContainer.querySelectorAll('.article-block');
+      blocs.forEach((b, idx) => {
+        b.querySelector('.article-index').textContent = idx + 1;
+      });
+    }
+
+    btnAjouterArticle.addEventListener('click', () => {
+      ajouterBlocArticle();
     });
 
-    btnGalerie2.addEventListener('click', () => fileGallery2.click());
-    btnPhotoDirecte2.addEventListener('click', () => fileCamera2.click());
-
-    function chargerFichier2(e) {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          compresserImage(event.target.result, (imageCompressée) => {
-            imageCaptureeData2 = imageCompressée;
-            photoPreview2.src = imageCaptureeData2;
-            previewWrapper2.style.display = 'block';
-
-            const ref2 = inputRef2.value.trim();
-            if (ref2) {
-              const cle2 = "REF_" + ref2.replace(/[.#$\/\[\]]/g, "_");
-              db.ref('catalogue_photos/' + cle2).update({
-                refOriginale: ref2,
-                photo: imageCaptureeData2,
-                fournisseur: inputFournisseur2.value.trim(),
-                remarque: inputNotes.value.trim()
-              }).catch(() => {});
+    db.ref('commandes').on('value', (snapshot) => {
+      const data = snapshot.val();
+      commandes = [];
+      if (data) {
+        Object.keys(data).forEach(key => {
+          let cmd = data[key];
+          // Rétrocompatibilité avec l'ancien format (photo1/photo2)
+          if (!cmd.articles && cmd.numero) {
+            cmd.articles = [];
+            if (cmd.ref1 || cmd.photo || cmd.fournisseur1) {
+              cmd.articles.push({ ref: cmd.ref1 || '', fournisseur: cmd.fournisseur1 || '', photo: cmd.photo || '' });
             }
-          });
-        };
-        reader.readAsDataURL(file);
+            if (cmd.ref2 || cmd.photo2 || cmd.fournisseur2) {
+              cmd.articles.push({ ref: cmd.ref2 || '', fournisseur: cmd.fournisseur2 || '', photo: cmd.photo2 || '' });
+            }
+          }
+          commandes.push(cmd);
+        });
+        commandes.sort((a, b) => b.id - a.id);
       }
-    }
-    fileGallery2.addEventListener('change', chargerFichier2);
-    fileCamera2.addEventListener('change', chargerFichier2);
-
-    btnSupprPhoto2.addEventListener('click', () => {
-      imageCaptureeData2 = "";
-      photoPreview2.src = "";
-      previewWrapper2.style.display = 'none';
-      fileGallery2.value = "";
-      fileCamera2.value = "";
+      afficherGalerie(inputRecherche.value);
+    }, (error) => {
+      alert("Erreur de lecture Firebase : " + error.message);
     });
 
     btnEnregistrer.addEventListener('click', () => {
       const numero = inputNumero.value.trim();
-      const fournisseur1 = inputFournisseur1.value.trim();
-      const ref1 = inputRef1.value.trim();
-      const fournisseur2 = inputFournisseur2.value.trim();
-      const ref2 = inputRef2.value.trim();
       const notes = inputNotes.value.trim();
+      const blocsArticles = articlesContainer.querySelectorAll('.article-block');
 
-      if (!numero || (!ref1 && !ref2)) {
-        alert("Veuillez renseigner un numéro de commande et au moins une référence article.");
+      if (!numero || blocsArticles.length === 0) {
+        alert("Veuillez renseigner un numéro de commande et ajouter au moins un article.");
+        return;
+      }
+
+      let articlesList = [];
+      let hasValidRef = false;
+
+      blocsArticles.forEach(b => {
+        const data = b.getArticleData();
+        if (data.ref) hasValidRef = true;
+        articlesList.push(data);
+
+        // Sauvegarde automatique dans le catalogue
+        if (data.ref && data.photo) {
+          const cle = "REF_" + data.ref.replace(/[.#$\/\[\]]/g, "_");
+          db.ref('catalogue_photos/' + cle).update({
+            refOriginale: data.ref,
+            photo: data.photo,
+            fournisseur: data.fournisseur,
+            remarque: notes
+          }).catch(() => {});
+        }
+      });
+
+      if (!hasValidRef) {
+        alert("Veuillez renseigner au moins une référence article.");
         return;
       }
 
       btnEnregistrer.disabled = true;
       btnEnregistrer.textContent = "Enregistrement...";
-
-      let photo1Final = imageCaptureeData1;
-      if (!photo1Final && ref1) {
-        const found = commandes.find(c => c.ref1 === ref1 || c.ref2 === ref1);
-        if (found) photo1Final = (found.ref1 === ref1 ? found.photo : found.photo2);
-        const cle1 = "REF_" + ref1.replace(/[.#$\/\[\]]/g, "_");
-        if (!photo1Final && catalogueArticles[cle1] && catalogueArticles[cle1].photo) {
-          photo1Final = catalogueArticles[cle1].photo;
-        }
-      }
-
-      let photo2Final = imageCaptureeData2;
-      if (!photo2Final && ref2) {
-        const found = commandes.find(c => c.ref1 === ref2 || c.ref2 === ref2);
-        if (found) photo2Final = (found.ref1 === ref2 ? found.photo : found.photo2);
-        const cle2 = "REF_" + ref2.replace(/[.#$\/\[\]]/g, "_");
-        if (!photo2Final && catalogueArticles[cle2] && catalogueArticles[cle2].photo) {
-          photo2Final = catalogueArticles[cle2].photo;
-        }
-      }
-
-      if (ref1 && photo1Final) {
-        const cle1 = "REF_" + ref1.replace(/[.#$\/\[\]]/g, "_");
-        db.ref('catalogue_photos/' + cle1).update({
-          refOriginale: ref1,
-          photo: photo1Final,
-          fournisseur: fournisseur1,
-          remarque: notes
-        }).catch(() => {});
-      }
-      if (ref2 && photo2Final) {
-        const cle2 = "REF_" + ref2.replace(/[.#$\/\[\]]/g, "_");
-        db.ref('catalogue_photos/' + cle2).update({
-          refOriginale: ref2,
-          photo: photo2Final,
-          fournisseur: fournisseur2,
-          remarque: notes
-        }).catch(() => {});
-      }
 
       const idObjet = modeEditionId !== null ? modeEditionId : Date.now();
       const existingCmd = commandes.find(c => c.id === idObjet);
@@ -1444,14 +1362,9 @@
       const commandeData = {
         id: idObjet,
         numero: numero,
-        photo: photo1Final || (existingCmd ? existingCmd.photo : ""),
-        fournisseur1: fournisseur1,
-        ref1: ref1,
-        photo2: photo2Final || (existingCmd ? existingCmd.photo2 : ""),
-        fournisseur2: fournisseur2,
-        ref2: ref2,
+        articles: articlesList,
         notes: notes,
-        date: modeEditionId !== null ? existingCmd.date : new Date().toLocaleString('fr-FR'),
+        date: modeEditionId !== null && existingCmd ? existingCmd.date : new Date().toLocaleString('fr-FR'),
         isNew: false 
       };
 
@@ -1470,22 +1383,11 @@
     function reinitialiserFormulaire() {
       modeEditionId = null;
       inputNumero.value = "";
-      inputFournisseur1.value = "";
-      inputRef1.value = "";
-      inputFournisseur2.value = "";
-      inputRef2.value = "";
-      imageCaptureeData1 = "";
-      imageCaptureeData2 = "";
-      previewWrapper1.style.display = 'none';
-      previewWrapper2.style.display = 'none';
       inputNotes.value = "";
-      fileGallery1.value = "";
-      fileCamera1.value = "";
-      fileGallery2.value = "";
-      fileCamera2.value = "";
+      articlesContainer.innerHTML = "";
       
-      blocArticle2.style.display = 'none';
-      containerBtnAjoutArticle.style.display = 'block';
+      // Ajouter un bloc article par défaut au démarrage
+      ajouterBlocArticle();
 
       btnEnregistrer.textContent = "Enregistrer les reliquats";
       btnEnregistrer.disabled = false;
@@ -1521,38 +1423,17 @@
       if (!item) return;
 
       inputRecherche.value = "";
-
       modeEditionId = id;
       inputNumero.value = item.numero;
-      inputFournisseur1.value = item.fournisseur1 || "";
-      inputRef1.value = item.ref1 || "";
-      inputFournisseur2.value = item.fournisseur2 || "";
-      inputRef2.value = item.ref2 || "";
       inputNotes.value = item.notes || "";
       
-      imageCaptureeData1 = item.photo || "";
-      imageCaptureeData2 = item.photo2 || "";
-      
-      if (imageCaptureeData1) {
-        photoPreview1.src = imageCaptureeData1;
-        previewWrapper1.style.display = 'block';
+      articlesContainer.innerHTML = "";
+      if (item.articles && item.articles.length > 0) {
+        item.articles.forEach(art => {
+          ajouterBlocArticle(art);
+        });
       } else {
-        previewWrapper1.style.display = 'none';
-      }
-
-      if (imageCaptureeData2 || item.ref2 || item.fournisseur2) {
-        blocArticle2.style.display = 'block';
-        containerBtnAjoutArticle.style.display = 'none';
-        if (imageCaptureeData2) {
-          photoPreview2.src = imageCaptureeData2;
-          previewWrapper2.style.display = 'block';
-        } else {
-          previewWrapper2.style.display = 'none';
-        }
-      } else {
-        blocArticle2.style.display = 'none';
-        containerBtnAjoutArticle.style.display = 'block';
-        previewWrapper2.style.display = 'none';
+        ajouterBlocArticle();
       }
 
       btnEnregistrer.textContent = "💾 Sauvegarder les modifications";
@@ -1703,11 +1584,11 @@
       galerieCommandes.innerHTML = "";
       const liste = commandes.filter(c => {
         const numMatch = c.numero.toLowerCase().includes(filtre.toLowerCase());
-        const f1Match = c.fournisseur1 && c.fournisseur1.toLowerCase().includes(filtre.toLowerCase());
-        const ref1Match = c.ref1 && c.ref1.toLowerCase().includes(filtre.toLowerCase());
-        const f2Match = c.fournisseur2 && c.fournisseur2.toLowerCase().includes(filtre.toLowerCase());
-        const ref2Match = c.ref2 && c.ref2.toLowerCase().includes(filtre.toLowerCase());
-        return numMatch || f1Match || ref1Match || f2Match || ref2Match;
+        const matchArt = c.articles && c.articles.some(art => 
+          (art.fournisseur && art.fournisseur.toLowerCase().includes(filtre.toLowerCase())) ||
+          (art.ref && art.ref.toLowerCase().includes(filtre.toLowerCase()))
+        );
+        return numMatch || matchArt;
       });
 
       badgeCount.textContent = liste.length;
@@ -1721,17 +1602,14 @@
         const item = document.createElement('div');
         item.className = 'commande-item-compact';
         
-        let count = 0;
-        if (cmd.photo || cmd.ref1) count++;
-        if (cmd.photo2 || cmd.ref2) count++;
-        const nbPhotosText = count === 2 ? "📦📦 (2 articles)" : "📦 (1 article)";
-        
+        const nbArticles = cmd.articles ? cmd.articles.length : 0;
+        const nbArticlesText = `📦 (${nbArticles} article${nbArticles > 1 ? 's' : ''})`;
         const newBadgeHtml = cmd.isNew ? `<span class="badge-news">🔥 NEW</span>` : '';
 
         item.innerHTML = `
           <input type="checkbox" class="commande-select-checkbox" data-id="${cmd.id}" onclick="event.stopPropagation()">
           <div class="commande-main-btn" onclick="ouvrirModal(${JSON.stringify(cmd).replace(/"/g, '&quot;')})">
-            <span>${nbPhotosText}</span>
+            <span>${nbArticlesText}</span>
             <div>
               <div class="commande-num-badge">N° ${cmd.numero} ${newBadgeHtml}</div>
               <div class="commande-date-compact">${cmd.date}</div>
@@ -1751,30 +1629,19 @@
       modalTitleBadge.innerHTML = `📦 N° ${cmd.numero} ${cmd.isNew ? '<span class="badge-news">🔥 NEW</span>' : ''}`;
       modalImagesRow.innerHTML = "";
 
-      if (cmd.photo || cmd.ref1 || cmd.fournisseur1) {
-        const box1 = document.createElement('div');
-        box1.className = 'modal-photo-box';
-        box1.innerHTML = `
-          ${cmd.photo ? `<img src="${cmd.photo}" alt="Article 1">` : ''}
-          <div class="modal-ref-badges">
-            ${cmd.fournisseur1 ? `<div class="modal-fournisseur-badge">Fournisseur: ${cmd.fournisseur1}</div>` : ''}
-            ${cmd.ref1 ? `<div class="modal-ref-badge">Réf: ${cmd.ref1}</div>` : ''}
-          </div>
-        `;
-        modalImagesRow.appendChild(box1);
-      }
-
-      if (cmd.photo2 || cmd.ref2 || cmd.fournisseur2) {
-        const box2 = document.createElement('div');
-        box2.className = 'modal-photo-box';
-        box2.innerHTML = `
-          ${cmd.photo2 ? `<img src="${cmd.photo2}" alt="Article 2">` : ''}
-          <div class="modal-ref-badges">
-            ${cmd.fournisseur2 ? `<div class="modal-fournisseur-badge">Fournisseur: ${cmd.fournisseur2}</div>` : ''}
-            ${cmd.ref2 ? `<div class="modal-ref-badge">Réf: ${cmd.ref2}</div>` : ''}
-          </div>
-        `;
-        modalImagesRow.appendChild(box2);
+      if (cmd.articles) {
+        cmd.articles.forEach(art => {
+          const box = document.createElement('div');
+          box.className = 'modal-photo-box';
+          box.innerHTML = `
+            ${art.photo ? `<img src="${art.photo}" alt="Article">` : ''}
+            <div class="modal-ref-badges">
+              ${art.fournisseur ? `<div class="modal-fournisseur-badge">Fournisseur: ${art.fournisseur}</div>` : ''}
+              ${art.ref ? `<div class="modal-ref-badge">Réf: ${art.ref}</div>` : ''}
+            </div>
+          `;
+          modalImagesRow.appendChild(box);
+        });
       }
 
       if (cmd.notes && cmd.notes.trim() !== "") {
@@ -1824,7 +1691,6 @@
 
         db.ref('commandes').once('value').then(snapshot => {
           const existingData = snapshot.val() || {};
-
           let groupCommandes = {};
 
           Object.keys(existingData).forEach(key => {
@@ -1858,9 +1724,11 @@
               let catalogItem = catalogueArticles[ref] || catalogueArticles[cleNorm] || catalogueArticles["REF_" + ref];
 
               if (!catalogItem) {
-                const found = commandes.find(c => c.ref1 === ref || c.ref2 === ref);
-                if (found) {
-                  photoAuto = (found.ref1 === ref ? found.photo : found.photo2);
+                for (let c of commandes) {
+                  if (c.articles) {
+                    const foundArt = c.articles.find(a => a.ref === ref);
+                    if (foundArt) { photoAuto = foundArt.photo; break; }
+                  }
                 }
               } else {
                 if (catalogItem.photo) photoAuto = catalogItem.photo;
@@ -1874,31 +1742,30 @@
                   id: newId,
                   numero: numero,
                   date: currentDate,
-                  photo: photoAuto,
-                  fournisseur1: fournisseurFinal,
-                  ref1: ref,
-                  photo2: "",
-                  fournisseur2: "",
-                  ref2: "",
+                  articles: [{
+                    photo: photoAuto,
+                    fournisseur: fournisseurFinal,
+                    ref: ref
+                  }],
                   notes: remarqueFinale,
                   isNew: true 
                 };
                 newAddedCount++;
               } else {
                 const cmd = groupCommandes[numero];
+                if (!cmd.articles) cmd.articles = [];
                 
-                if (!cmd.ref1) {
-                  cmd.fournisseur1 = fournisseurFinal;
-                  cmd.ref1 = ref;
-                  if (!cmd.photo && photoAuto) cmd.photo = photoAuto;
-                  if (remarqueFinale && !cmd.notes) cmd.notes = remarqueFinale;
-                } else if (!cmd.ref2 && cmd.ref1 !== ref) {
-                  cmd.fournisseur2 = fournisseurFinal;
-                  cmd.ref2 = ref;
-                  let photoAuto2 = photoAuto;
-                  if (!cmd.photo2 && photoAuto2) cmd.photo2 = photoAuto2;
+                const alreadyExists = cmd.articles.some(a => a.ref === ref);
+                if (!alreadyExists) {
+                  cmd.articles.push({
+                    photo: photoAuto,
+                    fournisseur: fournisseurFinal,
+                    ref: ref
+                  });
                   if (remarqueFinale && cmd.notes && !cmd.notes.includes(remarqueFinale)) {
                     cmd.notes = cmd.notes + " / " + remarqueFinale;
+                  } else if (remarqueFinale && !cmd.notes) {
+                    cmd.notes = remarqueFinale;
                   }
                 }
               }
@@ -1964,16 +1831,12 @@
         const numero = `"${(cmd.numero || "").replace(/"/g, '""')}"`;
         const notes = `"${(cmd.notes || "").replace(/"/g, '""')}"`;
 
-        if (cmd.photo || cmd.fournisseur1 || cmd.ref1) {
-          const f1 = `"${(cmd.fournisseur1 || "").replace(/"/g, '""')}"`;
-          const r1 = `"${(cmd.ref1 || "").replace(/"/g, '""')}"`;
-          csvContent += `${date};${numero};${f1};${r1};${notes}\r\n`;
-        }
-
-        if (cmd.photo2 || cmd.fournisseur2 || cmd.ref2) {
-          const f2 = `"${(cmd.fournisseur2 || "").replace(/"/g, '""')}"`;
-          const r2 = `"${(cmd.ref2 || "").replace(/"/g, '""')}"`;
-          csvContent += `${date};${numero};${f2};${r2};${notes}\r\n`;
+        if (cmd.articles) {
+          cmd.articles.forEach(art => {
+            const f = `"${(art.fournisseur || "").replace(/"/g, '""')}"`;
+            const r = `"${(art.ref || "").replace(/"/g, '""')}"`;
+            csvContent += `${date};${numero};${f};${r};${notes}\r\n`;
+          });
         }
       });
 
@@ -2032,20 +1895,21 @@
             <h3>Commande : ${cmd.numero}</h3>
             <div class="date">Date : ${cmd.date}</div>
             <div class="print-photos-flex">
-              ${(cmd.photo || cmd.fournisseur1 || cmd.ref1) ? `
-                <div class="print-photo-print-item">
-                  ${cmd.photo ? `<img src="${cmd.photo}" alt="Article 1">` : ''}
-                  ${cmd.fournisseur1 ? `<div class="print-fournisseur-label">Fournisseur: ${cmd.fournisseur1}</div>` : ''}
-                  ${cmd.ref1 ? `<div class="print-ref-label">Réf: ${cmd.ref1}</div>` : ''}
-                </div>
-              ` : ''}
-              ${(cmd.photo2 || cmd.fournisseur2 || cmd.ref2) ? `
-                <div class="print-photo-print-item">
-                  ${cmd.photo2 ? `<img src="${cmd.photo2}" alt="Article 2">` : ''}
-                  ${cmd.fournisseur2 ? `<div class="print-fournisseur-label">Fournisseur: ${cmd.fournisseur2}</div>` : ''}
-                  ${cmd.ref2 ? `<div class="print-ref-label">Réf: ${cmd.ref2}</div>` : ''}
-                </div>
-              ` : ''}
+        `;
+
+        if (cmd.articles) {
+          cmd.articles.forEach(art => {
+            html += `
+              <div class="print-photo-print-item">
+                ${art.photo ? `<img src="${art.photo}" alt="Article">` : ''}
+                ${art.fournisseur ? `<div class="print-fournisseur-label">Fournisseur: ${art.fournisseur}</div>` : ''}
+                ${art.ref ? `<div class="print-ref-label">Réf: ${art.ref}</div>` : ''}
+              </div>
+            `;
+          });
+        }
+
+        html += `
             </div>
             ${cmd.notes ? `<div class="notes">💬 ${cmd.notes}</div>` : ''}
           </div>
@@ -2055,11 +1919,13 @@
       html += `</div>`;
       printArea.innerHTML = html;
 
-      // Délai de sécurité pour laisser le temps aux images de s'afficher correctement du premier coup
       setTimeout(() => {
         window.print();
       }, 300);
     });
+
+    // Initialisation d'un premier bloc au premier chargement
+    reinitialiserFormulaire();
   </script>
   <script>
     if ('serviceWorker' in navigator) {
