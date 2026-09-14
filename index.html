@@ -9,7 +9,6 @@
   <link rel="icon" type="image/png" href="https://i49.servimg.com/u/f49/11/31/89/70/img_2010.jpg?v=2">
   <link rel="apple-touch-icon" href="https://i49.servimg.com/u/f49/11/31/89/70/img_2010.jpg?v=2">
   <meta name="mobile-web-app-capable" content="yes">
-  <link rel="manifest" href="manifest.json">
 
   <style>
     /* VARIABLES THEME SOMBRE (Défaut) */
@@ -301,13 +300,12 @@
       border-color: var(--primary);
     }
 
-    .photo-preview-wrapper {
+    .previewWrapper {
       position: relative;
       margin-bottom: 0.75rem;
-      display: none;
     }
 
-    .photo-preview {
+    .photoPreview {
       width: 100%;
       max-height: 200px;
       object-fit: cover;
@@ -528,7 +526,6 @@
       cursor: pointer;
     }
 
-    /* COMPTEUR DE RELIQUATS EN HAUT À DROITE */
     .section-header-flex {
       display: flex;
       align-items: center;
@@ -545,7 +542,6 @@
       font-weight: 800;
     }
 
-    /* --- MISE EN PAGE BUREAU (DISPOSITION 2 COLONNES) --- */
     @media (min-width: 900px) {
       .main-layout-desktop {
         display: grid;
@@ -683,7 +679,6 @@
       z-index: 1001;
     }
 
-    /* ZONE D'IMPRESSION CACHÉE SUR L'ÉCRAN */
     #print-area {
       display: none;
     }
@@ -820,7 +815,6 @@
             🔒 Mode Admin : OFF
           </button>
           
-          <!-- OPTIONS ADMIN MASQUÉES PAR DÉFAUT -->
           <div id="adminMenuOptions" style="display: none;">
             <button class="dropdown-item" id="btnExportBackup" style="color: #0284c7;">
               💾 Exporter une sauvegarde
@@ -837,12 +831,8 @@
       </div>
     </header>
 
-    <!-- STRUCTURE EN DEUX COLONNES SUR ORDINATEUR -->
     <div class="main-layout-desktop">
-      
-      <!-- COLONNE DE GAUCHE : Formulaire & Recherche -->
       <div class="column-left">
-        <!-- SECTION RECHERCHE -->
         <section class="card" style="padding: 1rem;">
           <div class="search-box">
             <input type="text" id="recherche" placeholder="🔍 Rechercher par numéro, fournisseur..." autocomplete="off">
@@ -850,7 +840,6 @@
           </div>
         </section>
 
-        <!-- NOUVEAU RELIQUAT -->
         <section class="card" id="sectionPreparation">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
             <h2 id="formTitle" style="font-size: 1.1rem; color:var(--primary);">Nvx reliquats</h2>
@@ -862,10 +851,8 @@
             <input type="text" id="numeroCommande" name="no_autofill_cmd" autocomplete="off" placeholder="Ex: S-103567">
           </div>
 
-          <!-- CONTENEUR DYNAMIQUE DES ARTICLES -->
           <div id="articlesContainer"></div>
 
-          <!-- BOUTON AJOUTER UN ARTICLE -->
           <div style="margin-bottom: 1rem; text-align: center;">
             <button type="button" id="btnAjouterArticle" style="background: transparent; border: 2px dashed var(--border); color: var(--primary); padding: 0.75rem; border-radius: 10px; font-weight: 700; width: 100%; cursor: pointer; transition: all 0.2s;">
               ➕ Ajouter un article pour cette commande
@@ -884,9 +871,7 @@
         </section>
       </div>
 
-      <!-- COLONNE DE DROITE : Historique et Filtres d'export -->
       <div class="column-right">
-        <!-- HISTORIQUE DES RELIQUATS -->
         <section class="card" style="margin-bottom: 0;">
           <div class="section-header-flex">
             <h2>Historique Reliquats</h2>
@@ -899,7 +884,6 @@
               <input type="date" id="dateFiltreExport" class="input-date-custom">
               <button class="btn-pdf" id="btnExportPDF">📄 Exporter PDF</button>
               
-              <!-- BOUTONS GOOGLE SHEETS ET IMPORTER CSV MASQUÉS PAR DÉFAUT -->
               <div id="adminExportOptions" style="display: none; gap: 0.5rem; align-items: center;">
                 <button class="btn-sheets" id="btnExportSheets">🟢 Google Sheets</button>
                 <input type="file" id="fileImportCSV" accept=".csv,.txt" style="display: none;">
@@ -911,7 +895,6 @@
           <div class="liste-commandes" id="galerieCommandes"></div>
         </section>
       </div>
-
     </div>
   </div>
 
@@ -946,11 +929,9 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // 🔑 MOT DE PASSE ADMIN
     const ADMIN_PASSWORD = "1234";
     let estAdmin = false;
 
-    // GESTION DU THÈME CLAIR / SOMBRE
     const htmlRoot = document.documentElement;
     const btnToggleTheme = document.getElementById('btnToggleTheme');
 
@@ -1666,7 +1647,6 @@
       fileImportCSV.click();
     });
 
-    // 📥 IMPORTATION CORRIGÉE POUR LES FICHIERS CSV SÉPARÉS PAR POINTS-VIRGULES (;)
     fileImportCSV.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (!file) return;
@@ -1701,16 +1681,13 @@
             const line = lines[i].trim();
             if (!line) continue;
 
-            // Découpage adapté au séparateur point-virgule (;) de ton fichier CSV
             const cols = line.split(';').map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
             
-            // On s'assure qu'on a bien au moins les colonnes nécessaires (ex: Ref interne, Fournisseur, Code barre, Code article, Désignation, Qté)
             if (cols.length >= 6) {
-              const numero = cols[0];         // Référence interne doc. (N° de commande)
-              const fournisseurCSV = cols[1]; // Fournisseur en contremarque
-              // cols[2] est le Code à barres ligne (on peut l'ignorer ou l'utiliser si besoin)
-              const ref = cols[3];            // Code article
-              const designation = cols[4];    // Désignation
+              const numero = cols[0];
+              const fournisseurCSV = cols[1];
+              const ref = cols[3];
+              const designation = cols[4];
 
               if (!numero || !ref) continue;
 
@@ -1923,11 +1900,6 @@
     });
 
     reinitialiserFormulaire();
-  </script>
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.serviceWorker.register('./sw.js').catch(() => {});
-    }
   </script>
 
 </body>
