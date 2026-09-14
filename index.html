@@ -1178,7 +1178,6 @@
         </div>
       `;
 
-      // Éléments du bloc
       const inputRef = bloc.querySelector('.input-ref');
       const inputFournisseur = bloc.querySelector('.input-fournisseur');
       const previewWrapper = bloc.querySelector('.previewWrapper');
@@ -1192,7 +1191,6 @@
 
       let photoData = photoInit;
 
-      // Autocomplétion sur la référence
       function verifierAutocompletion() {
         const ref = inputRef.value.trim();
         if (!ref) return;
@@ -1299,7 +1297,6 @@
       if (data) {
         Object.keys(data).forEach(key => {
           let cmd = data[key];
-          // Rétrocompatibilité avec l'ancien format (photo1/photo2)
           if (!cmd.articles && cmd.numero) {
             cmd.articles = [];
             if (cmd.ref1 || cmd.photo || cmd.fournisseur1) {
@@ -1336,7 +1333,6 @@
         if (data.ref) hasValidRef = true;
         articlesList.push(data);
 
-        // Sauvegarde automatique dans le catalogue
         if (data.ref && data.photo) {
           const cle = "REF_" + data.ref.replace(/[.#$\/\[\]]/g, "_");
           db.ref('catalogue_photos/' + cle).update({
@@ -1385,8 +1381,6 @@
       inputNumero.value = "";
       inputNotes.value = "";
       articlesContainer.innerHTML = "";
-      
-      // Ajouter un bloc article par défaut au démarrage
       ajouterBlocArticle();
 
       btnEnregistrer.textContent = "Enregistrer les reliquats";
@@ -1672,6 +1666,7 @@
       fileImportCSV.click();
     });
 
+    // 📥 IMPORTATION CORRIGÉE POUR LES FICHIERS CSV SÉPARÉS PAR POINTS-VIRGULES (;)
     fileImportCSV.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (!file) return;
@@ -1706,15 +1701,18 @@
             const line = lines[i].trim();
             if (!line) continue;
 
-            const cols = line.split(',').map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
+            // Découpage adapté au séparateur point-virgule (;) de ton fichier CSV
+            const cols = line.split(';').map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
             
-            if (cols.length >= 4) {
-              const numero = cols[0];      
-              const fournisseurCSV = cols[1]; 
-              const ref = cols[2];         
-              const designation = cols[3]; 
+            // On s'assure qu'on a bien au moins les colonnes nécessaires (ex: Ref interne, Fournisseur, Code barre, Code article, Désignation, Qté)
+            if (cols.length >= 6) {
+              const numero = cols[0];         // Référence interne doc. (N° de commande)
+              const fournisseurCSV = cols[1]; // Fournisseur en contremarque
+              // cols[2] est le Code à barres ligne (on peut l'ignorer ou l'utiliser si besoin)
+              const ref = cols[3];            // Code article
+              const designation = cols[4];    // Désignation
 
-              if (!numero) continue;
+              if (!numero || !ref) continue;
 
               let photoAuto = "";
               let fournisseurFinal = fournisseurCSV;
@@ -1924,7 +1922,6 @@
       }, 300);
     });
 
-    // Initialisation d'un premier bloc au premier chargement
     reinitialiserFormulaire();
   </script>
   <script>
