@@ -405,6 +405,18 @@
       white-space: nowrap;
     }
 
+    button.btn-select-all {
+      background-color: var(--secondary);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 0.6rem 0.85rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
     button.btn-sheets {
       background-color: #16a34a;
       color: white;
@@ -882,6 +894,7 @@
             <span class="export-filter-label">📅 Filtrer par date ou sélection pour l'export :</span>
             <div class="export-actions-row">
               <input type="date" id="dateFiltreExport" class="input-date-custom">
+              <button class="btn-select-all" id="btnSelectAll" title="Tout cocher / décocher">☑️ Tout cocher</button>
               <button class="btn-pdf" id="btnExportPDF">📄 Exporter PDF</button>
               
               <div id="adminExportOptions" style="display: none; gap: 0.5rem; align-items: center;">
@@ -1038,6 +1051,7 @@
     const btnImportBackup = document.getElementById('btnImportBackup');
     const fileRestoreJson = document.getElementById('fileRestoreJson');
     const btnExportPDF = document.getElementById('btnExportPDF');
+    const btnSelectAll = document.getElementById('btnSelectAll');
     const btnExportSheets = document.getElementById('btnExportSheets');
     const btnImportSheets = document.getElementById('btnImportSheets');
     const fileImportCSV = document.getElementById('fileImportCSV');
@@ -1598,6 +1612,15 @@
         galerieCommandes.appendChild(item);
       });
     }
+
+    // 🔘 GESTION DU BOUTON "TOUT COCHER / TOUT DÉCOCHER"
+    let toutCoche = false;
+    btnSelectAll.addEventListener('click', () => {
+      const checkboxes = document.querySelectorAll('.commande-select-checkbox');
+      toutCoche = !toutCoche;
+      checkboxes.forEach(cb => cb.checked = toutCoche);
+      btnSelectAll.innerHTML = toutCoche ? "☑️ Tout décocher" : "☑️ Tout cocher";
+    });
 
     window.ouvrirModal = function(cmd) {
       modal.style.display = "flex";
