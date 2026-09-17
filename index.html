@@ -1099,6 +1099,9 @@
                 catalogueArticles[art.ref].photo = art.photo;
                 if (art.fournisseur) catalogueArticles[art.ref].fournisseur = art.fournisseur;
                 if (art.codeBarre) catalogueArticles[art.ref].codeBarre = art.codeBarre;
+                if (cmd.notes && !catalogueArticles[art.ref].remarque) {
+                  catalogueArticles[art.ref].remarque = cmd.notes;
+                }
               }
             });
           }
@@ -1216,7 +1219,7 @@
             if (c.articles) {
               const foundArt = c.articles.find(a => a.ref === ref);
               if (foundArt) {
-                item = { photo: foundArt.photo, fournisseur: foundArt.fournisseur, codeBarre: foundArt.codeBarre };
+                item = { photo: foundArt.photo, fournisseur: foundArt.fournisseur, codeBarre: foundArt.codeBarre, remarque: c.notes };
                 break;
               }
             }
@@ -1233,6 +1236,9 @@
         }
         if (item && item.codeBarre && !inputBarcode.value.trim()) {
           inputBarcode.value = item.codeBarre;
+        }
+        if (item && item.remarque && !inputNotes.value.trim()) {
+          inputNotes.value = item.remarque;
         }
       }
 
@@ -1696,7 +1702,6 @@
       fileImportCSV.click();
     });
 
-    // 📥 IMPORTATION : Index 0=Date, 1=Numéro de commande, 2=Fournisseur, 3=Code barre ligne, 4=Code article, 5=Désignation
     fileImportCSV.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (!file) return;
@@ -1732,12 +1737,12 @@
             const cols = line.split(';').map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
             
             if (cols.length >= 6) {
-              const dateCSV = cols[0];          // Ex: 17/09/2026
-              const numero = cols;           // Ex: S-103502
-              const fournisseurCSV = cols;   // Fournisseur en contremarque
-              const barcodeCSV = cols;       // Code à barres ligne
-              const ref = cols;              // Code article
-              const designation = cols;      // Désignation
+              const dateCSV = cols[0];
+              const numero = cols[1];
+              const fournisseurCSV = cols[2];
+              const barcodeCSV = cols[3];
+              const ref = cols[4];
+              const designation = cols[5];
 
               if (!numero || !ref) continue;
 
@@ -1779,8 +1784,7 @@
                     ref: ref,
                     codeBarre: barcodeFinal
                   }],
-                  notes: remarqueFinale,
-                  isNew: false 
+                  notes: remarqueFinale
                 };
                 newAddedCount++;
               } else {
@@ -1843,7 +1847,7 @@
 
       if (dateSelect) {
         const parts = dateSelect.split('-');
-        const dateFormatee = `${parts}/${parts}/${parts[0]}`;
+        const dateFormatee = `${parts[2]}/${parts[1]}/${parts[0]}`;
         listeAExporter = commandes.filter(cmd => cmd.date === dateFormatee);
 
         if (listeAExporter.length === 0) {
@@ -1898,7 +1902,7 @@
         const dateSelect = dateFiltreExport.value;
         if (dateSelect) {
           const parts = dateSelect.split('-');
-          const dateFormatee = `${parts}/${parts}/${parts[0]}`;
+          const dateFormatee = `${parts[2]}/${parts[1]}/${parts[0]}`;
           listeAExporter = commandes.filter(cmd => cmd.date === dateFormatee);
           titreExport = `Historique Reliquats - Date : ${dateFormatee}`;
 
