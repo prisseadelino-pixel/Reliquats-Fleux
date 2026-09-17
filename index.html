@@ -486,25 +486,6 @@
       color: var(--primary);
     }
 
-    .badge-news {
-      background: #ff6b00;
-      color: white;
-      font-size: 0.7rem;
-      font-weight: bold;
-      padding: 0.15rem 0.4rem;
-      border-radius: 4px;
-      margin-left: 0.4rem;
-      vertical-align: middle;
-      display: inline-block;
-      animation: pulse 1.5s infinite;
-    }
-
-    @keyframes pulse {
-      0% { opacity: 1; }
-      50% { opacity: 0.5; }
-      100% { opacity: 1; }
-    }
-
     .commande-date-compact {
       font-size: 0.75rem;
       color: var(--subtext);
@@ -1637,14 +1618,13 @@
         
         const nbArticles = cmd.articles ? cmd.articles.length : 0;
         const nbArticlesText = `📦 (${nbArticles} article${nbArticles > 1 ? 's' : ''})`;
-        const newBadgeHtml = cmd.isNew ? `<span class="badge-news">🔥 NEW</span>` : '';
 
         item.innerHTML = `
           <input type="checkbox" class="commande-select-checkbox" data-id="${cmd.id}" onclick="event.stopPropagation()">
           <div class="commande-main-btn" onclick="ouvrirModal(${JSON.stringify(cmd).replace(/"/g, '&quot;')})">
             <span>${nbArticlesText}</span>
             <div>
-              <div class="commande-num-badge">N° ${cmd.numero} ${newBadgeHtml}</div>
+              <div class="commande-num-badge">N° ${cmd.numero}</div>
               <div class="commande-date-compact">${cmd.date}</div>
             </div>
           </div>
@@ -1667,7 +1647,7 @@
 
     window.ouvrirModal = function(cmd) {
       modal.style.display = "flex";
-      modalTitleBadge.innerHTML = `📦 N° ${cmd.numero} ${cmd.isNew ? '<span class="badge-news">🔥 NEW</span>' : ''}`;
+      modalTitleBadge.innerHTML = `📦 N° ${cmd.numero}`;
       modalImagesRow.innerHTML = "";
 
       if (cmd.articles) {
@@ -1753,11 +1733,11 @@
             
             if (cols.length >= 6) {
               const dateCSV = cols[0];          // Ex: 17/09/2026
-              const numero = cols[1];           // Ex: S-103502
-              const fournisseurCSV = cols[2];   // Fournisseur en contremarque
-              const barcodeCSV = cols[3];       // Code à barres ligne
-              const ref = cols[4];              // Code article
-              const designation = cols[5];      // Désignation
+              const numero = cols;           // Ex: S-103502
+              const fournisseurCSV = cols;   // Fournisseur en contremarque
+              const barcodeCSV = cols;       // Code à barres ligne
+              const ref = cols;              // Code article
+              const designation = cols;      // Désignation
 
               if (!numero || !ref) continue;
 
@@ -1800,7 +1780,7 @@
                     codeBarre: barcodeFinal
                   }],
                   notes: remarqueFinale,
-                  isNew: true 
+                  isNew: false 
                 };
                 newAddedCount++;
               } else {
@@ -1863,7 +1843,7 @@
 
       if (dateSelect) {
         const parts = dateSelect.split('-');
-        const dateFormatee = `${parts[2]}/${parts[1]}/${parts[0]}`;
+        const dateFormatee = `${parts}/${parts}/${parts[0]}`;
         listeAExporter = commandes.filter(cmd => cmd.date === dateFormatee);
 
         if (listeAExporter.length === 0) {
@@ -1918,7 +1898,7 @@
         const dateSelect = dateFiltreExport.value;
         if (dateSelect) {
           const parts = dateSelect.split('-');
-          const dateFormatee = `${parts[2]}/${parts[1]}/${parts[0]}`;
+          const dateFormatee = `${parts}/${parts}/${parts[0]}`;
           listeAExporter = commandes.filter(cmd => cmd.date === dateFormatee);
           titreExport = `Historique Reliquats - Date : ${dateFormatee}`;
 
