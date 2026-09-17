@@ -1355,7 +1355,7 @@
         numero: numero,
         articles: articlesList,
         notes: notes,
-        date: modeEditionId !== null && existingCmd ? existingCmd.date : new Date().toLocaleString('fr-FR'),
+        date: modeEditionId !== null && existingCmd ? existingCmd.date : new Date().toLocaleDateString('fr-FR'),
         isNew: false 
       };
 
@@ -1613,7 +1613,6 @@
       });
     }
 
-    // 🔘 GESTION DU BOUTON "TOUT COCHER / TOUT DÉCOCHER"
     let toutCoche = false;
     btnSelectAll.addEventListener('click', () => {
       const checkboxes = document.querySelectorAll('.commande-select-checkbox');
@@ -1670,6 +1669,7 @@
       fileImportCSV.click();
     });
 
+    // 📥 IMPORTATION CORRIGÉE : Récupération de la vraie date (colonne 0) et des autres infos (colonne 1 = Ref interne/cmd, etc.)
     fileImportCSV.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (!file) return;
@@ -1684,8 +1684,6 @@
           fileImportCSV.value = "";
           return;
         }
-
-        const currentDate = new Date().toLocaleString('fr-FR');
 
         db.ref('commandes').once('value').then(snapshot => {
           const existingData = snapshot.val() || {};
@@ -1706,11 +1704,13 @@
 
             const cols = line.split(';').map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
             
+            // Structure : Date (0), Référence interne doc. (1), Fournisseur en contremarque (2), Code barre (3), Code article (4), Désignation (5)
             if (cols.length >= 6) {
-              const numero = cols[0];
-              const fournisseurCSV = cols[1];
-              const ref = cols[3];
-              const designation = cols[4];
+              const dateCSV = cols[0];        // Ex: 17/09/2026
+              const numero = cols[1];         // Ex: S-103502
+              const fournisseurCSV = cols[2]; // Fournisseur en contremarque
+              const ref = cols[4];            // Code article
+              const designation = cols[5];    // Désignation
 
               if (!numero || !ref) continue;
 
@@ -1739,7 +1739,7 @@
                 groupCommandes[numero] = {
                   id: newId,
                   numero: numero,
-                  date: currentDate,
+                  date: dateCSV || new Date().toLocaleDateString('fr-FR'),
                   articles: [{
                     photo: photoAuto,
                     fournisseur: fournisseurFinal,
@@ -1751,6 +1751,7 @@
                 newAddedCount++;
               } else {
                 const cmd = groupCommandes[numero];
+                if (dateCSV) cmd.date = dateCSV; // Met à jour la date si dispo
                 if (!cmd.articles) cmd.articles = [];
                 
                 const alreadyExists = cmd.articles.some(a => a.ref === ref);
@@ -1808,7 +1809,7 @@
       if (dateSelect) {
         const parts = dateSelect.split('-');
         const dateFormatee = `${parts[2]}/${parts[1]}/${parts[0]}`;
-        listeAExporter = commandes.filter(cmd => cmd.date.startsWith(dateFormatee));
+        listeAExporter = commandes.filter(cmd => cmd.date === dateFormatee);
 
         if (listeAExporter.length === 0) {
           alert(`Aucun reliquat trouvé pour la date du ${dateFormatee}.`);
@@ -1862,7 +1863,7 @@
         if (dateSelect) {
           const parts = dateSelect.split('-');
           const dateFormatee = `${parts[2]}/${parts[1]}/${parts[0]}`;
-          listeAExporter = commandes.filter(cmd => cmd.date.startsWith(dateFormatee));
+          listeAExporter = commandes.filter(cmd => cmd.date === dateFormatee);
           titreExport = `Historique Reliquats - Date : ${dateFormatee}`;
 
           if (listeAExporter.length === 0) {
