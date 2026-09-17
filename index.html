@@ -659,6 +659,15 @@
       border: 1px solid var(--border);
     }
 
+    .modal-barcode-badge {
+      background: rgba(148, 163, 184, 0.15);
+      color: var(--subtext);
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-family: monospace;
+    }
+
     @media (max-width: 600px) {
       .modal-images-row {
         flex-direction: column;
@@ -784,6 +793,14 @@
         border-radius: 4px;
         text-align: center;
       }
+      .print-barcode-label {
+        font-size: 9px;
+        color: #475569;
+        font-family: monospace;
+        text-align: center;
+        background: #f8fafc;
+        padding: 1px;
+      }
       .print-card .notes {
         font-size: 12px;
         color: #334155;
@@ -847,7 +864,7 @@
       <div class="column-left">
         <section class="card" style="padding: 1rem;">
           <div class="search-box">
-            <input type="text" id="recherche" placeholder="🔍 Rechercher par numéro, fournisseur..." autocomplete="off">
+            <input type="text" id="recherche" placeholder="🔍 Rechercher par numéro, fournisseur, EAN..." autocomplete="off">
             <button type="button" class="btn-search" id="btnLancerRecherche">Rechercher</button>
           </div>
         </section>
@@ -1088,6 +1105,7 @@
                 if (!catalogueArticles[art.ref]) catalogueArticles[art.ref] = {};
                 catalogueArticles[art.ref].photo = art.photo;
                 if (art.fournisseur) catalogueArticles[art.ref].fournisseur = art.fournisseur;
+                if (art.codeBarre) catalogueArticles[art.ref].codeBarre = art.codeBarre;
               }
             });
           }
@@ -1142,6 +1160,7 @@
       const photoInit = dataArticle ? (dataArticle.photo || "") : "";
       const fournisseurInit = dataArticle ? (dataArticle.fournisseur || "") : "";
       const refInit = dataArticle ? (dataArticle.ref || "") : "";
+      const barcodeInit = dataArticle ? (dataArticle.codeBarre || "") : "";
 
       bloc.innerHTML = `
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
@@ -1167,14 +1186,20 @@
           <input type="text" class="input-fournisseur" placeholder="Ex: Nom du fournisseur" autocomplete="off" value="${fournisseurInit}">
         </div>
 
-        <div class="form-group" style="margin-bottom: 0;">
+        <div class="form-group" style="margin-bottom: 0.75rem;">
           <label>Référence article</label>
           <input type="text" class="input-ref" placeholder="Ex: QM6214" autocomplete="off" value="${refInit}">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+          <label>Code-barres ligne (EAN)</label>
+          <input type="text" class="input-barcode" placeholder="Ex: 5711173353217" autocomplete="off" value="${barcodeInit}">
         </div>
       `;
 
       const inputRef = bloc.querySelector('.input-ref');
       const inputFournisseur = bloc.querySelector('.input-fournisseur');
+      const inputBarcode = bloc.querySelector('.input-barcode');
       const previewWrapper = bloc.querySelector('.previewWrapper');
       const photoPreview = bloc.querySelector('.photoPreview');
       const btnSupprPhoto = bloc.querySelector('.btn-suppr-photo-interne');
@@ -1198,7 +1223,7 @@
             if (c.articles) {
               const foundArt = c.articles.find(a => a.ref === ref);
               if (foundArt) {
-                item = { photo: foundArt.photo, fournisseur: foundArt.fournisseur };
+                item = { photo: foundArt.photo, fournisseur: foundArt.fournisseur, codeBarre: foundArt.codeBarre };
                 break;
               }
             }
@@ -1212,6 +1237,9 @@
         }
         if (item && item.fournisseur && !inputFournisseur.value.trim()) {
           inputFournisseur.value = item.fournisseur;
+        }
+        if (item && item.codeBarre && !inputBarcode.value.trim()) {
+          inputBarcode.value = item.codeBarre;
         }
       }
 
@@ -1238,6 +1266,7 @@
                   refOriginale: ref,
                   photo: photoData,
                   fournisseur: inputFournisseur.value.trim(),
+                  codeBarre: inputBarcode.value.trim(),
                   remarque: inputNotes.value.trim()
                 }).catch(() => {});
               }
@@ -1267,7 +1296,8 @@
         return {
           photo: photoData,
           fournisseur: inputFournisseur.value.trim(),
-          ref: inputRef.value.trim()
+          ref: inputRef.value.trim(),
+          codeBarre: inputBarcode.value.trim()
         };
       };
 
@@ -1295,10 +1325,10 @@
           if (!cmd.articles && cmd.numero) {
             cmd.articles = [];
             if (cmd.ref1 || cmd.photo || cmd.fournisseur1) {
-              cmd.articles.push({ ref: cmd.ref1 || '', fournisseur: cmd.fournisseur1 || '', photo: cmd.photo || '' });
+              cmd.articles.push({ ref: cmd.ref1 || '', fournisseur: cmd.fournisseur1 || '', photo: cmd.photo || '', codeBarre: '' });
             }
             if (cmd.ref2 || cmd.photo2 || cmd.fournisseur2) {
-              cmd.articles.push({ ref: cmd.ref2 || '', fournisseur: cmd.fournisseur2 || '', photo: cmd.photo2 || '' });
+              cmd.articles.push({ ref: cmd.ref2 || '', fournisseur: cmd.fournisseur2 || '', photo: cmd.photo2 || '', codeBarre: '' });
             }
           }
           commandes.push(cmd);
@@ -1334,6 +1364,7 @@
             refOriginale: data.ref,
             photo: data.photo,
             fournisseur: data.fournisseur,
+            codeBarre: data.codeBarre,
             remarque: notes
           }).catch(() => {});
         }
@@ -1575,7 +1606,8 @@
         const numMatch = c.numero.toLowerCase().includes(filtre.toLowerCase());
         const matchArt = c.articles && c.articles.some(art => 
           (art.fournisseur && art.fournisseur.toLowerCase().includes(filtre.toLowerCase())) ||
-          (art.ref && art.ref.toLowerCase().includes(filtre.toLowerCase()))
+          (art.ref && art.ref.toLowerCase().includes(filtre.toLowerCase())) ||
+          (art.codeBarre && art.codeBarre.toLowerCase().includes(filtre.toLowerCase()))
         );
         return numMatch || matchArt;
       });
@@ -1636,6 +1668,7 @@
               ${art.fournisseur ? `<div class="modal-fournisseur-badge">Fournisseur: ${art.fournisseur}</div>` : ''}
               ${art.ref ? `<div class="modal-ref-badge">Réf: ${art.ref}</div>` : ''}
             </div>
+            ${art.codeBarre ? `<div class="modal-barcode-badge">EAN: ${art.codeBarre}</div>` : ''}
           `;
           modalImagesRow.appendChild(box);
         });
@@ -1669,7 +1702,7 @@
       fileImportCSV.click();
     });
 
-    // 📥 IMPORTATION CORRIGÉE : Récupération de la vraie date (colonne 0) et des autres infos (colonne 1 = Ref interne/cmd, etc.)
+    // 📥 IMPORTATION : Index 0=Date, 1=Numéro de commande, 2=Fournisseur, 3=Code barre ligne, 4=Code article, 5=Désignation
     fileImportCSV.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (!file) return;
@@ -1704,18 +1737,19 @@
 
             const cols = line.split(';').map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
             
-            // Structure : Date (0), Référence interne doc. (1), Fournisseur en contremarque (2), Code barre (3), Code article (4), Désignation (5)
             if (cols.length >= 6) {
-              const dateCSV = cols[0];        // Ex: 17/09/2026
-              const numero = cols[1];         // Ex: S-103502
-              const fournisseurCSV = cols[2]; // Fournisseur en contremarque
-              const ref = cols[4];            // Code article
-              const designation = cols[5];    // Désignation
+              const dateCSV = cols[0];          // Ex: 17/09/2026
+              const numero = cols[1];           // Ex: S-103502
+              const fournisseurCSV = cols[2];   // Fournisseur en contremarque
+              const barcodeCSV = cols[3];       // Code à barres ligne
+              const ref = cols[4];              // Code article
+              const designation = cols[5];      // Désignation
 
               if (!numero || !ref) continue;
 
               let photoAuto = "";
               let fournisseurFinal = fournisseurCSV;
+              let barcodeFinal = barcodeCSV;
               let remarqueFinale = designation || "";
 
               const cleNorm = "REF_" + ref.replace(/[.#$\/\[\]]/g, "_");
@@ -1725,12 +1759,17 @@
                 for (let c of commandes) {
                   if (c.articles) {
                     const foundArt = c.articles.find(a => a.ref === ref);
-                    if (foundArt) { photoAuto = foundArt.photo; break; }
+                    if (foundArt) { 
+                      photoAuto = foundArt.photo; 
+                      if (!barcodeFinal && foundArt.codeBarre) barcodeFinal = foundArt.codeBarre;
+                      break; 
+                    }
                   }
                 }
               } else {
                 if (catalogItem.photo) photoAuto = catalogItem.photo;
                 if (catalogItem.fournisseur) fournisseurFinal = catalogItem.fournisseur;
+                if (catalogItem.codeBarre && !barcodeFinal) barcodeFinal = catalogItem.codeBarre;
                 if (catalogItem.remarque && !remarqueFinale) remarqueFinale = catalogItem.remarque;
               }
 
@@ -1743,7 +1782,8 @@
                   articles: [{
                     photo: photoAuto,
                     fournisseur: fournisseurFinal,
-                    ref: ref
+                    ref: ref,
+                    codeBarre: barcodeFinal
                   }],
                   notes: remarqueFinale,
                   isNew: true 
@@ -1751,7 +1791,7 @@
                 newAddedCount++;
               } else {
                 const cmd = groupCommandes[numero];
-                if (dateCSV) cmd.date = dateCSV; // Met à jour la date si dispo
+                if (dateCSV) cmd.date = dateCSV; 
                 if (!cmd.articles) cmd.articles = [];
                 
                 const alreadyExists = cmd.articles.some(a => a.ref === ref);
@@ -1759,7 +1799,8 @@
                   cmd.articles.push({
                     photo: photoAuto,
                     fournisseur: fournisseurFinal,
-                    ref: ref
+                    ref: ref,
+                    codeBarre: barcodeFinal
                   });
                   if (remarqueFinale && cmd.notes && !cmd.notes.includes(remarqueFinale)) {
                     cmd.notes = cmd.notes + " / " + remarqueFinale;
@@ -1823,7 +1864,7 @@
       }
 
       let csvContent = "\uFEFF";
-      csvContent += "Date;Numero de Commande;Fournisseur;Reference;Remarques\r\n";
+      csvContent += "Date;Numero de Commande;Fournisseur;Reference;CodeBarre;Remarques\r\n";
 
       listeAExporter.forEach(cmd => {
         const date = `"${(cmd.date || "").replace(/"/g, '""')}"`;
@@ -1834,7 +1875,8 @@
           cmd.articles.forEach(art => {
             const f = `"${(art.fournisseur || "").replace(/"/g, '""')}"`;
             const r = `"${(art.ref || "").replace(/"/g, '""')}"`;
-            csvContent += `${date};${numero};${f};${r};${notes}\r\n`;
+            const b = `"${(art.codeBarre || "").replace(/"/g, '""')}"`;
+            csvContent += `${date};${numero};${f};${r};${b};${notes}\r\n`;
           });
         }
       });
@@ -1903,6 +1945,7 @@
                 ${art.photo ? `<img src="${art.photo}" alt="Article">` : ''}
                 ${art.fournisseur ? `<div class="print-fournisseur-label">Fournisseur: ${art.fournisseur}</div>` : ''}
                 ${art.ref ? `<div class="print-ref-label">Réf: ${art.ref}</div>` : ''}
+                ${art.codeBarre ? `<div class="print-barcode-label">EAN: ${art.codeBarre}</div>` : ''}
               </div>
             `;
           });
