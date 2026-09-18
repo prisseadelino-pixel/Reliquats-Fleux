@@ -952,7 +952,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    const ADMIN_PASSWORD = "1234";
+    const ADMIN_PASSWORD = "Fleux.reliquats!";
     let estAdmin = false;
 
     const htmlRoot = document.documentElement;
@@ -1738,11 +1738,11 @@
             
             if (cols.length >= 6) {
               const dateCSV = cols[0];
-              const numero = cols[1];
-              const fournisseurCSV = cols[2];
-              const barcodeCSV = cols[3];
-              const ref = cols[4];
-              const designation = cols[5];
+              const numero = cols;
+              const fournisseurCSV = cols;
+              const barcodeCSV = cols;
+              const ref = cols;
+              const designation = cols;
 
               if (!numero || !ref) continue;
 
@@ -1847,7 +1847,7 @@
 
       if (dateSelect) {
         const parts = dateSelect.split('-');
-        const dateFormatee = `${parts[2]}/${parts[1]}/${parts[0]}`;
+        const dateFormatee = `${parts}/${parts}/${parts[0]}`;
         listeAExporter = commandes.filter(cmd => cmd.date === dateFormatee);
 
         if (listeAExporter.length === 0) {
@@ -1902,7 +1902,7 @@
         const dateSelect = dateFiltreExport.value;
         if (dateSelect) {
           const parts = dateSelect.split('-');
-          const dateFormatee = `${parts[2]}/${parts[1]}/${parts[0]}`;
+          const dateFormatee = `${parts}/${parts}/${parts[0]}`;
           listeAExporter = commandes.filter(cmd => cmd.date === dateFormatee);
           titreExport = `Historique Reliquats - Date : ${dateFormatee}`;
 
