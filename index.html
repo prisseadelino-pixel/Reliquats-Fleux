@@ -1327,6 +1327,20 @@
     });
 
     btnEnregistrer.addEventListener('click', () => {
+      if (!estAdmin) {
+        const mdp = prompt("🔒 Action réservée à l'administrateur. Entrez le code :");
+        if (mdp === ADMIN_PASSWORD) {
+          estAdmin = true;
+          btnToggleAdmin.innerHTML = "🔓 Mode Admin : ON";
+          btnToggleAdmin.style.color = "#16a34a";
+          adminMenuOptions.style.display = "block";
+          adminExportOptions.style.display = "inline-flex";
+        } else {
+          if (mdp !== null) alert("❌ Code incorrect !");
+          return;
+        }
+      }
+
       const numero = inputNumero.value.trim();
       const notes = inputNotes.value.trim();
       const blocsArticles = articlesContainer.querySelectorAll('.article-block');
