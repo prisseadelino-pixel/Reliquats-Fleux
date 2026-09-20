@@ -931,6 +931,21 @@
     </div>
   </div>
 
+  <!-- MODAL CONNEXION ADMIN -->
+  <div id="adminLoginModal" class="modal" style="display: none; z-index: 2000;">
+    <div style="background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; width: 100%; max-width: 340px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: flex; flex-direction: column; gap: 1rem;">
+      <h3 style="color: var(--primary); font-size: 1.1rem; text-align: center;">🔒 Accès Administrateur</h3>
+      <div style="position: relative;">
+        <input type="password" id="adminPasswordInput" placeholder="Mot de passe admin" autocomplete="off" style="padding-right: 2.8rem; width: 100%;">
+        <button type="button" id="btnTogglePasswordView" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 1.1rem; color: var(--subtext); padding: 4px;">👁️</button>
+      </div>
+      <div style="display: flex; gap: 0.5rem;">
+        <button type="button" class="btn-main" id="btnSubmitAdminLogin" style="flex: 1;">Valider</button>
+        <button type="button" class="btn-secondary" id="btnCancelAdminLogin" style="flex: 1;">Annuler</button>
+      </div>
+    </div>
+  </div>
+
   <!-- SDK FIREBASE COMPAT -->
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
@@ -952,6 +967,74 @@
 
     const ADMIN_PASSWORD = "Fleux.reliquats!";
     let estAdmin = false;
+
+    // --- GESTION MODALE ADMIN ---
+    let adminCallback = null;
+    const adminLoginModal = document.getElementById('adminLoginModal');
+    const adminPasswordInput = document.getElementById('adminPasswordInput');
+    const btnTogglePasswordView = document.getElementById('btnTogglePasswordView');
+
+    function ouvrirModaleAdmin(callback) {
+      adminCallback = callback;
+      adminPasswordInput.value = '';
+      adminPasswordInput.type = 'password';
+      btnTogglePasswordView.textContent = '👁️';
+      adminLoginModal.style.display = 'flex';
+      setTimeout(() => adminPasswordInput.focus(), 50);
+    }
+
+    btnTogglePasswordView.addEventListener('click', () => {
+      if (adminPasswordInput.type === 'password') {
+        adminPasswordInput.type = 'text';
+        btnTogglePasswordView.textContent = '🙈';
+      } else {
+        adminPasswordInput.type = 'password';
+        btnTogglePasswordView.textContent = '👁️';
+      }
+    });
+
+    document.getElementById('btnCancelAdminLogin').addEventListener('click', () => {
+      adminLoginModal.style.display = 'none';
+      adminCallback = null;
+    });
+
+    function validerPasswordAdmin() {
+      const mdp = adminPasswordInput.value;
+      if (mdp === ADMIN_PASSWORD) {
+        adminLoginModal.style.display = 'none';
+        estAdmin = true;
+        btnToggleAdmin.innerHTML = "🔓 Mode Admin : ON";
+        btnToggleAdmin.style.color = "#16a34a";
+        adminMenuOptions.style.display = "block";
+        adminExportOptions.style.display = "inline-flex";
+        if (adminCallback) {
+          const cb = adminCallback;
+          adminCallback = null;
+          cb(true);
+        }
+      } else {
+        alert("❌ Code incorrect !");
+        adminPasswordInput.value = '';
+        adminPasswordInput.focus();
+      }
+    }
+
+    document.getElementById('btnSubmitAdminLogin').addEventListener('click', validerPasswordAdmin);
+    adminPasswordInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') validerPasswordAdmin();
+    });
+
+    function requireAdmin(actionFn) {
+      if (estAdmin) {
+        actionFn();
+      } else {
+        ouvrirModaleAdmin((success) => {
+          if (success) {
+            actionFn();
+          }
+        });
+      }
+    }
 
     const htmlRoot = document.documentElement;
     const btnToggleTheme = document.getElementById('btnToggleTheme');
@@ -1001,18 +1084,12 @@
     btnToggleAdmin.addEventListener('click', () => {
       dropdownMenu.classList.remove('show');
       if (!estAdmin) {
-        const mdp = prompt("🔒 Entrez le mot de passe administrateur :");
-        if (mdp === ADMIN_PASSWORD) {
-          estAdmin = true;
-          btnToggleAdmin.innerHTML = "🔓 Mode Admin : ON";
-          btnToggleAdmin.style.color = "#16a34a";
-          adminMenuOptions.style.display = "block";
-          adminExportOptions.style.display = "inline-flex";
-          alert("✅ Mode Administrateur activé !");
-          afficherGalerie(inputRecherche.value);
-        } else if (mdp !== null) {
-          alert("❌ Mot de passe incorrect !");
-        }
+        ouvrirModaleAdmin((success) => {
+          if (success) {
+            alert("✅ Mode Administrateur activé !");
+            afficherGalerie(inputRecherche.value);
+          }
+        });
       } else {
         estAdmin = false;
         btnToggleAdmin.innerHTML = "🔒 Mode Admin : OFF";
@@ -1355,21 +1432,7 @@
       alert("Erreur de lecture Firebase : " + error.message);
     });
 
-    btnEnregistrer.addEventListener('click', () => {
-      if (!estAdmin) {
-        const mdp = prompt("🔒 Action réservée à l'administrateur. Entrez le code :");
-        if (mdp === ADMIN_PASSWORD) {
-          estAdmin = true;
-          btnToggleAdmin.innerHTML = "🔓 Mode Admin : ON";
-          btnToggleAdmin.style.color = "#16a34a";
-          adminMenuOptions.style.display = "block";
-          adminExportOptions.style.display = "inline-flex";
-        } else {
-          if (mdp !== null) alert("❌ Code incorrect !");
-          return;
-        }
-      }
-
+    function executerEnregistrement() {
       const numero = inputNumero.value.trim();
       const notes = inputNotes.value.trim();
       const blocsArticles = articlesContainer.querySelectorAll('.article-block');
@@ -1430,6 +1493,10 @@
           btnEnregistrer.textContent = "Enregistrer les reliquats";
           alert("❌ ÉCHEC FIREBASE : " + error.message);
         });
+    }
+
+    btnEnregistrer.addEventListener('click', () => {
+      requireAdmin(executerEnregistrement);
     });
 
     function reinitialiserFormulaire() {
@@ -1455,124 +1522,79 @@
     window.editerCommande = function(id, event) {
       if (event) event.stopPropagation();
       
-      if (!estAdmin) {
-        const mdp = prompt("🔒 Action réservée à l'administrateur. Entrez le code :");
-        if (mdp === ADMIN_PASSWORD) {
-          estAdmin = true;
-          btnToggleAdmin.innerHTML = "🔓 Mode Admin : ON";
-          btnToggleAdmin.style.color = "#16a34a";
-          adminMenuOptions.style.display = "block";
-          adminExportOptions.style.display = "inline-flex";
+      requireAdmin(() => {
+        const item = commandes.find(c => c.id === id);
+        if (!item) return;
+
+        inputRecherche.value = "";
+        modeEditionId = id;
+        inputNumero.value = item.numero;
+        inputNotes.value = item.notes || "";
+        
+        articlesContainer.innerHTML = "";
+        if (item.articles && item.articles.length > 0) {
+          item.articles.forEach(art => {
+            ajouterBlocArticle(art);
+          });
         } else {
-          if (mdp !== null) alert("❌ Code incorrect !");
-          return;
+          ajouterBlocArticle();
         }
-      }
 
-      const item = commandes.find(c => c.id === id);
-      if (!item) return;
-
-      inputRecherche.value = "";
-      modeEditionId = id;
-      inputNumero.value = item.numero;
-      inputNotes.value = item.notes || "";
-      
-      articlesContainer.innerHTML = "";
-      if (item.articles && item.articles.length > 0) {
-        item.articles.forEach(art => {
-          ajouterBlocArticle(art);
-        });
-      } else {
-        ajouterBlocArticle();
-      }
-
-      btnEnregistrer.textContent = "💾 Sauvegarder les modifications";
-      btnAnnulerEdit.style.display = "inline-block";
-      formTitle.textContent = "✏️ Modifier le reliquat " + item.numero;
-      
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+        btnEnregistrer.textContent = "💾 Sauvegarder les modifications";
+        btnAnnulerEdit.style.display = "inline-block";
+        formTitle.textContent = "✏️ Modifier le reliquat " + item.numero;
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
     };
 
     window.supprimerCommande = function(id, event) {
       if (event) event.stopPropagation();
       
-      if (!estAdmin) {
-        const mdp = prompt("🔒 Action réservée à l'administrateur. Entrez le code :");
-        if (mdp === ADMIN_PASSWORD) {
-          estAdmin = true;
-          btnToggleAdmin.innerHTML = "🔓 Mode Admin : ON";
-          btnToggleAdmin.style.color = "#16a34a";
-          adminMenuOptions.style.display = "block";
-          adminExportOptions.style.display = "inline-flex";
-        } else {
-          if (mdp !== null) alert("❌ Code incorrect !");
-          return;
+      requireAdmin(() => {
+        const item = commandes.find(c => c.id === id);
+        if (!item) return;
+
+        if (confirm(`Voulez-vous vraiment supprimer le reliquat ${item.numero} ?`)) {
+          db.ref('commandes/' + id).remove()
+            .then(() => {
+              if (modeEditionId === id) reinitialiserFormulaire();
+            });
         }
-      }
-
-      const item = commandes.find(c => c.id === id);
-      if (!item) return;
-
-      if (confirm(`Voulez-vous vraiment supprimer le reliquat ${item.numero} ?`)) {
-        db.ref('commandes/' + id).remove()
-          .then(() => {
-            if (modeEditionId === id) reinitialiserFormulaire();
-          });
-      }
+      });
     };
 
     btnExportBackup.addEventListener('click', () => {
       dropdownMenu.classList.remove('show');
-      if (!estAdmin) {
-        const mdp = prompt("🔒 Action réservée à l'administrateur. Entrez le code :");
-        if (mdp !== ADMIN_PASSWORD) {
-          if (mdp !== null) alert("❌ Code incorrect !");
-          return;
-        }
-        estAdmin = true;
-        btnToggleAdmin.innerHTML = "🔓 Mode Admin : ON";
-        btnToggleAdmin.style.color = "#16a34a";
-        adminMenuOptions.style.display = "block";
-        adminExportOptions.style.display = "inline-flex";
-      }
-
-      db.ref('/').once('value').then(snapshot => {
-        const fullData = snapshot.val() || {};
-        const jsonString = JSON.stringify(fullData, null, 2);
-        
-        const blob = new Blob([jsonString], { type: "application/json;charset=utf-8;" });
-        const url = URL.createObjectURL(blob);
-        const downloadAnchor = document.createElement('a');
-        downloadAnchor.href = url;
-        
-        const dateJour = new Date().toISOString().slice(0, 10);
-        downloadAnchor.download = `sauvegarde_reliquats_fleux_${dateJour}.json`;
-        
-        document.body.appendChild(downloadAnchor);
-        downloadAnchor.click();
-        
-        setTimeout(() => {
-          document.body.removeChild(downloadAnchor);
-          URL.revokeObjectURL(url);
-        }, 100);
+      requireAdmin(() => {
+        db.ref('/').once('value').then(snapshot => {
+          const fullData = snapshot.val() || {};
+          const jsonString = JSON.stringify(fullData, null, 2);
+          
+          const blob = new Blob([jsonString], { type: "application/json;charset=utf-8;" });
+          const url = URL.createObjectURL(blob);
+          const downloadAnchor = document.createElement('a');
+          downloadAnchor.href = url;
+          
+          const dateJour = new Date().toISOString().slice(0, 10);
+          downloadAnchor.download = `sauvegarde_reliquats_fleux_${dateJour}.json`;
+          
+          document.body.appendChild(downloadAnchor);
+          downloadAnchor.click();
+          
+          setTimeout(() => {
+            document.body.removeChild(downloadAnchor);
+            URL.revokeObjectURL(url);
+          }, 100);
+        });
       });
     });
 
     btnImportBackup.addEventListener('click', () => {
       dropdownMenu.classList.remove('show');
-      if (!estAdmin) {
-        const mdp = prompt("🔒 Action réservée à l'administrateur. Entrez le code :");
-        if (mdp !== ADMIN_PASSWORD) {
-          if (mdp !== null) alert("❌ Code incorrect !");
-          return;
-        }
-        estAdmin = true;
-        btnToggleAdmin.innerHTML = "🔓 Mode Admin : ON";
-        btnToggleAdmin.style.color = "#16a34a";
-        adminMenuOptions.style.display = "block";
-        adminExportOptions.style.display = "inline-flex";
-      }
-      fileRestoreJson.click();
+      requireAdmin(() => {
+        fileRestoreJson.click();
+      });
     });
 
     fileRestoreJson.addEventListener('change', (e) => {
@@ -1607,27 +1629,14 @@
 
     btnViderHistorique.addEventListener('click', () => {
       dropdownMenu.classList.remove('show');
-      
-      if (!estAdmin) {
-        const mdp = prompt("🔒 Action réservée à l'administrateur. Entrez le code :");
-        if (mdp === ADMIN_PASSWORD) {
-          estAdmin = true;
-          btnToggleAdmin.innerHTML = "🔓 Mode Admin : ON";
-          btnToggleAdmin.style.color = "#16a34a";
-          adminMenuOptions.style.display = "block";
-          adminExportOptions.style.display = "inline-flex";
-        } else {
-          if (mdp !== null) alert("❌ Code incorrect !");
-          return;
+      requireAdmin(() => {
+        if (confirm("Voulez-vous vraiment effacer TOUT l'historique de la base de données ?")) {
+          db.ref('commandes').remove()
+            .then(() => {
+              reinitialiserFormulaire();
+            });
         }
-      }
-
-      if (confirm("Voulez-vous vraiment effacer TOUT l'historique de la base de données ?")) {
-        db.ref('commandes').remove()
-          .then(() => {
-            reinitialiserFormulaire();
-          });
-      }
+      });
     });
 
     function afficherGalerie(filtre = "") {
@@ -1690,7 +1699,6 @@
 
       if (cmd.articles) {
         cmd.articles.forEach(art => {
-          // Utilise la remarque article spécifique OU se replie sur la note globale de la commande si vide
           const texteRemarque = art.remarqueArticle || cmd.notes || "";
           const box = document.createElement('div');
           box.className = 'modal-photo-box';
@@ -1771,7 +1779,7 @@
               const ref = cols || '';
               const barcodeCSV = cols || '';
               const remArtCSV = cols || '';
-              const designation = cols || '';
+              const designation = cols[6] || '';
 
               if (!numero || !ref) continue;
 
