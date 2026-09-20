@@ -1769,13 +1769,13 @@
             const cols = line.split(';').map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
             
             if (cols.length >= 6) {
-              const dateCSV = cols[0];
-              const numero = cols;
-              const fournisseurCSV = cols;
-              const barcodeCSV = cols;
-              const ref = cols;
-              const remArtCSV = cols || "";
-              const designation = cols || "";
+              const dateCSV = cols[0] || '';
+              const numero = cols || '';
+              const fournisseurCSV = cols || '';
+              const ref = cols || '';
+              const barcodeCSV = cols || '';
+              const remArtCSV = cols || '';
+              const designation = cols || cols || '';
 
               if (!numero || !ref) continue;
 
