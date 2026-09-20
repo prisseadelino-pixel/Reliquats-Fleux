@@ -680,17 +680,6 @@
       }
     }
 
-    .modal-notes {
-      color: var(--text);
-      background: var(--card-bg);
-      padding: 0.75rem 1rem;
-      border-radius: 8px;
-      max-width: 500px;
-      text-align: center;
-      font-size: 0.95rem;
-      border: 1px solid var(--border);
-    }
-
     .modal-close {
       position: absolute;
       top: 20px;
@@ -813,12 +802,6 @@
         padding: 2px;
         border-radius: 4px;
         text-align: center;
-      }
-      .print-card .notes {
-        font-size: 12px;
-        color: #334155;
-        margin-top: 6px;
-        font-style: italic;
       }
     }
   </style>
@@ -945,7 +928,6 @@
     <div class="modal-content-container">
       <div id="modalTitleBadge" class="modal-title-badge"></div>
       <div class="modal-images-row" id="modalImagesRow"></div>
-      <div id="modalNotes" class="modal-notes" style="display: none;"></div>
     </div>
   </div>
 
@@ -1086,7 +1068,6 @@
     const modal = document.getElementById('imageModal');
     const modalTitleBadge = document.getElementById('modalTitleBadge');
     const modalImagesRow = document.getElementById('modalImagesRow');
-    const modalNotes = document.getElementById('modalNotes');
     const closeModal = document.getElementById('closeModal');
 
     function chargerToutesLesDonnees() {
@@ -1709,6 +1690,8 @@
 
       if (cmd.articles) {
         cmd.articles.forEach(art => {
+          // Utilise la remarque article spécifique OU se replie sur la note globale de la commande si vide
+          const texteRemarque = art.remarqueArticle || cmd.notes || "";
           const box = document.createElement('div');
           box.className = 'modal-photo-box';
           box.innerHTML = `
@@ -1719,19 +1702,11 @@
                 ${art.ref ? `<div class="modal-ref-badge">Réf: ${art.ref}</div>` : ''}
               </div>
               ${art.codeBarre ? `<div class="modal-barcode-badge">EAN: ${art.codeBarre}</div>` : ''}
-              ${art.remarqueArticle ? `<div class="modal-article-remarque-box">💬 ${art.remarqueArticle}</div>` : ''}
+              ${texteRemarque ? `<div class="modal-article-remarque-box">💬 ${texteRemarque}</div>` : ''}
             </div>
           `;
           modalImagesRow.appendChild(box);
         });
-      }
-
-      // Note globale optionnelle si présente
-      if (cmd.notes && cmd.notes.trim() !== "") {
-        modalNotes.textContent = "💬 Note globale: " + cmd.notes;
-        modalNotes.style.display = "block";
-      } else {
-        modalNotes.style.display = "none";
       }
     };
 
@@ -1933,7 +1908,7 @@
             const f = `"${(art.fournisseur || "").replace(/"/g, '""')}"`;
             const r = `"${(art.ref || "").replace(/"/g, '""')}"`;
             const b = `"${(art.codeBarre || "").replace(/"/g, '""')}"`;
-            const ra = `"${(art.remarqueArticle || "").replace(/"/g, '""')}"`;
+            const ra = `"${(art.remarqueArticle || cmd.notes || "").replace(/"/g, '""')}"`;
             csvContent += `${date};${numero};${f};${r};${b};${ra};${notes}\r\n`;
           });
         }
@@ -1998,13 +1973,14 @@
 
         if (cmd.articles) {
           cmd.articles.forEach(art => {
+            const texteRem = art.remarqueArticle || cmd.notes || "";
             html += `
               <div class="print-photo-print-item">
                 ${art.photo ? `<img src="${art.photo}" alt="Article">` : ''}
                 ${art.fournisseur ? `<div class="print-fournisseur-label">Fournisseur: ${art.fournisseur}</div>` : ''}
                 ${art.ref ? `<div class="print-ref-label">Réf: ${art.ref}</div>` : ''}
                 ${art.codeBarre ? `<div class="print-barcode-label">EAN: ${art.codeBarre}</div>` : ''}
-                ${art.remarqueArticle ? `<div class="print-art-remarque-label">💬 ${art.remarqueArticle}</div>` : ''}
+                ${texteRem ? `<div class="print-art-remarque-label">💬 ${texteRem}</div>` : ''}
               </div>
             `;
           });
