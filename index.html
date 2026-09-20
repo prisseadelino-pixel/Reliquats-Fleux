@@ -880,12 +880,7 @@
             </button>
           </div>
 
-          <div class="form-group">
-            <label for="notes">Remarques globales (optionnel)</label>
-            <textarea id="notes" rows="2" placeholder="Ex: Palette complète en attente..." autocomplete="off"></textarea>
-          </div>
-
-          <div style="display:flex; gap:0.5rem;">
+          <div style="display:flex; gap:0.5rem; margin-top: 1rem;">
             <button class="btn-main" id="btnEnregistrer">Enregistrer les reliquats</button>
             <button class="btn-secondary" id="btnAnnulerEdit" style="display:none; width:auto;">Annuler</button>
           </div>
@@ -1120,7 +1115,6 @@
     let modeEditionId = null;
 
     const inputNumero = document.getElementById('numeroCommande');
-    const inputNotes = document.getElementById('notes');
     const btnNouvelleCommande = document.getElementById('btnNouvelleCommande');
     const articlesContainer = document.getElementById('articlesContainer');
     const btnAjouterArticle = document.getElementById('btnAjouterArticle');
@@ -1174,9 +1168,6 @@
                 if (art.fournisseur) catalogueArticles[art.ref].fournisseur = art.fournisseur;
                 if (art.codeBarre) catalogueArticles[art.ref].codeBarre = art.codeBarre;
                 if (art.remarqueArticle) catalogueArticles[art.ref].remarqueArticle = art.remarqueArticle;
-                if (cmd.notes && !catalogueArticles[art.ref].remarque) {
-                  catalogueArticles[art.ref].remarque = cmd.notes;
-                }
               }
             });
           }
@@ -1305,8 +1296,7 @@
                   photo: foundArt.photo, 
                   fournisseur: foundArt.fournisseur, 
                   codeBarre: foundArt.codeBarre, 
-                  remarqueArticle: foundArt.remarqueArticle,
-                  remarque: c.notes 
+                  remarqueArticle: foundArt.remarqueArticle
                 };
                 break;
               }
@@ -1327,9 +1317,6 @@
         }
         if (item && item.remarqueArticle && !inputArtRemarque.value.trim()) {
           inputArtRemarque.value = item.remarqueArticle;
-        }
-        if (item && item.remarque && !inputNotes.value.trim()) {
-          inputNotes.value = item.remarque;
         }
       }
 
@@ -1357,8 +1344,7 @@
                   photo: photoData,
                   fournisseur: inputFournisseur.value.trim(),
                   codeBarre: inputBarcode.value.trim(),
-                  remarqueArticle: inputArtRemarque.value.trim(),
-                  remarque: inputNotes.value.trim()
+                  remarqueArticle: inputArtRemarque.value.trim()
                 }).catch(() => {});
               }
             });
@@ -1434,7 +1420,6 @@
 
     function executerEnregistrement() {
       const numero = inputNumero.value.trim();
-      const notes = inputNotes.value.trim();
       const blocsArticles = articlesContainer.querySelectorAll('.article-block');
 
       if (!numero || blocsArticles.length === 0) {
@@ -1457,8 +1442,7 @@
             photo: data.photo,
             fournisseur: data.fournisseur,
             codeBarre: data.codeBarre,
-            remarqueArticle: data.remarqueArticle,
-            remarque: notes
+            remarqueArticle: data.remarqueArticle
           }).catch(() => {});
         }
       });
@@ -1478,7 +1462,6 @@
         id: idObjet,
         numero: numero,
         articles: articlesList,
-        notes: notes,
         date: modeEditionId !== null && existingCmd ? existingCmd.date : new Date().toLocaleDateString('fr-FR'),
         isNew: false 
       };
@@ -1502,9 +1485,8 @@
     function reinitialiserFormulaire() {
       modeEditionId = null;
       inputNumero.value = "";
-      inputNotes.value = "";
       articlesContainer.innerHTML = "";
-      ajouterBlocArticle();
+      ajouterBlocArticle(); // 1 article par défaut affiché
 
       btnEnregistrer.textContent = "Enregistrer les reliquats";
       btnEnregistrer.disabled = false;
@@ -1529,7 +1511,6 @@
         inputRecherche.value = "";
         modeEditionId = id;
         inputNumero.value = item.numero;
-        inputNotes.value = item.notes || "";
         
         articlesContainer.innerHTML = "";
         if (item.articles && item.articles.length > 0) {
@@ -1699,7 +1680,7 @@
 
       if (cmd.articles) {
         cmd.articles.forEach(art => {
-          const texteRemarque = art.remarqueArticle || cmd.notes || "";
+          const texteRemarque = art.remarqueArticle || "";
           const box = document.createElement('div');
           box.className = 'modal-photo-box';
           box.innerHTML = `
@@ -1772,14 +1753,13 @@
 
             const cols = line.split(';').map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
             
-            if (cols.length >= 6) {
+            if (cols.length >= 5) {
               const dateCSV = cols[0] || '';
               const numero = cols || '';
               const fournisseurCSV = cols || '';
               const ref = cols || '';
               const barcodeCSV = cols || '';
               const remArtCSV = cols || '';
-              const designation = cols[6] || '';
 
               if (!numero || !ref) continue;
 
@@ -1787,7 +1767,6 @@
               let fournisseurFinal = fournisseurCSV;
               let barcodeFinal = barcodeCSV;
               let remArtFinal = remArtCSV;
-              let remarqueFinale = designation || "";
 
               const cleNorm = "REF_" + ref.replace(/[.#$\/\[\]]/g, "_");
               let catalogItem = catalogueArticles[ref] || catalogueArticles[cleNorm] || catalogueArticles["REF_" + ref];
@@ -1809,7 +1788,6 @@
                 if (catalogItem.fournisseur) fournisseurFinal = catalogItem.fournisseur;
                 if (catalogItem.codeBarre && !barcodeFinal) barcodeFinal = catalogItem.codeBarre;
                 if (catalogItem.remarqueArticle && !remArtFinal) remArtFinal = catalogItem.remarqueArticle;
-                if (catalogItem.remarque && !remarqueFinale) remarqueFinale = catalogItem.remarque;
               }
 
               if (!groupCommandes[numero]) {
@@ -1824,8 +1802,7 @@
                     ref: ref,
                     codeBarre: barcodeFinal,
                     remarqueArticle: remArtFinal
-                  }],
-                  notes: remarqueFinale
+                  }]
                 };
                 newAddedCount++;
               } else {
@@ -1842,11 +1819,6 @@
                     codeBarre: barcodeFinal,
                     remarqueArticle: remArtFinal
                   });
-                  if (remarqueFinale && cmd.notes && !cmd.notes.includes(remarqueFinale)) {
-                    cmd.notes = cmd.notes + " / " + remarqueFinale;
-                  } else if (remarqueFinale && !cmd.notes) {
-                    cmd.notes = remarqueFinale;
-                  }
                 }
               }
             }
@@ -1904,20 +1876,19 @@
       }
 
       let csvContent = "\uFEFF";
-      csvContent += "Date;Numero de Commande;Fournisseur;Reference;CodeBarre;RemarqueArticle;RemarquesGlobales\r\n";
+      csvContent += "Date;Numero de Commande;Fournisseur;Reference;CodeBarre;RemarqueArticle\r\n";
 
       listeAExporter.forEach(cmd => {
         const date = `"${(cmd.date || "").replace(/"/g, '""')}"`;
         const numero = `"${(cmd.numero || "").replace(/"/g, '""')}"`;
-        const notes = `"${(cmd.notes || "").replace(/"/g, '""')}"`;
 
         if (cmd.articles) {
           cmd.articles.forEach(art => {
             const f = `"${(art.fournisseur || "").replace(/"/g, '""')}"`;
             const r = `"${(art.ref || "").replace(/"/g, '""')}"`;
             const b = `"${(art.codeBarre || "").replace(/"/g, '""')}"`;
-            const ra = `"${(art.remarqueArticle || cmd.notes || "").replace(/"/g, '""')}"`;
-            csvContent += `${date};${numero};${f};${r};${b};${ra};${notes}\r\n`;
+            const ra = `"${(art.remarqueArticle || "").replace(/"/g, '""')}"`;
+            csvContent += `${date};${numero};${f};${r};${b};${ra}\r\n`;
           });
         }
       });
@@ -1981,7 +1952,7 @@
 
         if (cmd.articles) {
           cmd.articles.forEach(art => {
-            const texteRem = art.remarqueArticle || cmd.notes || "";
+            const texteRem = art.remarqueArticle || "";
             html += `
               <div class="print-photo-print-item">
                 ${art.photo ? `<img src="${art.photo}" alt="Article">` : ''}
@@ -1996,7 +1967,6 @@
 
         html += `
             </div>
-            ${cmd.notes ? `<div class="notes">💬 Note globale: ${cmd.notes}</div>` : ''}
           </div>
         `;
       });
