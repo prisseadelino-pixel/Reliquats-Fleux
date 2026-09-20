@@ -1485,8 +1485,7 @@
     function reinitialiserFormulaire() {
       modeEditionId = null;
       inputNumero.value = "";
-      articlesContainer.innerHTML = "";
-      ajouterBlocArticle(); // 1 article par défaut affiché
+      articlesContainer.innerHTML = ""; // Vide par défaut (0 bloc article)
 
       btnEnregistrer.textContent = "Enregistrer les reliquats";
       btnEnregistrer.disabled = false;
@@ -1517,8 +1516,6 @@
           item.articles.forEach(art => {
             ajouterBlocArticle(art);
           });
-        } else {
-          ajouterBlocArticle();
         }
 
         btnEnregistrer.textContent = "💾 Sauvegarder les modifications";
