@@ -785,6 +785,15 @@
         padding: 2px 4px;
         border-radius: 4px;
       }
+      .print-art-remarque-label {
+        font-size: 10px;
+        font-weight: bold;
+        color: #ff6b00;
+        background: #fff7ed;
+        padding: 2px;
+        border-radius: 4px;
+        text-align: center;
+      }
       .print-card .notes {
         font-size: 12px;
         color: #334155;
@@ -869,8 +878,8 @@
           </div>
 
           <div class="form-group">
-            <label for="notes">Remarques (optionnel)</label>
-            <textarea id="notes" rows="2" placeholder="Ex: Produit fragile..." autocomplete="off"></textarea>
+            <label for="notes">Remarques globales (optionnel)</label>
+            <textarea id="notes" rows="2" placeholder="Ex: Palette complète en attente..." autocomplete="off"></textarea>
           </div>
 
           <div style="display:flex; gap:0.5rem;">
@@ -1086,6 +1095,7 @@
                 catalogueArticles[art.ref].photo = art.photo;
                 if (art.fournisseur) catalogueArticles[art.ref].fournisseur = art.fournisseur;
                 if (art.codeBarre) catalogueArticles[art.ref].codeBarre = art.codeBarre;
+                if (art.remarqueArticle) catalogueArticles[art.ref].remarqueArticle = art.remarqueArticle;
                 if (cmd.notes && !catalogueArticles[art.ref].remarque) {
                   catalogueArticles[art.ref].remarque = cmd.notes;
                 }
@@ -1144,6 +1154,7 @@
       const fournisseurInit = dataArticle ? (dataArticle.fournisseur || "") : "";
       const refInit = dataArticle ? (dataArticle.ref || "") : "";
       const barcodeInit = dataArticle ? (dataArticle.codeBarre || "") : "";
+      const remArticleInit = dataArticle ? (dataArticle.remarqueArticle || "") : "";
 
       bloc.innerHTML = `
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
@@ -1174,15 +1185,21 @@
           <input type="text" class="input-ref" placeholder="Ex: QM6214" autocomplete="off" value="${refInit}">
         </div>
 
-        <div class="form-group" style="margin-bottom: 0;">
+        <div class="form-group" style="margin-bottom: 0.75rem;">
           <label>Code-barres ligne (EAN)</label>
           <input type="text" class="input-barcode" placeholder="Ex: 5711173353217" autocomplete="off" value="${barcodeInit}">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+          <label>💬 Remarque spécifique article</label>
+          <input type="text" class="input-article-remarque" placeholder="Ex: Couleur spécifique, set incomplet..." autocomplete="off" value="${remArticleInit}">
         </div>
       `;
 
       const inputRef = bloc.querySelector('.input-ref');
       const inputFournisseur = bloc.querySelector('.input-fournisseur');
       const inputBarcode = bloc.querySelector('.input-barcode');
+      const inputArtRemarque = bloc.querySelector('.input-article-remarque');
       const previewWrapper = bloc.querySelector('.previewWrapper');
       const photoPreview = bloc.querySelector('.photoPreview');
       const btnSupprPhoto = bloc.querySelector('.btn-suppr-photo-interne');
@@ -1206,7 +1223,13 @@
             if (c.articles) {
               const foundArt = c.articles.find(a => a.ref === ref);
               if (foundArt) {
-                item = { photo: foundArt.photo, fournisseur: foundArt.fournisseur, codeBarre: foundArt.codeBarre, remarque: c.notes };
+                item = { 
+                  photo: foundArt.photo, 
+                  fournisseur: foundArt.fournisseur, 
+                  codeBarre: foundArt.codeBarre, 
+                  remarqueArticle: foundArt.remarqueArticle,
+                  remarque: c.notes 
+                };
                 break;
               }
             }
@@ -1223,6 +1246,9 @@
         }
         if (item && item.codeBarre && !inputBarcode.value.trim()) {
           inputBarcode.value = item.codeBarre;
+        }
+        if (item && item.remarqueArticle && !inputArtRemarque.value.trim()) {
+          inputArtRemarque.value = item.remarqueArticle;
         }
         if (item && item.remarque && !inputNotes.value.trim()) {
           inputNotes.value = item.remarque;
@@ -1253,6 +1279,7 @@
                   photo: photoData,
                   fournisseur: inputFournisseur.value.trim(),
                   codeBarre: inputBarcode.value.trim(),
+                  remarqueArticle: inputArtRemarque.value.trim(),
                   remarque: inputNotes.value.trim()
                 }).catch(() => {});
               }
@@ -1283,7 +1310,8 @@
           photo: photoData,
           fournisseur: inputFournisseur.value.trim(),
           ref: inputRef.value.trim(),
-          codeBarre: inputBarcode.value.trim()
+          codeBarre: inputBarcode.value.trim(),
+          remarqueArticle: inputArtRemarque.value.trim()
         };
       };
 
@@ -1311,10 +1339,10 @@
           if (!cmd.articles && cmd.numero) {
             cmd.articles = [];
             if (cmd.ref1 || cmd.photo || cmd.fournisseur1) {
-              cmd.articles.push({ ref: cmd.ref1 || '', fournisseur: cmd.fournisseur1 || '', photo: cmd.photo || '', codeBarre: '' });
+              cmd.articles.push({ ref: cmd.ref1 || '', fournisseur: cmd.fournisseur1 || '', photo: cmd.photo || '', codeBarre: '', remarqueArticle: '' });
             }
             if (cmd.ref2 || cmd.photo2 || cmd.fournisseur2) {
-              cmd.articles.push({ ref: cmd.ref2 || '', fournisseur: cmd.fournisseur2 || '', photo: cmd.photo2 || '', codeBarre: '' });
+              cmd.articles.push({ ref: cmd.ref2 || '', fournisseur: cmd.fournisseur2 || '', photo: cmd.photo2 || '', codeBarre: '', remarqueArticle: '' });
             }
           }
           commandes.push(cmd);
@@ -1365,6 +1393,7 @@
             photo: data.photo,
             fournisseur: data.fournisseur,
             codeBarre: data.codeBarre,
+            remarqueArticle: data.remarqueArticle,
             remarque: notes
           }).catch(() => {});
         }
@@ -1607,7 +1636,8 @@
         const matchArt = c.articles && c.articles.some(art => 
           (art.fournisseur && art.fournisseur.toLowerCase().includes(filtre.toLowerCase())) ||
           (art.ref && art.ref.toLowerCase().includes(filtre.toLowerCase())) ||
-          (art.codeBarre && art.codeBarre.toLowerCase().includes(filtre.toLowerCase()))
+          (art.codeBarre && art.codeBarre.toLowerCase().includes(filtre.toLowerCase())) ||
+          (art.remarqueArticle && art.remarqueArticle.toLowerCase().includes(filtre.toLowerCase()))
         );
         return numMatch || matchArt;
       });
@@ -1669,6 +1699,7 @@
                 ${art.ref ? `<div class="modal-ref-badge">Réf: ${art.ref}</div>` : ''}
               </div>
               ${art.codeBarre ? `<div class="modal-barcode-badge">EAN: ${art.codeBarre}</div>` : ''}
+              ${art.remarqueArticle ? `<div style="font-size: 0.85rem; color: var(--primary); font-weight: 600; margin-top: 0.2rem;">💬 ${art.remarqueArticle}</div>` : ''}
             </div>
           `;
           modalImagesRow.appendChild(box);
@@ -1676,7 +1707,7 @@
       }
 
       if (cmd.notes && cmd.notes.trim() !== "") {
-        modalNotes.textContent = "💬 " + cmd.notes;
+        modalNotes.textContent = "💬 Note globale: " + cmd.notes;
         modalNotes.style.display = "block";
       } else {
         modalNotes.style.display = "none";
@@ -1743,13 +1774,15 @@
               const fournisseurCSV = cols;
               const barcodeCSV = cols;
               const ref = cols;
-              const designation = cols;
+              const remArtCSV = cols || "";
+              const designation = cols || "";
 
               if (!numero || !ref) continue;
 
               let photoAuto = "";
               let fournisseurFinal = fournisseurCSV;
               let barcodeFinal = barcodeCSV;
+              let remArtFinal = remArtCSV;
               let remarqueFinale = designation || "";
 
               const cleNorm = "REF_" + ref.replace(/[.#$\/\[\]]/g, "_");
@@ -1762,6 +1795,7 @@
                     if (foundArt) { 
                       photoAuto = foundArt.photo; 
                       if (!barcodeFinal && foundArt.codeBarre) barcodeFinal = foundArt.codeBarre;
+                      if (!remArtFinal && foundArt.remarqueArticle) remArtFinal = foundArt.remarqueArticle;
                       break; 
                     }
                   }
@@ -1770,6 +1804,7 @@
                 if (catalogItem.photo) photoAuto = catalogItem.photo;
                 if (catalogItem.fournisseur) fournisseurFinal = catalogItem.fournisseur;
                 if (catalogItem.codeBarre && !barcodeFinal) barcodeFinal = catalogItem.codeBarre;
+                if (catalogItem.remarqueArticle && !remArtFinal) remArtFinal = catalogItem.remarqueArticle;
                 if (catalogItem.remarque && !remarqueFinale) remarqueFinale = catalogItem.remarque;
               }
 
@@ -1783,7 +1818,8 @@
                     photo: photoAuto,
                     fournisseur: fournisseurFinal,
                     ref: ref,
-                    codeBarre: barcodeFinal
+                    codeBarre: barcodeFinal,
+                    remarqueArticle: remArtFinal
                   }],
                   notes: remarqueFinale
                 };
@@ -1799,7 +1835,8 @@
                     photo: photoAuto,
                     fournisseur: fournisseurFinal,
                     ref: ref,
-                    codeBarre: barcodeFinal
+                    codeBarre: barcodeFinal,
+                    remarqueArticle: remArtFinal
                   });
                   if (remarqueFinale && cmd.notes && !cmd.notes.includes(remarqueFinale)) {
                     cmd.notes = cmd.notes + " / " + remarqueFinale;
@@ -1863,7 +1900,7 @@
       }
 
       let csvContent = "\uFEFF";
-      csvContent += "Date;Numero de Commande;Fournisseur;Reference;CodeBarre;Remarques\r\n";
+      csvContent += "Date;Numero de Commande;Fournisseur;Reference;CodeBarre;RemarqueArticle;RemarquesGlobales\r\n";
 
       listeAExporter.forEach(cmd => {
         const date = `"${(cmd.date || "").replace(/"/g, '""')}"`;
@@ -1875,7 +1912,8 @@
             const f = `"${(art.fournisseur || "").replace(/"/g, '""')}"`;
             const r = `"${(art.ref || "").replace(/"/g, '""')}"`;
             const b = `"${(art.codeBarre || "").replace(/"/g, '""')}"`;
-            csvContent += `${date};${numero};${f};${r};${b};${notes}\r\n`;
+            const ra = `"${(art.remarqueArticle || "").replace(/"/g, '""')}"`;
+            csvContent += `${date};${numero};${f};${r};${b};${ra};${notes}\r\n`;
           });
         }
       });
@@ -1945,6 +1983,7 @@
                 ${art.fournisseur ? `<div class="print-fournisseur-label">Fournisseur: ${art.fournisseur}</div>` : ''}
                 ${art.ref ? `<div class="print-ref-label">Réf: ${art.ref}</div>` : ''}
                 ${art.codeBarre ? `<div class="print-barcode-label">EAN: ${art.codeBarre}</div>` : ''}
+                ${art.remarqueArticle ? `<div class="print-art-remarque-label">💬 ${art.remarqueArticle}</div>` : ''}
               </div>
             `;
           });
@@ -1952,7 +1991,7 @@
 
         html += `
             </div>
-            ${cmd.notes ? `<div class="notes">💬 ${cmd.notes}</div>` : ''}
+            ${cmd.notes ? `<div class="notes">💬 Note globale: ${cmd.notes}</div>` : ''}
           </div>
         `;
       });
