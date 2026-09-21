@@ -658,6 +658,16 @@
       display: inline-block;
     }
 
+    .modal-qty-badge {
+      background-color: #16a34a;
+      color: #ffffff;
+      font-weight: 700;
+      padding: 0.25rem 0.65rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      display: inline-block;
+    }
+
     .modal-article-remarque-box {
       background: rgba(255, 107, 0, 0.15);
       color: var(--text);
@@ -790,6 +800,15 @@
         color: #ffffff;
         background-color: #0284c7;
         font-family: monospace;
+        text-align: center;
+        padding: 2px 4px;
+        border-radius: 4px;
+      }
+      .print-qty-label {
+        font-size: 10px;
+        font-weight: bold;
+        color: #ffffff;
+        background-color: #16a34a;
         text-align: center;
         padding: 2px 4px;
         border-radius: 4px;
@@ -1167,6 +1186,7 @@
                 catalogueArticles[art.ref].photo = art.photo;
                 if (art.fournisseur) catalogueArticles[art.ref].fournisseur = art.fournisseur;
                 if (art.codeBarre) catalogueArticles[art.ref].codeBarre = art.codeBarre;
+                if (art.quantite !== undefined) catalogueArticles[art.ref].quantite = art.quantite;
                 if (art.remarqueArticle) catalogueArticles[art.ref].remarqueArticle = art.remarqueArticle;
               }
             });
@@ -1223,6 +1243,7 @@
       const fournisseurInit = dataArticle ? (dataArticle.fournisseur || "") : "";
       const refInit = dataArticle ? (dataArticle.ref || "") : "";
       const barcodeInit = dataArticle ? (dataArticle.codeBarre || "") : "";
+      const qteInit = dataArticle && dataArticle.quantite !== undefined ? dataArticle.quantite : 1;
       const remArticleInit = dataArticle ? (dataArticle.remarqueArticle || "") : "";
 
       bloc.innerHTML = `
@@ -1259,6 +1280,11 @@
           <input type="text" class="input-barcode" placeholder="Ex: 5711173353217" autocomplete="off" value="${barcodeInit}">
         </div>
 
+        <div class="form-group" style="margin-bottom: 0.75rem;">
+          <label>Quantité</label>
+          <input type="number" min="1" class="input-qte" placeholder="Ex: 3" autocomplete="off" value="${qteInit}">
+        </div>
+
         <div class="form-group" style="margin-bottom: 0;">
           <label>💬 Remarque spécifique article</label>
           <input type="text" class="input-article-remarque" placeholder="Ex: Couleur spécifique, set incomplet..." autocomplete="off" value="${remArticleInit}">
@@ -1268,6 +1294,7 @@
       const inputRef = bloc.querySelector('.input-ref');
       const inputFournisseur = bloc.querySelector('.input-fournisseur');
       const inputBarcode = bloc.querySelector('.input-barcode');
+      const inputQte = bloc.querySelector('.input-qte');
       const inputArtRemarque = bloc.querySelector('.input-article-remarque');
       const previewWrapper = bloc.querySelector('.previewWrapper');
       const photoPreview = bloc.querySelector('.photoPreview');
@@ -1296,6 +1323,7 @@
                   photo: foundArt.photo, 
                   fournisseur: foundArt.fournisseur, 
                   codeBarre: foundArt.codeBarre, 
+                  quantite: foundArt.quantite,
                   remarqueArticle: foundArt.remarqueArticle
                 };
                 break;
@@ -1314,6 +1342,9 @@
         }
         if (item && item.codeBarre && !inputBarcode.value.trim()) {
           inputBarcode.value = item.codeBarre;
+        }
+        if (item && item.quantite !== undefined && inputQte.value == "1") {
+          inputQte.value = item.quantite;
         }
         if (item && item.remarqueArticle && !inputArtRemarque.value.trim()) {
           inputArtRemarque.value = item.remarqueArticle;
@@ -1344,6 +1375,7 @@
                   photo: photoData,
                   fournisseur: inputFournisseur.value.trim(),
                   codeBarre: inputBarcode.value.trim(),
+                  quantite: Number(inputQte.value) || 1,
                   remarqueArticle: inputArtRemarque.value.trim()
                 }).catch(() => {});
               }
@@ -1375,6 +1407,7 @@
           fournisseur: inputFournisseur.value.trim(),
           ref: inputRef.value.trim(),
           codeBarre: inputBarcode.value.trim(),
+          quantite: Number(inputQte.value) || 1,
           remarqueArticle: inputArtRemarque.value.trim()
         };
       };
@@ -1403,11 +1436,15 @@
           if (!cmd.articles && cmd.numero) {
             cmd.articles = [];
             if (cmd.ref1 || cmd.photo || cmd.fournisseur1) {
-              cmd.articles.push({ ref: cmd.ref1 || '', fournisseur: cmd.fournisseur1 || '', photo: cmd.photo || '', codeBarre: '', remarqueArticle: '' });
+              cmd.articles.push({ ref: cmd.ref1 || '', fournisseur: cmd.fournisseur1 || '', photo: cmd.photo || '', codeBarre: '', quantite: 1, remarqueArticle: '' });
             }
             if (cmd.ref2 || cmd.photo2 || cmd.fournisseur2) {
-              cmd.articles.push({ ref: cmd.ref2 || '', fournisseur: cmd.fournisseur2 || '', photo: cmd.photo2 || '', codeBarre: '', remarqueArticle: '' });
+              cmd.articles.push({ ref: cmd.ref2 || '', fournisseur: cmd.fournisseur2 || '', photo: cmd.photo2 || '', codeBarre: '', quantite: 1, remarqueArticle: '' });
             }
+          } else if (cmd.articles) {
+            cmd.articles.forEach(a => {
+              if (a.quantite === undefined) a.quantite = 1;
+            });
           }
           commandes.push(cmd);
         });
@@ -1442,6 +1479,7 @@
             photo: data.photo,
             fournisseur: data.fournisseur,
             codeBarre: data.codeBarre,
+            quantite: data.quantite,
             remarqueArticle: data.remarqueArticle
           }).catch(() => {});
         }
@@ -1485,7 +1523,7 @@
     function reinitialiserFormulaire() {
       modeEditionId = null;
       inputNumero.value = "";
-      articlesContainer.innerHTML = ""; // Vide par défaut (0 bloc article)
+      articlesContainer.innerHTML = "";
 
       btnEnregistrer.textContent = "Enregistrer les reliquats";
       btnEnregistrer.disabled = false;
@@ -1641,7 +1679,7 @@
         const item = document.createElement('div');
         item.className = 'commande-item-compact';
         
-        const nbArticles = cmd.articles ? cmd.articles.length : 0;
+        const nbArticles = cmd.articles ? cmd.articles.reduce((acc, a) => acc + (Number(a.quantite) || 1), 0) : 0;
         const nbArticlesText = `📦 (${nbArticles} article${nbArticles > 1 ? 's' : ''})`;
 
         item.innerHTML = `
@@ -1677,6 +1715,7 @@
 
       if (cmd.articles) {
         cmd.articles.forEach(art => {
+          const qte = art.quantite !== undefined ? art.quantite : 1;
           const texteRemarque = art.remarqueArticle || "";
           const box = document.createElement('div');
           box.className = 'modal-photo-box';
@@ -1687,7 +1726,10 @@
                 ${art.fournisseur ? `<div class="modal-fournisseur-badge">Fournisseur: ${art.fournisseur}</div>` : ''}
                 ${art.ref ? `<div class="modal-ref-badge">Réf: ${art.ref}</div>` : ''}
               </div>
-              ${art.codeBarre ? `<div class="modal-barcode-badge">EAN: ${art.codeBarre}</div>` : ''}
+              <div style="display: flex; gap: 0.4rem; justify-content: center; flex-wrap: wrap;">
+                ${art.codeBarre ? `<div class="modal-barcode-badge">EAN: ${art.codeBarre}</div>` : ''}
+                <div class="modal-qty-badge">Qte: ${qte}</div>
+              </div>
               ${texteRemarque ? `<div class="modal-article-remarque-box">💬 ${texteRemarque}</div>` : ''}
             </div>
           `;
@@ -1756,6 +1798,7 @@
               const fournisseurCSV = cols || '';
               const ref = cols || '';
               const barcodeCSV = cols || '';
+              const qteCSV = cols ? Number(cols) : 1;
               const remArtCSV = cols || '';
 
               if (!numero || !ref) continue;
@@ -1763,6 +1806,7 @@
               let photoAuto = "";
               let fournisseurFinal = fournisseurCSV;
               let barcodeFinal = barcodeCSV;
+              let qteFinal = qteCSV || 1;
               let remArtFinal = remArtCSV;
 
               const cleNorm = "REF_" + ref.replace(/[.#$\/\[\]]/g, "_");
@@ -1798,6 +1842,7 @@
                     fournisseur: fournisseurFinal,
                     ref: ref,
                     codeBarre: barcodeFinal,
+                    quantite: qteFinal,
                     remarqueArticle: remArtFinal
                   }]
                 };
@@ -1814,6 +1859,7 @@
                     fournisseur: fournisseurFinal,
                     ref: ref,
                     codeBarre: barcodeFinal,
+                    quantite: qteFinal,
                     remarqueArticle: remArtFinal
                   });
                 }
@@ -1873,7 +1919,7 @@
       }
 
       let csvContent = "\uFEFF";
-      csvContent += "Date;Numero de Commande;Fournisseur;Reference;CodeBarre;RemarqueArticle\r\n";
+      csvContent += "Date;Numero de Commande;Fournisseur;Reference;CodeBarre;Quantite;RemarqueArticle\r\n";
 
       listeAExporter.forEach(cmd => {
         const date = `"${(cmd.date || "").replace(/"/g, '""')}"`;
@@ -1884,8 +1930,9 @@
             const f = `"${(art.fournisseur || "").replace(/"/g, '""')}"`;
             const r = `"${(art.ref || "").replace(/"/g, '""')}"`;
             const b = `"${(art.codeBarre || "").replace(/"/g, '""')}"`;
+            const q = art.quantite !== undefined ? art.quantite : 1;
             const ra = `"${(art.remarqueArticle || "").replace(/"/g, '""')}"`;
-            csvContent += `${date};${numero};${f};${r};${b};${ra}\r\n`;
+            csvContent += `${date};${numero};${f};${r};${b};${q};${ra}\r\n`;
           });
         }
       });
@@ -1949,13 +1996,17 @@
 
         if (cmd.articles) {
           cmd.articles.forEach(art => {
+            const qte = art.quantite !== undefined ? art.quantite : 1;
             const texteRem = art.remarqueArticle || "";
             html += `
               <div class="print-photo-print-item">
                 ${art.photo ? `<img src="${art.photo}" alt="Article">` : ''}
                 ${art.fournisseur ? `<div class="print-fournisseur-label">Fournisseur: ${art.fournisseur}</div>` : ''}
                 ${art.ref ? `<div class="print-ref-label">Réf: ${art.ref}</div>` : ''}
-                ${art.codeBarre ? `<div class="print-barcode-label">EAN: ${art.codeBarre}</div>` : ''}
+                <div style="display:flex; gap:2px; flex-wrap:wrap; justify-content:center;">
+                  ${art.codeBarre ? `<div class="print-barcode-label">EAN: ${art.codeBarre}</div>` : ''}
+                  <div class="print-qty-label">Qte: ${qte}</div>
+                </div>
                 ${texteRem ? `<div class="print-art-remarque-label">💬 ${texteRem}</div>` : ''}
               </div>
             `;
