@@ -1710,7 +1710,7 @@
 
         item.innerHTML = `
           <input type="checkbox" class="commande-select-checkbox" data-id="${cmd.id}" onclick="event.stopPropagation()">
-          <div class="commande-main-btn" onclick="ouvrirModal(${JSON.stringify(cmd).replace(/"/g, '&quot;')})">
+          <div class="commande-main-btn" onclick='ouvrirModal(${JSON.stringify(cmd).replace(/'/g, "&#39;")})'>
             <span>${nbArticlesText}</span>
             <div>
               <div class="commande-num-badge">N° ${cmd.numero || ''}</div>
@@ -1831,7 +1831,14 @@
 
             if (cols.length < 6) continue;
 
-            // Mapping corrigé indices propres: Date(0), NumCommande(1), Fournisseur(2), EAN(3), Reference(4), Désignation(5), Qte(6)
+            // Mapping exact du format ERP source:
+            // cols[0] = Date
+            // cols = Référence interne doc. (N° Commande)
+            // cols = Fournisseur en contremarque
+            // cols = Code à barres ligne (EAN)
+            // cols = Code article (Référence)
+            // cols = Désignation
+            // cols[6] = Qté restante ligne
             let dateCSV = cols[0] || '';
             let numero = cols || '';
             let fournisseurCSV = cols || '';
@@ -1840,7 +1847,7 @@
             let remArtCSV = cols || '';
             let qteCSV = Number(cols[6]) || 1;
 
-            if (!ref || ref.length > 50) continue;
+            if (!numero || !ref) continue;
             parsedRowsCount++;
 
             let photoAuto = "";
@@ -1853,6 +1860,7 @@
                   const foundArt = c.articles.find(a => String(a.ref).trim() === String(ref).trim());
                   if (foundArt) { 
                     photoAuto = foundArt.photo || ""; 
+                    if (!fournisseurCSV && foundArt.fournisseur) fournisseurCSV = foundArt.fournisseur;
                     break; 
                   }
                 }
@@ -1861,7 +1869,7 @@
               if (catalogItem.photo) photoAuto = catalogItem.photo;
             }
 
-            const numClean = String(numero).replace(/[^a-zA-Z0-9-_]/g, '') || `CMD-${i}`;
+            const numClean = String(numero).trim();
 
             if (!groupCommandes[numClean]) {
               const newId = Date.now() + i;
@@ -1881,6 +1889,7 @@
               newAddedCount++;
             } else {
               const cmd = groupCommandes[numClean];
+              if (dateCSV) cmd.date = dateCSV;
               if (!cmd.articles) cmd.articles = [];
               const alreadyExists = cmd.articles.some(a => String(a.ref).trim() === String(ref).trim());
               if (!alreadyExists) {
