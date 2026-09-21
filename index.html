@@ -1160,6 +1160,49 @@
     const modalImagesRow = document.getElementById('modalImagesRow');
     const closeModal = document.getElementById('closeModal');
 
+    // --- FONCTION DE NETTOYAGE AUTOMATIQUE DES LIGNES CORROMPUES ---
+    function nettoyerCommandeObjet(cmd) {
+      if (!cmd) return cmd;
+      let rawNum = String(cmd.numero || '').trim();
+      let rawDate = String(cmd.date || '').trim();
+
+      let parts = [];
+      if (rawNum.includes(';')) parts = rawNum.split(';');
+      else if (rawNum.includes(',')) parts = rawNum.split(',');
+
+      if (parts.length >= 2) {
+        let p0 = parts[0].trim();
+        let p1 = parts[1].trim();
+        if (p0.includes('/')) {
+          if (!rawDate || rawDate === 'undefined') rawDate = p0;
+          rawNum = p1;
+        } else {
+          rawNum = p0;
+        }
+
+        if (!cmd.articles || cmd.articles.length === 0 || (cmd.articles.length === 1 && String(cmd.articles[0].ref).includes(','))) {
+          let fourn = parts[2] ? parts[2].trim() : '';
+          let ean = parts[3] ? parts[3].trim() : '';
+          let ref = parts[4] ? parts[4].trim() : '';
+          let rem = parts[5] ? parts[5].trim() : '';
+          let qte = parts[6] ? Number(parts[6]) : 1;
+
+          cmd.articles = [{
+            photo: (cmd.articles && cmd.articles[0] && cmd.articles[0].photo) || '',
+            fournisseur: fourn,
+            ref: ref || ean || 'Réf',
+            codeBarre: ean,
+            quantite: isNaN(qte) ? 1 : qte,
+            remarqueArticle: rem
+          }];
+        }
+      }
+
+      cmd.numero = rawNum;
+      if (rawDate) cmd.date = rawDate;
+      return cmd;
+    }
+
     function chargerToutesLesDonnees() {
       db.ref('catalogue_photos').once('value').then((snapshot) => {
         const data = snapshot.val() || {};
@@ -1432,25 +1475,13 @@
       commandes = [];
       if (data) {
         if (Array.isArray(data)) {
-          commandes = data.filter(Boolean);
+          commandes = data.filter(Boolean).map(nettoyerCommandeObjet);
         } else {
           Object.keys(data).forEach(key => {
             let cmd = data[key];
             if (cmd) {
               if (!cmd.id) cmd.id = Number(key) || Date.now();
-              if (!cmd.articles && cmd.numero) {
-                cmd.articles = [];
-                if (cmd.ref1 || cmd.photo || cmd.fournisseur1) {
-                  cmd.articles.push({ ref: cmd.ref1 || '', fournisseur: cmd.fournisseur1 || '', photo: cmd.photo || '', codeBarre: '', quantite: 1, remarqueArticle: '' });
-                }
-                if (cmd.ref2 || cmd.photo2 || cmd.fournisseur2) {
-                  cmd.articles.push({ ref: cmd.ref2 || '', fournisseur: cmd.fournisseur2 || '', photo: cmd.photo2 || '', codeBarre: '', quantite: 1, remarqueArticle: '' });
-                }
-              } else if (cmd.articles) {
-                cmd.articles.forEach(a => {
-                  if (a.quantite === undefined) a.quantite = 1;
-                });
-              }
+              cmd = nettoyerCommandeObjet(cmd);
               commandes.push(cmd);
             }
           });
@@ -1555,40 +1586,18 @@
         inputRecherche.value = "";
         modeEditionId = id;
         
-        let rawNumero = String(item.numero || '');
-        if (rawNumero.includes(',') && rawNumero.length > 25) {
-          const partsNum = rawNumero.split(',');
-          rawNumero = partsNum || partsNum[0] || rawNumero;
-        }
-        inputNumero.value = rawNumero.trim();
+        inputNumero.value = String(item.numero || '').trim();
         
         articlesContainer.innerHTML = "";
         if (item.articles && item.articles.length > 0) {
           item.articles.forEach(art => {
-            let cleanRef = String(art.ref || '');
-            let cleanFourn = String(art.fournisseur || '');
-            let cleanEAN = String(art.codeBarre || '');
-            let cleanQte = art.quantite !== undefined ? art.quantite : 1;
-            let cleanRem = art.remarqueArticle || '';
-
-            if (cleanRef.includes(',') && cleanRef.length > 30) {
-              const p = cleanRef.split(',').map(s => s.trim());
-              cleanNumeroFallback = p || rawNumero;
-              cleanFourn = p || cleanFourn;
-              cleanEAN = p || cleanEAN;
-              cleanRef = p || cleanRef;
-              cleanRem = p || cleanRem;
-              cleanQte = Number(p) || cleanQte;
-              inputNumero.value = cleanNumeroFallback;
-            }
-
             ajouterBlocArticle({
               photo: art.photo || "",
-              fournisseur: cleanFourn,
-              ref: cleanRef,
-              codeBarre: cleanEAN,
-              quantite: cleanQte,
-              remarqueArticle: cleanRem
+              fournisseur: art.fournisseur || "",
+              ref: art.ref || "",
+              codeBarre: art.codeBarre || "",
+              quantite: art.quantite !== undefined ? art.quantite : 1,
+              remarqueArticle: art.remarqueArticle || ""
             });
           });
         }
@@ -1825,9 +1834,7 @@
       const reader = new FileReader();
       reader.onload = function(event) {
         let text = event.target.result;
-        if (text.charCodeAt(0) === 0xFEFF) {
-          text = text.slice(1);
-        }
+        if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
         const lines = text.split(/\r\n|\n/).filter(l => l.trim() !== '');
         
         if (lines.length < 2) {
@@ -1847,54 +1854,60 @@
             }
           });
 
-          let newAddedCount = 0;
           let parsedRowsCount = 0;
 
           for (let i = 1; i < lines.length; i++) {
             const line = lines[i].trim();
             if (!line) continue;
 
-            let cols = line.split(';').map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
-            if (cols.length < 6) continue;
+            // Détection automatique virgule ou point-virgule
+            let cols = [];
+            if (line.includes(';')) {
+              cols = line.split(';').map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
+            } else {
+              cols = line.split(',').map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
+            }
 
-            // cols[0] = Date
-            // cols = Référence interne doc. (N° Commande)
-            // cols = Fournisseur en contremarque
-            // cols = Code à barres ligne (EAN)
-            // cols = Code article (Référence)
-            // cols = Désignation
-            // cols = Qté restante ligne
+            if (cols.length < 5) continue;
+
+            // Mapping exact format ERP :
+            // Index 0 = Date (ex: 02/04/2026)
+            // Index 1 = N° Commande (ex: S-96713)
+            // Index 2 = Fournisseur (ex: OPJET)
+            // Index 3 = Code à barres (EAN)
+            // Index 4 = Code article (Référence)
+            // Index 5 = Désignation
+            // Index 6 = Qté
             let dateCSV = cols[0] || '';
-            let numero = cols || '';
-            let fournisseurCSV = cols || '';
-            let barcodeCSV = cols || '';
-            let ref = cols || '';
-            let remArtCSV = cols || '';
-            let qteCSV = Number(cols) || 1;
+            let numeroClean = cols[1] || cols[0];
+            let fournisseurCSV = cols[2] || '';
+            let barcodeCSV = cols[3] || '';
+            let refCSV = cols[4] || cols[3] || cols[1];
+            let remArtCSV = cols[5] || '';
+            let qteCSV = Number(cols[6]) || 1;
 
-            if (!numero || !ref) continue;
+            if (!numeroClean || !refCSV) continue;
             parsedRowsCount++;
 
             let photoAuto = "";
-            const cleNorm = "REF_" + String(ref).replace(/[.#$\/\[\]]/g, "_");
-            let catalogItem = catalogueArticles[ref] || catalogueArticles[cleNorm] || catalogueArticles["REF_" + ref];
+            const cleNorm = "REF_" + String(refCSV).replace(/[.#$\/\[\]]/g, "_");
+            let catalogItem = catalogueArticles[refCSV] || catalogueArticles[cleNorm] || catalogueArticles["REF_" + refCSV];
 
-            if (!catalogItem) {
+            if (catalogItem && catalogItem.photo) {
+              photoAuto = catalogItem.photo;
+            } else {
               for (let c of commandes) {
                 if (c.articles) {
-                  const foundArt = c.articles.find(a => String(a.ref).trim() === String(ref).trim());
-                  if (foundArt) { 
-                    photoAuto = foundArt.photo || ""; 
-                    if (!fournisseurCSV && foundArt.fournisseur) fournisseurCSV = foundArt.fournisseur;
-                    break; 
+                  const foundArt = c.articles.find(a => String(a.ref).trim() === String(refCSV).trim());
+                  if (foundArt && foundArt.photo) {
+                    photoAuto = foundArt.photo;
+                    break;
                   }
                 }
               }
-            } else {
-              if (catalogItem.photo) photoAuto = catalogItem.photo;
             }
 
-            const numClean = String(numero).trim();
+            const numClean = String(numeroClean).trim();
 
             if (!groupCommandes[numClean]) {
               const newId = Date.now() + i;
@@ -1905,23 +1918,22 @@
                 articles: [{
                   photo: photoAuto,
                   fournisseur: fournisseurCSV,
-                  ref: String(ref),
+                  ref: String(refCSV),
                   codeBarre: barcodeCSV,
                   quantite: qteCSV,
                   remarqueArticle: remArtCSV
                 }]
               };
-              newAddedCount++;
             } else {
               const cmd = groupCommandes[numClean];
               if (dateCSV) cmd.date = dateCSV;
               if (!cmd.articles) cmd.articles = [];
-              const alreadyExists = cmd.articles.some(a => String(a.ref).trim() === String(ref).trim());
+              const alreadyExists = cmd.articles.some(a => String(a.ref).trim() === String(refCSV).trim());
               if (!alreadyExists) {
                 cmd.articles.push({
                   photo: photoAuto,
                   fournisseur: fournisseurCSV,
-                  ref: String(ref),
+                  ref: String(refCSV),
                   codeBarre: barcodeCSV,
                   quantite: qteCSV,
                   remarqueArticle: remArtCSV
