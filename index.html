@@ -1806,9 +1806,6 @@
           return;
         }
 
-        const header = lines[0].toLowerCase();
-        const isERPFormat = header.includes('référence interne doc.');
-
         db.ref('commandes').once('value').then(snapshot => {
           const existingData = snapshot.val() || {};
           let groupCommandes = {};
@@ -1827,37 +1824,31 @@
             const line = lines[i].trim();
             if (!line) continue;
 
-            const cols = line.split(';').map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
-            
-            let dateCSV = '', numero = '', fournisseurCSV = '', ref = '', barcodeCSV = '', qteCSV = 1, remArtCSV = '';
-
-            if (isERPFormat && cols.length >= 7) {
-              dateCSV = cols[0] || '';
-              numero = cols || '';
-              fournisseurCSV = cols || '';
-              barcodeCSV = cols || '';
-              ref = cols || '';
-              remArtCSV = cols || '';
-              qteCSV = Number(cols) || 1;
-            } else if (cols.length >= 7) {
-              dateCSV = cols[0] || '';
-              numero = cols || '';
-              fournisseurCSV = cols || '';
-              ref = cols || '';
-              barcodeCSV = cols || '';
-              qteCSV = Number(cols) || 1;
-              remArtCSV = cols || '';
+            let cols = line.split(';').map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
+            if (cols.length === 1 && line.includes(',')) {
+              cols = line.split(',').map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
             }
 
-            if (!numero || !ref) continue;
+            if (cols.length < 5) continue;
+
+            let dateCSV = cols[0] || '';
+            let numero = cols || '';
+            let fournisseurCSV = cols || '';
+            let barcodeCSV = cols || '';
+            let ref = cols || '';
+            let remArtCSV = cols || '';
+            let qteCSV = Number(cols[6]) || 1;
+
+            if (!numero || numero.length > 30) {
+              numero = cols[0] || 'IMPORT-' + i;
+            }
+            if (!ref) {
+              ref = cols || cols || 'REF-INCONNUE';
+            }
+
             parsedRowsCount++;
 
             let photoAuto = "";
-            let fournisseurFinal = fournisseurCSV;
-            let barcodeFinal = barcodeCSV;
-            let qteFinal = qteCSV || 1;
-            let remArtFinal = remArtCSV;
-
             const cleNorm = "REF_" + String(ref).replace(/[.#$\/\[\]]/g, "_");
             let catalogItem = catalogueArticles[ref] || catalogueArticles[cleNorm] || catalogueArticles["REF_" + ref];
 
@@ -1867,50 +1858,42 @@
                   const foundArt = c.articles.find(a => String(a.ref).trim() === String(ref).trim());
                   if (foundArt) { 
                     photoAuto = foundArt.photo || ""; 
-                    if (!fournisseurFinal && foundArt.fournisseur) fournisseurFinal = foundArt.fournisseur;
-                    if (!barcodeFinal && foundArt.codeBarre) barcodeFinal = foundArt.codeBarre;
-                    if (!remArtFinal && foundArt.remarqueArticle) remArtFinal = foundArt.remarqueArticle;
                     break; 
                   }
                 }
               }
             } else {
               if (catalogItem.photo) photoAuto = catalogItem.photo;
-              if (catalogItem.fournisseur && !fournisseurFinal) fournisseurFinal = catalogItem.fournisseur;
-              if (catalogItem.codeBarre && !barcodeFinal) barcodeFinal = catalogItem.codeBarre;
-              if (catalogItem.remarqueArticle && !remArtFinal) remArtFinal = catalogItem.remarqueArticle;
             }
 
             if (!groupCommandes[numero]) {
               const newId = Date.now() + i;
               groupCommandes[numero] = {
                 id: newId,
-                numero: numero,
-                date: dateCSV || new Date().toLocaleDateString('fr-FR'),
+                numero: String(numero),
+                date: dateCSV.includes('/') ? dateCSV : new Date().toLocaleDateString('fr-FR'),
                 articles: [{
                   photo: photoAuto,
-                  fournisseur: fournisseurFinal,
-                  ref: ref,
-                  codeBarre: barcodeFinal,
-                  quantite: qteFinal,
-                  remarqueArticle: remArtFinal
+                  fournisseur: fournisseurCSV,
+                  ref: String(ref),
+                  codeBarre: barcodeCSV,
+                  quantite: qteCSV,
+                  remarqueArticle: remArtCSV
                 }]
               };
               newAddedCount++;
             } else {
               const cmd = groupCommandes[numero];
-              if (dateCSV) cmd.date = dateCSV; 
               if (!cmd.articles) cmd.articles = [];
-              
               const alreadyExists = cmd.articles.some(a => String(a.ref).trim() === String(ref).trim());
               if (!alreadyExists) {
                 cmd.articles.push({
                   photo: photoAuto,
-                  fournisseur: fournisseurFinal,
-                  ref: ref,
-                  codeBarre: barcodeFinal,
-                  quantite: qteFinal,
-                  remarqueArticle: remArtFinal
+                  fournisseur: fournisseurCSV,
+                  ref: String(ref),
+                  codeBarre: barcodeCSV,
+                  quantite: qteCSV,
+                  remarqueArticle: remArtCSV
                 });
               }
             }
