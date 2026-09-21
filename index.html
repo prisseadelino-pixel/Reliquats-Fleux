@@ -1825,12 +1825,13 @@
             if (!line) continue;
 
             let cols = line.split(';').map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
-            if (cols.length === 1 && line.includes(',')) {
+            if (cols.length < 5 && line.includes(',')) {
               cols = line.split(',').map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
             }
 
-            if (cols.length < 5) continue;
+            if (cols.length < 6) continue;
 
+            // Mapping corrigé indices propres: Date(0), NumCommande(1), Fournisseur(2), EAN(3), Reference(4), Désignation(5), Qte(6)
             let dateCSV = cols[0] || '';
             let numero = cols || '';
             let fournisseurCSV = cols || '';
@@ -1839,13 +1840,7 @@
             let remArtCSV = cols || '';
             let qteCSV = Number(cols[6]) || 1;
 
-            if (!numero || numero.length > 30) {
-              numero = cols[0] || 'IMPORT-' + i;
-            }
-            if (!ref) {
-              ref = cols || cols || 'REF-INCONNUE';
-            }
-
+            if (!ref || ref.length > 50) continue;
             parsedRowsCount++;
 
             let photoAuto = "";
@@ -1866,11 +1861,13 @@
               if (catalogItem.photo) photoAuto = catalogItem.photo;
             }
 
-            if (!groupCommandes[numero]) {
+            const numClean = String(numero).replace(/[^a-zA-Z0-9-_]/g, '') || `CMD-${i}`;
+
+            if (!groupCommandes[numClean]) {
               const newId = Date.now() + i;
-              groupCommandes[numero] = {
+              groupCommandes[numClean] = {
                 id: newId,
-                numero: String(numero),
+                numero: numClean,
                 date: dateCSV.includes('/') ? dateCSV : new Date().toLocaleDateString('fr-FR'),
                 articles: [{
                   photo: photoAuto,
@@ -1883,7 +1880,7 @@
               };
               newAddedCount++;
             } else {
-              const cmd = groupCommandes[numero];
+              const cmd = groupCommandes[numClean];
               if (!cmd.articles) cmd.articles = [];
               const alreadyExists = cmd.articles.some(a => String(a.ref).trim() === String(ref).trim());
               if (!alreadyExists) {
