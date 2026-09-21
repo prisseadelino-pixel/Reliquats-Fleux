@@ -1431,24 +1431,31 @@
       const data = snapshot.val();
       commandes = [];
       if (data) {
-        Object.keys(data).forEach(key => {
-          let cmd = data[key];
-          if (!cmd.articles && cmd.numero) {
-            cmd.articles = [];
-            if (cmd.ref1 || cmd.photo || cmd.fournisseur1) {
-              cmd.articles.push({ ref: cmd.ref1 || '', fournisseur: cmd.fournisseur1 || '', photo: cmd.photo || '', codeBarre: '', quantite: 1, remarqueArticle: '' });
+        if (Array.isArray(data)) {
+          commandes = data.filter(Boolean);
+        } else {
+          Object.keys(data).forEach(key => {
+            let cmd = data[key];
+            if (cmd) {
+              if (!cmd.id) cmd.id = Number(key) || Date.now();
+              if (!cmd.articles && cmd.numero) {
+                cmd.articles = [];
+                if (cmd.ref1 || cmd.photo || cmd.fournisseur1) {
+                  cmd.articles.push({ ref: cmd.ref1 || '', fournisseur: cmd.fournisseur1 || '', photo: cmd.photo || '', codeBarre: '', quantite: 1, remarqueArticle: '' });
+                }
+                if (cmd.ref2 || cmd.photo2 || cmd.fournisseur2) {
+                  cmd.articles.push({ ref: cmd.ref2 || '', fournisseur: cmd.fournisseur2 || '', photo: cmd.photo2 || '', codeBarre: '', quantite: 1, remarqueArticle: '' });
+                }
+              } else if (cmd.articles) {
+                cmd.articles.forEach(a => {
+                  if (a.quantite === undefined) a.quantite = 1;
+                });
+              }
+              commandes.push(cmd);
             }
-            if (cmd.ref2 || cmd.photo2 || cmd.fournisseur2) {
-              cmd.articles.push({ ref: cmd.ref2 || '', fournisseur: cmd.fournisseur2 || '', photo: cmd.photo2 || '', codeBarre: '', quantite: 1, remarqueArticle: '' });
-            }
-          } else if (cmd.articles) {
-            cmd.articles.forEach(a => {
-              if (a.quantite === undefined) a.quantite = 1;
-            });
-          }
-          commandes.push(cmd);
-        });
-        commandes.sort((a, b) => b.id - a.id);
+          });
+        }
+        commandes.sort((a, b) => (Number(b.id) || 0) - (Number(a.id) || 0));
       }
       afficherGalerie(inputRecherche.value);
     }, (error) => {
@@ -1663,8 +1670,18 @@
 
     function afficherGalerie(filtre = "") {
       galerieCommandes.innerHTML = "";
+      const dateFilterVal = dateFiltreExport ? dateFiltreExport.value : "";
+      let targetDateFormatted = "";
+      if (dateFilterVal) {
+        const p = dateFilterVal.split('-');
+        targetDateFormatted = `${p}/${p}/${p[0]}`;
+      }
+
       const liste = commandes.filter(c => {
-        const numMatch = c.numero.toLowerCase().includes(filtre.toLowerCase());
+        if (targetDateFormatted && c.date !== targetDateFormatted) {
+          return false;
+        }
+        const numMatch = c.numero && c.numero.toLowerCase().includes(filtre.toLowerCase());
         const matchArt = c.articles && c.articles.some(art => 
           (art.fournisseur && art.fournisseur.toLowerCase().includes(filtre.toLowerCase())) ||
           (art.ref && art.ref.toLowerCase().includes(filtre.toLowerCase())) ||
@@ -1712,6 +1729,10 @@
       toutCoche = !toutCoche;
       checkboxes.forEach(cb => cb.checked = toutCoche);
       btnSelectAll.innerHTML = toutCoche ? "☑️ Tout décocher" : "☑️ Tout cocher";
+    });
+
+    dateFiltreExport.addEventListener('change', () => {
+      afficherGalerie(inputRecherche.value);
     });
 
     window.ouvrirModal = function(cmd) {
@@ -1813,8 +1834,8 @@
               numero = cols || '';
               fournisseurCSV = cols || '';
               barcodeCSV = cols || '';
-              ref = cols[4] || '';
-              remArtCSV = cols[5] || '';
+              ref = cols || '';
+              remArtCSV = cols || '';
               qteCSV = Number(cols[6]) || 1;
             } else if (cols.length >= 7) {
               // Format natif export app: Date(0);Numero(1);Fournisseur(2);Reference(3);CodeBarre(4);Qte(5);Remarque(6)
@@ -1822,8 +1843,8 @@
               numero = cols || '';
               fournisseurCSV = cols || '';
               ref = cols || '';
-              barcodeCSV = cols[4] || '';
-              qteCSV = Number(cols[5]) || 1;
+              barcodeCSV = cols || '';
+              qteCSV = Number(cols) || 1;
               remArtCSV = cols[6] || '';
             }
 
@@ -1912,6 +1933,9 @@
               .then(() => {
                 alert(`Importation réussie : ${keys.length} commande(s) mise(s) à jour / ajoutée(s) !`);
                 fileImportCSV.value = "";
+                // Réinitialise le filtre de date pour voir l'import immédiatement
+                if (dateFiltreExport) dateFiltreExport.value = "";
+                afficherGalerie(inputRecherche.value);
               })
               .catch(err => {
                 alert("Erreur lors de l'enregistrement Firebase : " + err.message);
