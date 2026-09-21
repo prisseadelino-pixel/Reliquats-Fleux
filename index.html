@@ -1831,21 +1831,21 @@
 
             if (cols.length < 6) continue;
 
-            // Mapping exact du format ERP source:
+            // Mapping exact format ERP :
             // cols[0] = Date
             // cols = Référence interne doc. (N° Commande)
             // cols = Fournisseur en contremarque
             // cols = Code à barres ligne (EAN)
             // cols = Code article (Référence)
             // cols = Désignation
-            // cols[6] = Qté restante ligne
+            // cols = Qté restante ligne
             let dateCSV = cols[0] || '';
             let numero = cols || '';
             let fournisseurCSV = cols || '';
             let barcodeCSV = cols || '';
             let ref = cols || '';
             let remArtCSV = cols || '';
-            let qteCSV = Number(cols[6]) || 1;
+            let qteCSV = Number(cols) || 1;
 
             if (!numero || !ref) continue;
             parsedRowsCount++;
