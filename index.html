@@ -296,13 +296,18 @@
       margin-bottom: 0.75rem;
     }
 
+    .previewWrapper img, .modal-photo-box img {
+      max-width: 100%;
+      height: auto;
+      object-fit: contain;
+    }
+
     .photoPreview {
-      width: 100%;
       max-height: 200px;
-      object-fit: cover;
       border-radius: 8px;
       border: 1px solid var(--border);
       display: block;
+      background: rgba(0,0,0,0.1);
     }
 
     .btn-suppr-photo-interne {
@@ -605,10 +610,8 @@
     }
 
     .modal-photo-box img {
-      width: 100%;
       max-height: 42vh;
       border-radius: 8px;
-      object-fit: contain;
       background: rgba(0,0,0,0.1);
     }
 
@@ -1160,7 +1163,7 @@
     const modalImagesRow = document.getElementById('modalImagesRow');
     const closeModal = document.getElementById('closeModal');
 
-    // --- FONCTION DE NETTOYAGE AUTOMATIQUE DES LIGNES CORROMPUES ---
+    // --- NETTOYAGE AUTOMATIQUE DES LIGNES CORROMPUES ---
     function nettoyerCommandeObjet(cmd) {
       if (!cmd) return cmd;
       let rawNum = String(cmd.numero || '').trim();
@@ -1172,7 +1175,7 @@
 
       if (parts.length >= 2) {
         let p0 = parts[0].trim();
-        let p1 = parts[1].trim();
+        let p1 = parts.trim();
         if (p0.includes('/')) {
           if (!rawDate || rawDate === 'undefined') rawDate = p0;
           rawNum = p1;
@@ -1181,11 +1184,11 @@
         }
 
         if (!cmd.articles || cmd.articles.length === 0 || (cmd.articles.length === 1 && String(cmd.articles[0].ref).includes(','))) {
-          let fourn = parts[2] ? parts[2].trim() : '';
-          let ean = parts[3] ? parts[3].trim() : '';
-          let ref = parts[4] ? parts[4].trim() : '';
-          let rem = parts[5] ? parts[5].trim() : '';
-          let qte = parts[6] ? Number(parts[6]) : 1;
+          let fourn = parts ? parts.trim() : '';
+          let ean = parts ? parts.trim() : '';
+          let ref = parts ? parts.trim() : '';
+          let rem = parts ? parts.trim() : '';
+          let qte = parts ? Number(parts) : 1;
 
           cmd.articles = [{
             photo: (cmd.articles && cmd.articles[0] && cmd.articles[0].photo) || '',
@@ -1252,13 +1255,14 @@
       });
     });
 
+    // COMPRESSION OPTIMISÉE POUR FLUIDITÉ FIREBASE (600px max, qual 0.5)
     function compresserImage(dataUrl, callback) {
       const img = new Image();
       img.onload = () => {
         const canvas = document.createElement('canvas');
         let width = img.width;
         let height = img.height;
-        const maxDimension = 900;
+        const maxDimension = 600;
 
         if (width > height && width > maxDimension) {
           height *= maxDimension / width;
@@ -1272,7 +1276,7 @@
         canvas.height = height;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
-        callback(canvas.toDataURL('image/jpeg', 0.65));
+        callback(canvas.toDataURL('image/jpeg', 0.5));
       };
       img.src = dataUrl;
     }
@@ -1296,7 +1300,7 @@
         </div>
 
         <div class="previewWrapper" style="position: relative; margin-bottom: 0.75rem; display: ${photoInit ? 'block' : 'none'};">
-          <img class="photoPreview" src="${photoInit}" alt="Aperçu Photo" style="width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border); display: block;">
+          <img class="photoPreview" src="${photoInit}" alt="Aperçu Photo">
           <button type="button" class="btn-suppr-photo-interne" style="position: absolute; top: 8px; right: 8px; background: rgba(244, 63, 94, 0.9); color: white; border: none; padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: bold; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.3);">❌ Supprimer cette photo</button>
         </div>
         
@@ -1712,8 +1716,8 @@
       const dateFilterVal = dateFiltreExport ? dateFiltreExport.value : "";
       let targetDateFormatted = "";
       if (dateFilterVal) {
-        const p = dateFilterVal.split('-');
-        targetDateFormatted = `${p}/${p}/${p[0]}`;
+        const parts = dateFilterVal.split('-');
+        targetDateFormatted = `${parts}/${parts}/${parts[0]}`;
       }
 
       const liste = commandes.filter(c => {
@@ -1860,7 +1864,6 @@
             const line = lines[i].trim();
             if (!line) continue;
 
-            // Détection automatique virgule ou point-virgule
             let cols = [];
             if (line.includes(';')) {
               cols = line.split(';').map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
@@ -1870,21 +1873,13 @@
 
             if (cols.length < 5) continue;
 
-            // Mapping exact format ERP :
-            // Index 0 = Date (ex: 02/04/2026)
-            // Index 1 = N° Commande (ex: S-96713)
-            // Index 2 = Fournisseur (ex: OPJET)
-            // Index 3 = Code à barres (EAN)
-            // Index 4 = Code article (Référence)
-            // Index 5 = Désignation
-            // Index 6 = Qté
             let dateCSV = cols[0] || '';
-            let numeroClean = cols[1] || cols[0];
-            let fournisseurCSV = cols[2] || '';
-            let barcodeCSV = cols[3] || '';
-            let refCSV = cols[4] || cols[3] || cols[1];
-            let remArtCSV = cols[5] || '';
-            let qteCSV = Number(cols[6]) || 1;
+            let numeroClean = cols || cols[0];
+            let fournisseurCSV = cols || '';
+            let barcodeCSV = cols || '';
+            let refCSV = cols || cols || cols;
+            let remArtCSV = cols || '';
+            let qteCSV = Number(cols) || 1;
 
             if (!numeroClean || !refCSV) continue;
             parsedRowsCount++;
