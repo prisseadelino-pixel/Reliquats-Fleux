@@ -1554,18 +1554,60 @@
 
         inputRecherche.value = "";
         modeEditionId = id;
-        inputNumero.value = item.numero;
+        
+        let rawNumero = String(item.numero || '');
+        if (rawNumero.includes(',')) {
+          const partsNum = rawNumero.split(',');
+          rawNumero = partsNum || partsNum[0] || rawNumero;
+        }
+        inputNumero.value = rawNumero.trim();
         
         articlesContainer.innerHTML = "";
         if (item.articles && item.articles.length > 0) {
           item.articles.forEach(art => {
-            ajouterBlocArticle(art);
+            let cleanRef = String(art.ref || '');
+            let cleanFourn = String(art.fournisseur || '');
+            let cleanEAN = String(art.codeBarre || '');
+            let cleanQte = art.quantite !== undefined ? art.quantite : 1;
+            let cleanRem = art.remarqueArticle || '';
+
+            if (cleanRef.includes(',') && cleanRef.length > 30) {
+              const p = cleanRef.split(',').map(s => s.trim());
+              cleanNumeroFallback = p || rawNumero;
+              cleanFourn = p || cleanFourn;
+              cleanEAN = p || cleanEAN;
+              cleanRef = p || cleanRef;
+              cleanQte = Number(p) || 1;
+              inputNumero.value = cleanNumeroFallback;
+            }
+
+            ajouterBlocArticle({
+              photo: art.photo || "",
+              fournisseur: cleanFourn,
+              ref: cleanRef,
+              codeBarre: cleanEAN,
+              quantite: cleanQte,
+              remarqueArticle: cleanRem
+            });
           });
+        } else {
+          let parts = rawNumero.split(',').map(s => s.trim());
+          if (parts.length >= 6) {
+            inputNumero.value = parts || parts[0];
+            ajouterBlocArticle({
+              photo: "",
+              fournisseur: parts || '',
+              ref: parts || '',
+              codeBarre: parts || '',
+              quantite: Number(parts) || 1,
+              remarqueArticle: ""
+            });
+          }
         }
 
         btnEnregistrer.textContent = "💾 Sauvegarder les modifications";
         btnAnnulerEdit.style.display = "inline-block";
-        formTitle.textContent = "✏️ Modifier le reliquat " + item.numero;
+        formTitle.textContent = "✏️ Modifier le reliquat " + inputNumero.value;
         
         window.scrollTo({ top: 0, behavior: 'smooth' });
       });
