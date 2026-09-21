@@ -1556,7 +1556,7 @@
         modeEditionId = id;
         
         let rawNumero = String(item.numero || '');
-        if (rawNumero.includes(',')) {
+        if (rawNumero.includes(',') && rawNumero.length > 25) {
           const partsNum = rawNumero.split(',');
           rawNumero = partsNum || partsNum[0] || rawNumero;
         }
@@ -1577,7 +1577,8 @@
               cleanFourn = p || cleanFourn;
               cleanEAN = p || cleanEAN;
               cleanRef = p || cleanRef;
-              cleanQte = Number(p) || 1;
+              cleanRem = p || cleanRem;
+              cleanQte = Number(p) || cleanQte;
               inputNumero.value = cleanNumeroFallback;
             }
 
@@ -1590,19 +1591,6 @@
               remarqueArticle: cleanRem
             });
           });
-        } else {
-          let parts = rawNumero.split(',').map(s => s.trim());
-          if (parts.length >= 6) {
-            inputNumero.value = parts || parts[0];
-            ajouterBlocArticle({
-              photo: "",
-              fournisseur: parts || '',
-              ref: parts || '',
-              codeBarre: parts || '',
-              quantite: Number(parts) || 1,
-              remarqueArticle: ""
-            });
-          }
         }
 
         btnEnregistrer.textContent = "💾 Sauvegarder les modifications";
@@ -1867,13 +1855,8 @@
             if (!line) continue;
 
             let cols = line.split(';').map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
-            if (cols.length < 5 && line.includes(',')) {
-              cols = line.split(',').map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
-            }
-
             if (cols.length < 6) continue;
 
-            // Mapping exact format ERP :
             // cols[0] = Date
             // cols = Référence interne doc. (N° Commande)
             // cols = Fournisseur en contremarque
