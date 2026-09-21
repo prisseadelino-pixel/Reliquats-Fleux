@@ -1431,24 +1431,31 @@
       const data = snapshot.val();
       commandes = [];
       if (data) {
-        Object.keys(data).forEach(key => {
-          let cmd = data[key];
-          if (!cmd.articles && cmd.numero) {
-            cmd.articles = [];
-            if (cmd.ref1 || cmd.photo || cmd.fournisseur1) {
-              cmd.articles.push({ ref: cmd.ref1 || '', fournisseur: cmd.fournisseur1 || '', photo: cmd.photo || '', codeBarre: '', quantite: 1, remarqueArticle: '' });
+        if (Array.isArray(data)) {
+          commandes = data.filter(Boolean);
+        } else {
+          Object.keys(data).forEach(key => {
+            let cmd = data[key];
+            if (cmd) {
+              if (!cmd.id) cmd.id = Number(key) || Date.now();
+              if (!cmd.articles && cmd.numero) {
+                cmd.articles = [];
+                if (cmd.ref1 || cmd.photo || cmd.fournisseur1) {
+                  cmd.articles.push({ ref: cmd.ref1 || '', fournisseur: cmd.fournisseur1 || '', photo: cmd.photo || '', codeBarre: '', quantite: 1, remarqueArticle: '' });
+                }
+                if (cmd.ref2 || cmd.photo2 || cmd.fournisseur2) {
+                  cmd.articles.push({ ref: cmd.ref2 || '', fournisseur: cmd.fournisseur2 || '', photo: cmd.photo2 || '', codeBarre: '', quantite: 1, remarqueArticle: '' });
+                }
+              } else if (cmd.articles) {
+                cmd.articles.forEach(a => {
+                  if (a.quantite === undefined) a.quantite = 1;
+                });
+              }
+              commandes.push(cmd);
             }
-            if (cmd.ref2 || cmd.photo2 || cmd.fournisseur2) {
-              cmd.articles.push({ ref: cmd.ref2 || '', fournisseur: cmd.fournisseur2 || '', photo: cmd.photo2 || '', codeBarre: '', quantite: 1, remarqueArticle: '' });
-            }
-          } else if (cmd.articles) {
-            cmd.articles.forEach(a => {
-              if (a.quantite === undefined) a.quantite = 1;
-            });
-          }
-          commandes.push(cmd);
-        });
-        commandes.sort((a, b) => b.id - a.id);
+          });
+        }
+        commandes.sort((a, b) => (Number(b.id) || 0) - (Number(a.id) || 0));
       }
       afficherGalerie(inputRecherche.value);
     }, (error) => {
@@ -1547,18 +1554,60 @@
 
         inputRecherche.value = "";
         modeEditionId = id;
-        inputNumero.value = item.numero;
+        
+        let rawNumero = String(item.numero || '');
+        if (rawNumero.includes(',')) {
+          const partsNum = rawNumero.split(',');
+          rawNumero = partsNum || partsNum[0] || rawNumero;
+        }
+        inputNumero.value = rawNumero.trim();
         
         articlesContainer.innerHTML = "";
         if (item.articles && item.articles.length > 0) {
           item.articles.forEach(art => {
-            ajouterBlocArticle(art);
+            let cleanRef = String(art.ref || '');
+            let cleanFourn = String(art.fournisseur || '');
+            let cleanEAN = String(art.codeBarre || '');
+            let cleanQte = art.quantite !== undefined ? art.quantite : 1;
+            let cleanRem = art.remarqueArticle || '';
+
+            if (cleanRef.includes(',') && cleanRef.length > 30) {
+              const p = cleanRef.split(',').map(s => s.trim());
+              cleanNumeroFallback = p || rawNumero;
+              cleanFourn = p || cleanFourn;
+              cleanEAN = p || cleanEAN;
+              cleanRef = p || cleanRef;
+              cleanQte = Number(p) || 1;
+              inputNumero.value = cleanNumeroFallback;
+            }
+
+            ajouterBlocArticle({
+              photo: art.photo || "",
+              fournisseur: cleanFourn,
+              ref: cleanRef,
+              codeBarre: cleanEAN,
+              quantite: cleanQte,
+              remarqueArticle: cleanRem
+            });
           });
+        } else {
+          let parts = rawNumero.split(',').map(s => s.trim());
+          if (parts.length >= 6) {
+            inputNumero.value = parts || parts[0];
+            ajouterBlocArticle({
+              photo: "",
+              fournisseur: parts || '',
+              ref: parts || '',
+              codeBarre: parts || '',
+              quantite: Number(parts) || 1,
+              remarqueArticle: ""
+            });
+          }
         }
 
         btnEnregistrer.textContent = "💾 Sauvegarder les modifications";
         btnAnnulerEdit.style.display = "inline-block";
-        formTitle.textContent = "✏️ Modifier le reliquat " + item.numero;
+        formTitle.textContent = "✏️ Modifier le reliquat " + inputNumero.value;
         
         window.scrollTo({ top: 0, behavior: 'smooth' });
       });
@@ -1621,8 +1670,14 @@
       reader.onload = function(event) {
         try {
           const importedData = JSON.parse(event.target.result);
-          if (confirm("⚠️ ATTENTION : Restaurer cette sauvegarde va remplacer toutes les données actuelles par celles du fichier. Voulez-vous continuer ?")) {
-            db.ref('/').set(importedData)
+          if (confirm("⚠️ ATTENTION : Restaurer cette sauvegarde va remplacer les nœuds de données par ceux du fichier. Voulez-vous continuer ?")) {
+            const updates = {};
+            if (importedData.commandes) updates['commandes'] = importedData.commandes;
+            if (importedData.catalogue_photos) updates['catalogue_photos'] = importedData.catalogue_photos;
+            
+            const payload = Object.keys(updates).length > 0 ? db.ref('/').update(updates) : db.ref('/').set(importedData);
+
+            payload
               .then(() => {
                 alert("✅ Restauration de la sauvegarde réussie !");
                 fileRestoreJson.value = "";
@@ -1657,13 +1712,26 @@
 
     function afficherGalerie(filtre = "") {
       galerieCommandes.innerHTML = "";
+      const dateFilterVal = dateFiltreExport ? dateFiltreExport.value : "";
+      let targetDateFormatted = "";
+      if (dateFilterVal) {
+        const p = dateFilterVal.split('-');
+        targetDateFormatted = `${p}/${p}/${p[0]}`;
+      }
+
       const liste = commandes.filter(c => {
-        const numMatch = c.numero.toLowerCase().includes(filtre.toLowerCase());
+        if (!c) return false;
+        if (targetDateFormatted && c.date !== targetDateFormatted) {
+          return false;
+        }
+        const numeroStr = String(c.numero || '').toLowerCase();
+        const filtreStr = String(filtre || '').toLowerCase();
+        const numMatch = numeroStr.includes(filtreStr);
         const matchArt = c.articles && c.articles.some(art => 
-          (art.fournisseur && art.fournisseur.toLowerCase().includes(filtre.toLowerCase())) ||
-          (art.ref && art.ref.toLowerCase().includes(filtre.toLowerCase())) ||
-          (art.codeBarre && art.codeBarre.toLowerCase().includes(filtre.toLowerCase())) ||
-          (art.remarqueArticle && art.remarqueArticle.toLowerCase().includes(filtre.toLowerCase()))
+          (art.fournisseur && String(art.fournisseur).toLowerCase().includes(filtreStr)) ||
+          (art.ref && String(art.ref).toLowerCase().includes(filtreStr)) ||
+          (art.codeBarre && String(art.codeBarre).toLowerCase().includes(filtreStr)) ||
+          (art.remarqueArticle && String(art.remarqueArticle).toLowerCase().includes(filtreStr))
         );
         return numMatch || matchArt;
       });
@@ -1684,11 +1752,11 @@
 
         item.innerHTML = `
           <input type="checkbox" class="commande-select-checkbox" data-id="${cmd.id}" onclick="event.stopPropagation()">
-          <div class="commande-main-btn" onclick="ouvrirModal(${JSON.stringify(cmd).replace(/"/g, '&quot;')})">
+          <div class="commande-main-btn" onclick='ouvrirModal(${JSON.stringify(cmd).replace(/'/g, "&#39;")})'>
             <span>${nbArticlesText}</span>
             <div>
-              <div class="commande-num-badge">N° ${cmd.numero}</div>
-              <div class="commande-date-compact">${cmd.date}</div>
+              <div class="commande-num-badge">N° ${cmd.numero || ''}</div>
+              <div class="commande-date-compact">${cmd.date || ''}</div>
             </div>
           </div>
           <div class="commande-actions">
@@ -1708,9 +1776,13 @@
       btnSelectAll.innerHTML = toutCoche ? "☑️ Tout décocher" : "☑️ Tout cocher";
     });
 
+    dateFiltreExport.addEventListener('change', () => {
+      afficherGalerie(inputRecherche.value);
+    });
+
     window.ouvrirModal = function(cmd) {
       modal.style.display = "flex";
-      modalTitleBadge.innerHTML = `📦 N° ${cmd.numero}`;
+      modalTitleBadge.innerHTML = `📦 N° ${cmd.numero || ''}`;
       modalImagesRow.innerHTML = "";
 
       if (cmd.articles) {
@@ -1764,8 +1836,11 @@
 
       const reader = new FileReader();
       reader.onload = function(event) {
-        const text = event.target.result;
-        const lines = text.split(/\r\n|\n/);
+        let text = event.target.result;
+        if (text.charCodeAt(0) === 0xFEFF) {
+          text = text.slice(1);
+        }
+        const lines = text.split(/\r\n|\n/).filter(l => l.trim() !== '');
         
         if (lines.length < 2) {
           alert("Le fichier CSV est vide ou invalide.");
@@ -1780,89 +1855,94 @@
           Object.keys(existingData).forEach(key => {
             const item = existingData[key];
             if (item && item.numero) {
-              groupCommandes[item.numero] = item;
+              groupCommandes[String(item.numero).trim()] = item;
             }
           });
 
           let newAddedCount = 0;
+          let parsedRowsCount = 0;
 
           for (let i = 1; i < lines.length; i++) {
             const line = lines[i].trim();
             if (!line) continue;
 
-            const cols = line.split(';').map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
-            
-            if (cols.length >= 5) {
-              const dateCSV = cols[0] || '';
-              const numero = cols || '';
-              const fournisseurCSV = cols || '';
-              const ref = cols || '';
-              const barcodeCSV = cols || '';
-              const qteCSV = cols ? Number(cols) : 1;
-              const remArtCSV = cols || '';
+            let cols = line.split(';').map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
+            if (cols.length < 5 && line.includes(',')) {
+              cols = line.split(',').map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
+            }
 
-              if (!numero || !ref) continue;
+            if (cols.length < 6) continue;
 
-              let photoAuto = "";
-              let fournisseurFinal = fournisseurCSV;
-              let barcodeFinal = barcodeCSV;
-              let qteFinal = qteCSV || 1;
-              let remArtFinal = remArtCSV;
+            // Mapping exact format ERP :
+            // cols[0] = Date
+            // cols = Référence interne doc. (N° Commande)
+            // cols = Fournisseur en contremarque
+            // cols = Code à barres ligne (EAN)
+            // cols = Code article (Référence)
+            // cols = Désignation
+            // cols = Qté restante ligne
+            let dateCSV = cols[0] || '';
+            let numero = cols || '';
+            let fournisseurCSV = cols || '';
+            let barcodeCSV = cols || '';
+            let ref = cols || '';
+            let remArtCSV = cols || '';
+            let qteCSV = Number(cols) || 1;
 
-              const cleNorm = "REF_" + ref.replace(/[.#$\/\[\]]/g, "_");
-              let catalogItem = catalogueArticles[ref] || catalogueArticles[cleNorm] || catalogueArticles["REF_" + ref];
+            if (!numero || !ref) continue;
+            parsedRowsCount++;
 
-              if (!catalogItem) {
-                for (let c of commandes) {
-                  if (c.articles) {
-                    const foundArt = c.articles.find(a => a.ref === ref);
-                    if (foundArt) { 
-                      photoAuto = foundArt.photo; 
-                      if (!barcodeFinal && foundArt.codeBarre) barcodeFinal = foundArt.codeBarre;
-                      if (!remArtFinal && foundArt.remarqueArticle) remArtFinal = foundArt.remarqueArticle;
-                      break; 
-                    }
+            let photoAuto = "";
+            const cleNorm = "REF_" + String(ref).replace(/[.#$\/\[\]]/g, "_");
+            let catalogItem = catalogueArticles[ref] || catalogueArticles[cleNorm] || catalogueArticles["REF_" + ref];
+
+            if (!catalogItem) {
+              for (let c of commandes) {
+                if (c.articles) {
+                  const foundArt = c.articles.find(a => String(a.ref).trim() === String(ref).trim());
+                  if (foundArt) { 
+                    photoAuto = foundArt.photo || ""; 
+                    if (!fournisseurCSV && foundArt.fournisseur) fournisseurCSV = foundArt.fournisseur;
+                    break; 
                   }
                 }
-              } else {
-                if (catalogItem.photo) photoAuto = catalogItem.photo;
-                if (catalogItem.fournisseur) fournisseurFinal = catalogItem.fournisseur;
-                if (catalogItem.codeBarre && !barcodeFinal) barcodeFinal = catalogItem.codeBarre;
-                if (catalogItem.remarqueArticle && !remArtFinal) remArtFinal = catalogItem.remarqueArticle;
               }
+            } else {
+              if (catalogItem.photo) photoAuto = catalogItem.photo;
+            }
 
-              if (!groupCommandes[numero]) {
-                const newId = Date.now() + i;
-                groupCommandes[numero] = {
-                  id: newId,
-                  numero: numero,
-                  date: dateCSV || new Date().toLocaleDateString('fr-FR'),
-                  articles: [{
-                    photo: photoAuto,
-                    fournisseur: fournisseurFinal,
-                    ref: ref,
-                    codeBarre: barcodeFinal,
-                    quantite: qteFinal,
-                    remarqueArticle: remArtFinal
-                  }]
-                };
-                newAddedCount++;
-              } else {
-                const cmd = groupCommandes[numero];
-                if (dateCSV) cmd.date = dateCSV; 
-                if (!cmd.articles) cmd.articles = [];
-                
-                const alreadyExists = cmd.articles.some(a => a.ref === ref);
-                if (!alreadyExists) {
-                  cmd.articles.push({
-                    photo: photoAuto,
-                    fournisseur: fournisseurFinal,
-                    ref: ref,
-                    codeBarre: barcodeFinal,
-                    quantite: qteFinal,
-                    remarqueArticle: remArtFinal
-                  });
-                }
+            const numClean = String(numero).trim();
+
+            if (!groupCommandes[numClean]) {
+              const newId = Date.now() + i;
+              groupCommandes[numClean] = {
+                id: newId,
+                numero: numClean,
+                date: dateCSV.includes('/') ? dateCSV : new Date().toLocaleDateString('fr-FR'),
+                articles: [{
+                  photo: photoAuto,
+                  fournisseur: fournisseurCSV,
+                  ref: String(ref),
+                  codeBarre: barcodeCSV,
+                  quantite: qteCSV,
+                  remarqueArticle: remArtCSV
+                }]
+              };
+              newAddedCount++;
+            } else {
+              const cmd = groupCommandes[numClean];
+              if (dateCSV) cmd.date = dateCSV;
+              if (!cmd.articles) cmd.articles = [];
+              const alreadyExists = cmd.articles.some(a => String(a.ref).trim() === String(ref).trim());
+              if (!alreadyExists) {
+                cmd.articles.push({
+                  photo: photoAuto,
+                  fournisseur: fournisseurCSV,
+                  ref: String(ref),
+                  codeBarre: barcodeCSV,
+                  quantite: qteCSV,
+                  remarqueArticle: remArtCSV
+                });
               }
             }
           }
@@ -1874,17 +1954,19 @@
             return;
           }
 
-          if (confirm(`Voulez-vous importer et fusionner ces commandes ? (${newAddedCount} nouvelle(s) commande(s) détectée(s))`)) {
+          if (confirm(`Voulez-vous importer et fusionner ces commandes ? (${parsedRowsCount} ligne(s) valide(s) traitée(s))`)) {
             let updates = {};
             keys.forEach(num => {
               const cmd = groupCommandes[num];
               updates[cmd.id] = cmd;
             });
 
-            db.ref('commandes').set(updates)
+            db.ref('commandes').update(updates)
               .then(() => {
-                alert(`Importation réussie : ${newAddedCount} nouvelle(s) commande(s) ajoutée(s) !`);
+                alert(`Importation réussie : ${keys.length} commande(s) mise(s) à jour / ajoutée(s) !`);
                 fileImportCSV.value = "";
+                if (dateFiltreExport) dateFiltreExport.value = "";
+                afficherGalerie(inputRecherche.value);
               })
               .catch(err => {
                 alert("Erreur lors de l'enregistrement Firebase : " + err.message);
@@ -1895,7 +1977,7 @@
           }
         });
       };
-      reader.readAsText(file, 'UTF-8');
+      reader.readAsText(file, 'utf-8');
     });
 
     btnExportSheets.addEventListener('click', () => {
@@ -1989,8 +2071,8 @@
       listeAExporter.forEach(cmd => {
         html += `
           <div class="print-card">
-            <h3>Commande : ${cmd.numero}</h3>
-            <div class="date">Date : ${cmd.date}</div>
+            <h3>Commande : ${cmd.numero || ''}</h3>
+            <div class="date">Date : ${cmd.date || ''}</div>
             <div class="print-photos-flex">
         `;
 
