@@ -1622,7 +1622,15 @@
         try {
           const importedData = JSON.parse(event.target.result);
           if (confirm("⚠️ ATTENTION : Restaurer cette sauvegarde va remplacer toutes les données actuelles par celles du fichier. Voulez-vous continuer ?")) {
-            db.ref('/').set(importedData)
+            // Restauration propre par sous-nœuds (commandes et catalogue_photos)
+            const updates = {};
+            if (importedData.commandes) updates['commandes'] = importedData.commandes;
+            if (importedData.catalogue_photos) updates['catalogue_photos'] = importedData.catalogue_photos;
+            
+            const targetRef = Object.keys(updates).length > 0 ? db.ref('/') : null;
+            const payload = targetRef ? db.ref('/').set(importedData) : db.ref('/').set(importedData);
+
+            payload
               .then(() => {
                 alert("✅ Restauration de la sauvegarde réussie !");
                 fileRestoreJson.value = "";
@@ -1792,13 +1800,14 @@
 
             const cols = line.split(';').map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
             
-            if (cols.length >= 5) {
+            // Format attendu CSV : Date(0) ; Numero(1) ; Fournisseur(2) ; Reference(3) ; CodeBarre(4) ; Quantite(5) ; RemarqueArticle(6)
+            if (cols.length >= 6) {
               const dateCSV = cols[0] || '';
               const numero = cols || '';
               const fournisseurCSV = cols || '';
               const ref = cols || '';
               const barcodeCSV = cols || '';
-              const qteCSV = cols ? Number(cols) : 1;
+              const qteCSV = Number(cols) || 1;
               const remArtCSV = cols || '';
 
               if (!numero || !ref) continue;
