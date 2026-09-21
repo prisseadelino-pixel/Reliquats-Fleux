@@ -869,6 +869,9 @@
             <button class="dropdown-item danger" id="btnViderHistorique">
               🗑️ Vider l'historique
             </button>
+            <button class="dropdown-item" id="btnToggleMaintenance" style="color: #f59e0b;">
+              🛠️ Activer la maintenance
+            </button>
           </div>
         </div>
       </div>
@@ -963,6 +966,13 @@
     </div>
   </div>
 
+  <!-- OVERLAY MAINTENANCE -->
+  <div id="maintenanceOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 9999; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 2rem;">
+    <h1 style="color: var(--primary); font-size: 2rem; margin-bottom: 1rem;">🛠️ Maintenance en cours</h1>
+    <p style="color: var(--subtext); max-width: 500px; margin-bottom: 1.5rem;">L'application est temporairement en maintenance. Retour prévu très bientôt !</p>
+    <button id="btnBypassMaintenance" style="background: var(--secondary); color: var(--text); border: 1px solid var(--border); padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; font-size: 0.85rem;">Accès Admin / Contourner</button>
+  </div>
+
   <!-- SDK FIREBASE COMPAT -->
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
@@ -984,6 +994,57 @@
 
     const ADMIN_PASSWORD = "Fleux.reliquats!";
     let estAdmin = false;
+
+    // --- GESTION MAINTENANCE ---
+    const maintenanceOverlay = document.getElementById('maintenanceOverlay');
+    const btnToggleMaintenance = document.getElementById('btnToggleMaintenance');
+    const btnBypassMaintenance = document.getElementById('btnBypassMaintenance');
+    let maintenanceActive = false;
+
+    db.ref('config/maintenance').on('value', (snapshot) => {
+      maintenanceActive = snapshot.val() === true;
+      mettreAJourAffichageMaintenance();
+      
+      if (btnToggleMaintenance) {
+        btnToggleMaintenance.innerHTML = maintenanceActive 
+          ? "✅ Désactiver la maintenance" 
+          : "🛠️ Activer la maintenance";
+        btnToggleMaintenance.style.color = maintenanceActive ? "#16a34a" : "#f59e0b";
+      }
+    });
+
+    function mettreAJourAffichageMaintenance() {
+      if (maintenanceOverlay) {
+        if (maintenanceActive && !estAdmin) {
+          maintenanceOverlay.style.display = 'flex';
+        } else {
+          maintenanceOverlay.style.display = 'none';
+        }
+      }
+    }
+
+    if (btnToggleMaintenance) {
+      btnToggleMaintenance.addEventListener('click', () => {
+        dropdownMenu.classList.remove('show');
+        requireAdmin(() => {
+          const nouvelEtat = !maintenanceActive;
+          db.ref('config/maintenance').set(nouvelEtat).then(() => {
+            alert(nouvelEtat ? "🛠️ Mode maintenance ACTIVÉ pour les utilisateurs." : "✅ Mode maintenance DÉSACTIVÉ.");
+          });
+        });
+      });
+    }
+
+    if (btnBypassMaintenance) {
+      btnBypassMaintenance.addEventListener('click', () => {
+        ouvrirModaleAdmin((success) => {
+          if (success) {
+            alert("✅ Connecté en admin, maintenance contournée.");
+            mettreAJourAffichageMaintenance();
+          }
+        });
+      });
+    }
 
     // --- GESTION MODALE ADMIN ---
     let adminCallback = null;
@@ -1024,6 +1085,7 @@
         btnToggleAdmin.style.color = "#16a34a";
         adminMenuOptions.style.display = "block";
         adminExportOptions.style.display = "inline-flex";
+        mettreAJourAffichageMaintenance();
         if (adminCallback) {
           const cb = adminCallback;
           adminCallback = null;
@@ -1104,6 +1166,7 @@
         ouvrirModaleAdmin((success) => {
           if (success) {
             alert("✅ Mode Administrateur activé !");
+            mettreAJourAffichageMaintenance();
             afficherGalerie(inputRecherche.value);
           }
         });
@@ -1113,6 +1176,7 @@
         btnToggleAdmin.style.color = "var(--text)";
         adminMenuOptions.style.display = "none";
         adminExportOptions.style.display = "none";
+        mettreAJourAffichageMaintenance();
         alert("🔒 Mode Administrateur désactivé.");
         afficherGalerie(inputRecherche.value);
       }
@@ -1163,7 +1227,6 @@
     const modalImagesRow = document.getElementById('modalImagesRow');
     const closeModal = document.getElementById('closeModal');
 
-    // --- NETTOYAGE AUTOMATIQUE DES LIGNES CORROMPUES ---
     function nettoyerCommandeObjet(cmd) {
       if (!cmd) return cmd;
       let rawNum = String(cmd.numero || '').trim();
@@ -1181,23 +1244,6 @@
           rawNum = p1;
         } else {
           rawNum = p0;
-        }
-
-        if (!cmd.articles || cmd.articles.length === 0 || (cmd.articles.length === 1 && String(cmd.articles[0].ref).includes(','))) {
-          let fourn = parts ? parts.trim() : '';
-          let ean = parts ? parts.trim() : '';
-          let ref = parts ? parts.trim() : '';
-          let rem = parts ? parts.trim() : '';
-          let qte = parts ? Number(parts) : 1;
-
-          cmd.articles = [{
-            photo: (cmd.articles && cmd.articles[0] && cmd.articles[0].photo) || '',
-            fournisseur: fourn,
-            ref: ref || ean || 'Réf',
-            codeBarre: ean,
-            quantite: isNaN(qte) ? 1 : qte,
-            remarqueArticle: rem
-          }];
         }
       }
 
@@ -1255,7 +1301,6 @@
       });
     });
 
-    // COMPRESSION OPTIMISÉE POUR FLUIDITÉ FIREBASE (600px max, qual 0.5)
     function compresserImage(dataUrl, callback) {
       const img = new Image();
       img.onload = () => {
@@ -1827,10 +1872,6 @@
       if (e.key === 'Enter') executerRecherche();
     });
 
-    btnImportSheets.addEventListener('click', () => {
-      fileImportCSV.click();
-    });
-
     fileImportCSV.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (!file) return;
@@ -1877,9 +1918,9 @@
             let numeroClean = cols || cols[0];
             let fournisseurCSV = cols || '';
             let barcodeCSV = cols || '';
-            let refCSV = cols || cols || cols;
-            let remArtCSV = cols || '';
-            let qteCSV = Number(cols) || 1;
+            let refCSV = cols[4] || cols || cols;
+            let remArtCSV = cols[5] || '';
+            let qteCSV = Number(cols[6]) || 1;
 
             if (!numeroClean || !refCSV) continue;
             parsedRowsCount++;
@@ -1968,6 +2009,10 @@
         });
       };
       reader.readAsText(file, 'utf-8');
+    });
+
+    btnImportSheets.addEventListener('click', () => {
+      fileImportCSV.click();
     });
 
     btnExportSheets.addEventListener('click', () => {
