@@ -525,10 +525,11 @@
       background: rgba(255, 107, 0, 0.15);
       color: var(--primary);
       border: 1px solid rgba(255, 107, 0, 0.4);
-      padding: 0.35rem 0.9rem;
+      padding: 0.35rem 0.75rem;
       border-radius: 30px;
-      font-size: 1.1rem;
+      font-size: 0.95rem;
       font-weight: 800;
+      white-space: nowrap;
     }
 
     @media (min-width: 900px) {
@@ -1782,7 +1783,13 @@
         return numMatch || matchArt;
       });
 
-      badgeCount.textContent = liste.length;
+      // Calcul réel des 2 totaux (commandes et articles cumulés)
+      const nbCmd = liste.length;
+      const totalArt = liste.reduce((acc, cmd) => {
+        if (!cmd || !cmd.articles) return acc;
+        return acc + cmd.articles.reduce((sum, art) => sum + (Number(art.quantite) || 1), 0);
+      }, 0);
+      badgeCount.textContent = `${nbCmd} cmd • ${totalArt} art`;
 
       if (liste.length === 0) {
         galerieCommandes.innerHTML = `<p style="text-align:center; color:var(--subtext); padding:1rem;">Aucun reliquat trouvé.</p>`;
@@ -1918,7 +1925,7 @@
             let numeroClean = cols || cols[0];
             let fournisseurCSV = cols || '';
             let barcodeCSV = cols || '';
-            let refCSV = cols[4] || cols || cols;
+            let refCSV = cols[4] || '';
             let remArtCSV = cols[5] || '';
             let qteCSV = Number(cols[6]) || 1;
 
