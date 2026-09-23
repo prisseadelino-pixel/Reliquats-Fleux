@@ -409,14 +409,10 @@
     const modalImagesRow = document.getElementById('modalImagesRow');
     const closeModal = document.getElementById('closeModal');
 
+    // CONSERVATION BRUTE DU NUMÉRO SANS ALTERATION
     function nettoyerCommandeObjet(cmd) {
       if (!cmd) return cmd;
-      let numStr = String(cmd.numero || '').trim();
-      if (numStr.includes(',')) {
-        const partsNum = numStr.split(',');
-        numStr = partsNum[partsNum.length - 1] || numStr;
-      }
-      cmd.numero = numStr.startsWith('N°') ? numStr.replace(/^N°\s*/i, '') : numStr;
+      cmd.numero = cmd.numero !== undefined && cmd.numero !== null ? String(cmd.numero).trim() : '';
       cmd.date = String(cmd.date || '').trim();
       return cmd;
     }
@@ -658,11 +654,10 @@
       let targetDateFormatted = "";
       if (dateFilterVal) {
         const p = dateFilterVal.split('-');
-        if (p.length === 3) targetDateFormatted = `${p}/${p}/${p[0]}`;
+        if (p.length === 3) targetDateFormatted = `${p}/${p[0]}/${p[0]}`.slice(0,10); // simple fix date FR format jj/mm/aaaa si besoin
       }
       const liste = commandes.filter(c => {
         if (!c) return false;
-        if (targetDateFormatted && c.date !== targetDateFormatted) return false;
         const fStr = String(filtre || '').toLowerCase();
         return String(c.numero || '').toLowerCase().includes(fStr) || c.articles?.some(a => String(a.fournisseur||'').toLowerCase().includes(fStr) || String(a.ref||'').toLowerCase().includes(fStr) || String(a.codeBarre||'').toLowerCase().includes(fStr));
       });
@@ -671,12 +666,12 @@
       liste.forEach(cmd => {
         const item = document.createElement('div'); item.className = 'commande-item-compact';
         const nbA = cmd.articles?.reduce((acc, a) => acc + (Number(a.quantite)||1), 0)||0;
-        const cleanNum = String(cmd.numero || '').replace(/^N°\s*/i, '');
+        const displayNum = cmd.numero || 'Sans numéro';
         item.innerHTML = `
           <input type="checkbox" class="commande-select-checkbox" data-id="${cmd.id}" onclick="event.stopPropagation()">
           <div class="commande-main-btn" onclick='ouvrirModal(${JSON.stringify(cmd).replace(/'/g, "&#39;")})'>
             <span>📦 (${nbA} article${nbA > 1 ? 's' : ''})</span>
-            <div><div class="commande-num-badge">N° ${cleanNum}</div><div class="commande-date-compact">${cmd.date || ''}</div></div>
+            <div><div class="commande-num-badge">N° ${displayNum}</div><div class="commande-date-compact">${cmd.date || ''}</div></div>
           </div>
           <div class="commande-actions">
             <button class="btn-edit-small" onclick="editerCommande(${cmd.id}, event)">Modifier</button>
@@ -711,7 +706,7 @@
     inputRecherche.addEventListener('input', executerRecherche);
     inputRecherche.addEventListener('keypress', (e) => { if (e.key === 'Enter') executerRecherche(); });
 
-    // --- IMPORT CSV ADAPTÉ AU FORMAT FLEUX ---
+    // --- IMPORT CSV ---
     fileImportCSV.addEventListener('change', (e) => {
       const file = e.target.files[0]; if (!file) return;
       const reader = new FileReader();
@@ -734,9 +729,8 @@
             let parts = (isSemi ? line.split(';') : line.split(',')).map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
             if (parts.length < 5) continue;
 
-            // Mapping exact : parts[0]=Date, parts=Commande, parts=Fournisseur, parts=EAN, parts=Reference, parts[5..n-2]=Designation, parts[n-1]=Quantite
             const dateCSV = parts[0] || new Date().toLocaleDateString('fr-FR');
-            let numeroClean = String(parts || '').replace(/^N°\s*/i, '').trim();
+            let numeroClean = String(parts || '').trim();
             const fournisseurCSV = String(parts || '').trim();
             const barcodeCSV = String(parts || '').trim();
             const refCSV = String(parts || '').trim();
@@ -747,7 +741,6 @@
             if (!numeroClean || !refCSV) continue;
             parsedCount++;
 
-            // --- RECHERCHE PHOTO ULTRA-LARGE ---
             let photoAuto = "";
             const cleanRefKey = String(refCSV).trim();
             const cleNorm = "REF_" + cleanRefKey.replace(/[.#$\/\[\]]/g, "_");
@@ -810,9 +803,9 @@
         let listeAExporter = commandes;
         if (dateSelect) {
           const parts = dateSelect.split('-');
-          const dateFormatee = `${parts}/${parts}/${parts[0]}`;
+          const dateFormatee = `${parts}/${parts[0]}`;
           listeAExporter = commandes.filter(cmd => cmd.date === dateFormatee);
-          if (listeAExporter.length === 0) { alert(`Aucun reliquat trouvé pour la date du ${dateFormatee}.`); return; }
+          if (listeAExporter.length === 0) { alert(`Aucun reliquat trouvé pour la date.`); return; }
         } else if (commandes.length === 0) { alert("L'historique est vide."); return; }
 
         let csvContent = "\uFEFF";
@@ -833,7 +826,7 @@
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.setAttribute("href", url);
-        link.setAttribute("download", `reliquats_export_${dateSelect || 'complet'}.csv`);
+        link.setAttribute("download", `reliquats_export.csv`);
         document.body.appendChild(link); link.click(); document.body.removeChild(link);
       });
     }
