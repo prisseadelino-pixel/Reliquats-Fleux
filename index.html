@@ -411,7 +411,12 @@
 
     function nettoyerCommandeObjet(cmd) {
       if (!cmd) return cmd;
-      cmd.numero = String(cmd.numero || '').trim();
+      let numStr = String(cmd.numero || '').trim();
+      if (numStr.includes(',')) {
+        const partsNum = numStr.split(',');
+        numStr = partsNum[partsNum.length - 1] || numStr;
+      }
+      cmd.numero = numStr.startsWith('N°') ? numStr.replace(/^N°\s*/i, '') : numStr;
       cmd.date = String(cmd.date || '').trim();
       return cmd;
     }
@@ -666,15 +671,16 @@
       liste.forEach(cmd => {
         const item = document.createElement('div'); item.className = 'commande-item-compact';
         const nbA = cmd.articles?.reduce((acc, a) => acc + (Number(a.quantite)||1), 0)||0;
+        const cleanNum = String(cmd.numero || '').replace(/^N°\s*/i, '');
         item.innerHTML = `
           <input type="checkbox" class="commande-select-checkbox" data-id="${cmd.id}" onclick="event.stopPropagation()">
           <div class="commande-main-btn" onclick='ouvrirModal(${JSON.stringify(cmd).replace(/'/g, "&#39;")})'>
             <span>📦 (${nbA} article${nbA > 1 ? 's' : ''})</span>
-            <div><div class="commande-num-badge">N° ${cmd.numero || ''}</div><div class="commande-date-compact">${cmd.date || ''}</div></div>
+            <div><div class="commande-num-badge">N° ${cleanNum}</div><div class="commande-date-compact">${cmd.date || ''}</div></div>
           </div>
           <div class="commande-actions">
-            <button class="btn-edit-small" onclick="editerCommande(${cmd.id}, event)">✏️ Modifier</button>
-            <button class="btn-delete-small" onclick="supprimerCommande(${cmd.id}, event)" title="Supprimer">❌</button>
+            <button class="btn-edit-small" onclick="editerCommande(${cmd.id}, event)">Modifier</button>
+            <button class="btn-delete-small" onclick="supprimerCommande(${cmd.id}, event)" title="Supprimer">✕</button>
           </div>
         `;
         galerieCommandes.appendChild(item);
@@ -705,7 +711,7 @@
     inputRecherche.addEventListener('input', executerRecherche);
     inputRecherche.addEventListener('keypress', (e) => { if (e.key === 'Enter') executerRecherche(); });
 
-    // --- IMPORT CSV MAPPING EXACT (Date=0, Num=1, Fournisseur=2, EAN=3, Réf=4, Désignation=5, Quantité=6) ---
+    // --- IMPORT CSV ULTRA-ROBUSTE ---
     fileImportCSV.addEventListener('change', (e) => {
       const file = e.target.files[0]; if (!file) return;
       const reader = new FileReader();
@@ -713,6 +719,7 @@
         let text = event.target.result; if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
         const lines = text.split(/\r\n|\n/).filter(l => l.trim() !== '');
         if (lines.length < 2) { alert("CSV vide"); fileImportCSV.value = ""; return; }
+        
         db.ref('commandes').once('value').then(snap => {
           let existingData = snap.val() || {};
           let groupCommandes = {};
@@ -724,17 +731,35 @@
             if (!line) continue;
 
             const isSemi = line.includes(';');
-            const parts = (isSemi ? line.split(';') : line.split(',')).map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
-            if (parts.length < 5) continue;
+            let parts = (isSemi ? line.split(';') : line.split(',')).map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
+            if (parts.length < 4) continue;
 
-            // Mapping exact testé pour ton format CSV (ex: 02/04/2026, S-96713, OPJET, 3460000064438, 017899, SET 4..., 1)
-            let dateCSV = parts[0] || new Date().toLocaleDateString('fr-FR');
-            let numeroClean = String(parts || '').trim();
-            let fournisseurCSV = String(parts || '').trim();
-            let barcodeCSV = String(parts || '').trim();
-            let refCSV = String(parts || '').trim();
-            let remArtCSV = String(parts || '').trim();
-            let qteCSV = parts.length > 6 && !isNaN(parts) ? Number(parts) : 1;
+            let dateCSV = new Date().toLocaleDateString('fr-FR');
+            let numeroClean = '';
+            let fournisseurCSV = '';
+            let barcodeCSV = '';
+            let refCSV = '';
+            let remArtCSV = '';
+            let qteCSV = 1;
+
+            let idxNum = parts.findIndex(p => /^S?-?\d{4,}/i.test(p) && !p.includes('/'));
+            if (idxNum === -1) idxNum = 1;
+
+            const possibleDateIdx = parts.findIndex(p => /^\d{2}\/\d{2}\/\d{4}$/.test(p));
+            if (possibleDateIdx !== -1) dateCSV = parts[possibleDateIdx];
+
+            numeroClean = parts[idxNum] || '';
+            if (numeroClean.includes(',')) numeroClean = numeroClean.split(',')[0].trim();
+
+            const remaining = parts.filter((_, idx) => idx !== idxNum && idx !== possibleDateIdx);
+            fournisseurCSV = remaining[0] || '';
+            barcodeCSV = remaining.find(p => /^\d{8,14}$/.test(p)) || remaining || '';
+            refCSV = remaining.find(p => p !== barcodeCSV && p.length > 0) || remaining || '';
+            
+            const lastNum = parts.slice().reverse().find(p => !isNaN(p) && p !== '');
+            if (lastNum && Number(lastNum) < 1000) qteCSV = Number(lastNum);
+
+            remArtCSV = remaining.filter(p => p !== barcodeCSV && p !== refCSV && isNaN(p)).join(' ');
 
             if (!numeroClean || !refCSV) continue;
             parsedCount++;
@@ -790,7 +815,7 @@
 
     btnImportSheets.addEventListener('click', () => fileImportCSV.click());
 
-    btnExportExportCSV = document.getElementById('btnExportSheets');
+    const btnExportExportCSV = document.getElementById('btnExportSheets');
     if(btnExportExportCSV) {
       btnExportExportCSV.addEventListener('click', () => {
         const dateSelect = dateFiltreExport.value;
