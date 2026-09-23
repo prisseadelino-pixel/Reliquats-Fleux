@@ -1239,7 +1239,7 @@
 
       if (parts.length >= 2) {
         let p0 = parts[0].trim();
-        let p1 = parts.trim(); // Corrigé ici (parts au lieu de parts.trim())
+        let p1 = parts.trim();
         if (p0.includes('/')) {
           if (!rawDate || rawDate === 'undefined') rawDate = p0;
           rawNum = p1;
@@ -1763,7 +1763,9 @@
       let targetDateFormatted = "";
       if (dateFilterVal) {
         const parts = dateFilterVal.split('-');
-        targetDateFormatted = `${parts}/${parts}/${parts[0]}`;
+        if (parts.length === 3) {
+          targetDateFormatted = `${parts}/${parts}/${parts[0]}`;
+        }
       }
 
       const liste = commandes.filter(c => {
@@ -1878,7 +1880,7 @@
       if (e.key === 'Enter') executerRecherche();
     });
 
-    // --- IMPORT CSV STRICT & PROPRE CORRIGÉ ---
+    // --- IMPORT CSV SÉCURISÉ ---
     fileImportCSV.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (!file) return;
@@ -1921,14 +1923,13 @@
 
             if (cols.length < 7) continue;
 
-            // MAPPING PROPRE : 0=Date, 1=Numéro doc, 2=Fournisseur, 3=Code barres, 4=Code article, 5=Désignation, 6=Qté
-            let dateCSV = String(cols[0] || '').trim();
-            let numeroClean = String(cols || '').trim();
-            let fournisseurCSV = String(cols || '').trim();
-            let barcodeCSV = String(cols || '').trim();
-            let refCSV = String(cols || '').trim();
-            let remArtCSV = String(cols || '').trim();
-            let qteCSV = Number(cols) || 1;
+            const dateCSV = String(cols[0] || '').trim();
+            const numeroClean = String(cols || '').trim();
+            const fournisseurCSV = String(cols || '').trim();
+            const barcodeCSV = String(cols || '').trim();
+            const refCSV = String(cols || '').trim();
+            const remArtCSV = String(cols || '').trim();
+            const qteCSV = Number(cols) || 1;
 
             if (!numeroClean || !refCSV) continue;
             parsedRowsCount++;
@@ -2005,7 +2006,20 @@
                 alert(`Importation réussie : ${keys.length} commande(s) mise(s) à jour / ajoutée(s) !`);
                 fileImportCSV.value = "";
                 if (dateFiltreExport) dateFiltreExport.value = "";
-                afficherGalerie(inputRecherche.value);
+                db.ref('commandes').once('value').then(snap => {
+                  const val = snap.val() || {};
+                  commandes = [];
+                  if (Array.isArray(val)) {
+                    commandes = val.filter(Boolean).map(nettoyerCommandeObjet);
+                  } else {
+                    Object.keys(val).forEach(k => {
+                      let c = val[k];
+                      if (c) { if (!c.id) c.id = Number(k) || Date.now(); commandes.push(nettoyerCommandeObjet(c)); }
+                    });
+                  }
+                  commandes.sort((a, b) => (Number(b.id) || 0) - (Number(a.id) || 0));
+                  afficherGalerie(inputRecherche.value);
+                });
               })
               .catch(err => {
                 alert("Erreur lors de l'enregistrement Firebase : " + err.message);
