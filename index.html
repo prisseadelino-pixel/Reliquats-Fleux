@@ -711,7 +711,7 @@
     inputRecherche.addEventListener('input', executerRecherche);
     inputRecherche.addEventListener('keypress', (e) => { if (e.key === 'Enter') executerRecherche(); });
 
-    // --- IMPORT CSV ULTRA-ROBUSTE ---
+    // --- IMPORT CSV ULTRA-ROBUSTE AVEC RECHERCHE PHOTO CROISÉE ---
     fileImportCSV.addEventListener('change', (e) => {
       const file = e.target.files[0]; if (!file) return;
       const reader = new FileReader();
@@ -753,7 +753,7 @@
 
             const remaining = parts.filter((_, idx) => idx !== idxNum && idx !== possibleDateIdx);
             fournisseurCSV = remaining[0] || '';
-            barcodeCSV = remaining.find(p => /^\d{8,14}$/.test(p)) || remaining || '';
+            barcodeCSV = remaining.find(p => /^\d{8,14}$/.test(p)) || '';
             refCSV = remaining.find(p => p !== barcodeCSV && p.length > 0) || remaining || '';
             
             const lastNum = parts.slice().reverse().find(p => !isNaN(p) && p !== '');
@@ -764,15 +764,21 @@
             if (!numeroClean || !refCSV) continue;
             parsedCount++;
 
+            // --- RECHERCHE PHOTO ULTRA-LARGE ---
             let photoAuto = "";
-            const cleNorm = "REF_" + String(refCSV).replace(/[.#$\/\[\]]/g, "_");
-            const catalogItem = catalogueArticles[refCSV] || catalogueArticles[cleNorm];
-            if (catalogItem && catalogItem.photo) {
-              photoAuto = catalogItem.photo;
+            const cleanRefKey = String(refCSV).trim();
+            const cleNorm = "REF_" + cleanRefKey.replace(/[.#$\/\[\]]/g, "_");
+            
+            if (catalogueArticles[cleanRefKey]?.photo) {
+              photoAuto = catalogueArticles[cleanRefKey].photo;
+            } else if (catalogueArticles[cleNorm]?.photo) {
+              photoAuto = catalogueArticles[cleNorm].photo;
+            } else if (barcodeCSV && catalogueArticles[barcodeCSV]?.photo) {
+              photoAuto = catalogueArticles[barcodeCSV].photo;
             } else {
               for (let c of commandes) {
                 if (c.articles) {
-                  const foundArt = c.articles.find(a => String(a.ref).trim() === String(refCSV).trim());
+                  const foundArt = c.articles.find(a => String(a.ref).trim() === cleanRefKey || (barcodeCSV && String(a.codeBarre).trim() === barcodeCSV));
                   if (foundArt && foundArt.photo) { photoAuto = foundArt.photo; break; }
                 }
               }
@@ -787,11 +793,11 @@
                 articles: [] 
               };
             }
-            if (!groupCommandes[numClean].articles.some(a => String(a.ref).trim() === String(refCSV).trim())) {
+            if (!groupCommandes[numClean].articles.some(a => String(a.ref).trim() === cleanRefKey)) {
               groupCommandes[numClean].articles.push({ 
                 photo: photoAuto, 
                 fournisseur: fournisseurCSV, 
-                ref: refCSV, 
+                ref: cleanRefKey, 
                 codeBarre: barcodeCSV, 
                 quantite: qteCSV, 
                 remarqueArticle: remArtCSV 
