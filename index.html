@@ -409,7 +409,6 @@
     const modalImagesRow = document.getElementById('modalImagesRow');
     const closeModal = document.getElementById('closeModal');
 
-    // CONSERVATION BRUTE DU NUMÉRO SANS ALTERATION
     function nettoyerCommandeObjet(cmd) {
       if (!cmd) return cmd;
       cmd.numero = cmd.numero !== undefined && cmd.numero !== null ? String(cmd.numero).trim() : '';
@@ -634,13 +633,25 @@
     });
 
     btnImportBackup.addEventListener('click', () => { dropdownMenu.classList.remove('show'); requireAdmin(() => fileRestoreJson.click()); });
+    
+    // --- RESTAURATION JSON INTELLIGENTE ---
     fileRestoreJson.addEventListener('change', (e) => {
       const file = e.target.files[0]; if (!file) return;
       const reader = new FileReader();
       reader.onload = (evt) => {
         try {
-          const data = JSON.parse(evt.target.result);
-          db.ref('/').set(data).then(() => { alert("Restauration OK"); chargerToutesLesDonnees(); }).catch(err => alert(err.message));
+          const rawData = JSON.parse(evt.target.result);
+          const payload = (rawData.commandes || rawData.catalogue_photos) ? rawData : { commandes: rawData.commandes || {}, catalogue_photos: rawData.catalogue_photos || {} };
+          
+          let updates = {};
+          if (payload.commandes) updates['commandes'] = payload.commandes;
+          if (payload.catalogue_photos) updates['catalogue_photos'] = payload.catalogue_photos;
+
+          if (!payload.commandes && !payload.catalogue_photos) {
+            db.ref('/').set(rawData).then(() => { alert("Restauration OK !"); chargerToutesLesDonnees(); }).catch(err => alert(err.message));
+          } else {
+            db.ref('/').update(updates).then(() => { alert("Restauration OK !"); chargerToutesLesDonnees(); }).catch(err => alert(err.message));
+          }
         } catch { alert("JSON invalide"); }
       };
       reader.readAsText(file);
@@ -654,10 +665,11 @@
       let targetDateFormatted = "";
       if (dateFilterVal) {
         const p = dateFilterVal.split('-');
-        if (p.length === 3) targetDateFormatted = `${p}/${p[0]}/${p[0]}`.slice(0,10); // simple fix date FR format jj/mm/aaaa si besoin
+        if (p.length === 3) targetDateFormatted = `${p}.${p}.${p[0]}`.replace(/\./g, '/');
       }
       const liste = commandes.filter(c => {
         if (!c) return false;
+        if (targetDateFormatted && c.date !== targetDateFormatted) return false;
         const fStr = String(filtre || '').toLowerCase();
         return String(c.numero || '').toLowerCase().includes(fStr) || c.articles?.some(a => String(a.fournisseur||'').toLowerCase().includes(fStr) || String(a.ref||'').toLowerCase().includes(fStr) || String(a.codeBarre||'').toLowerCase().includes(fStr));
       });
@@ -803,7 +815,7 @@
         let listeAExporter = commandes;
         if (dateSelect) {
           const parts = dateSelect.split('-');
-          const dateFormatee = `${parts}/${parts[0]}`;
+          const dateFormatee = `${parts}/${parts}/${parts[0]}`;
           listeAExporter = commandes.filter(cmd => cmd.date === dateFormatee);
           if (listeAExporter.length === 0) { alert(`Aucun reliquat trouvé pour la date.`); return; }
         } else if (commandes.length === 0) { alert("L'historique est vide."); return; }
