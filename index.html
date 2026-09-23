@@ -711,7 +711,7 @@
     inputRecherche.addEventListener('input', executerRecherche);
     inputRecherche.addEventListener('keypress', (e) => { if (e.key === 'Enter') executerRecherche(); });
 
-    // --- IMPORT CSV ULTRA-ROBUSTE AVEC RECHERCHE PHOTO CROISÉE ---
+    // --- IMPORT CSV ADAPTÉ AU FORMAT FLEUX ---
     fileImportCSV.addEventListener('change', (e) => {
       const file = e.target.files[0]; if (!file) return;
       const reader = new FileReader();
@@ -732,34 +732,17 @@
 
             const isSemi = line.includes(';');
             let parts = (isSemi ? line.split(';') : line.split(',')).map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
-            if (parts.length < 4) continue;
+            if (parts.length < 5) continue;
 
-            let dateCSV = new Date().toLocaleDateString('fr-FR');
-            let numeroClean = '';
-            let fournisseurCSV = '';
-            let barcodeCSV = '';
-            let refCSV = '';
-            let remArtCSV = '';
-            let qteCSV = 1;
-
-            let idxNum = parts.findIndex(p => /^S?-?\d{4,}/i.test(p) && !p.includes('/'));
-            if (idxNum === -1) idxNum = 1;
-
-            const possibleDateIdx = parts.findIndex(p => /^\d{2}\/\d{2}\/\d{4}$/.test(p));
-            if (possibleDateIdx !== -1) dateCSV = parts[possibleDateIdx];
-
-            numeroClean = parts[idxNum] || '';
-            if (numeroClean.includes(',')) numeroClean = numeroClean.split(',')[0].trim();
-
-            const remaining = parts.filter((_, idx) => idx !== idxNum && idx !== possibleDateIdx);
-            fournisseurCSV = remaining[0] || '';
-            barcodeCSV = remaining.find(p => /^\d{8,14}$/.test(p)) || '';
-            refCSV = remaining.find(p => p !== barcodeCSV && p.length > 0) || remaining || '';
-            
-            const lastNum = parts.slice().reverse().find(p => !isNaN(p) && p !== '');
-            if (lastNum && Number(lastNum) < 1000) qteCSV = Number(lastNum);
-
-            remArtCSV = remaining.filter(p => p !== barcodeCSV && p !== refCSV && isNaN(p)).join(' ');
+            // Mapping exact : parts[0]=Date, parts=Commande, parts=Fournisseur, parts=EAN, parts=Reference, parts[5..n-2]=Designation, parts[n-1]=Quantite
+            const dateCSV = parts[0] || new Date().toLocaleDateString('fr-FR');
+            let numeroClean = String(parts || '').replace(/^N°\s*/i, '').trim();
+            const fournisseurCSV = String(parts || '').trim();
+            const barcodeCSV = String(parts || '').trim();
+            const refCSV = String(parts || '').trim();
+            const remArtCSV = parts.length > 6 ? parts.slice(5, -1).join(' ') : String(parts || '').trim();
+            const lastPart = parts[parts.length - 1];
+            const qteCSV = !isNaN(lastPart) && lastPart !== '' ? Number(lastPart) : 1;
 
             if (!numeroClean || !refCSV) continue;
             parsedCount++;
@@ -784,17 +767,16 @@
               }
             }
 
-            const numClean = String(numeroClean).trim();
-            if (!groupCommandes[numClean]) {
-              groupCommandes[numClean] = { 
+            if (!groupCommandes[numeroClean]) {
+              groupCommandes[numeroClean] = { 
                 id: Date.now() + i, 
-                numero: numClean, 
+                numero: numeroClean, 
                 date: dateCSV, 
                 articles: [] 
               };
             }
-            if (!groupCommandes[numClean].articles.some(a => String(a.ref).trim() === cleanRefKey)) {
-              groupCommandes[numClean].articles.push({ 
+            if (!groupCommandes[numeroClean].articles.some(a => String(a.ref).trim() === cleanRefKey)) {
+              groupCommandes[numeroClean].articles.push({ 
                 photo: photoAuto, 
                 fournisseur: fournisseurCSV, 
                 ref: cleanRefKey, 
@@ -834,17 +816,17 @@
         } else if (commandes.length === 0) { alert("L'historique est vide."); return; }
 
         let csvContent = "\uFEFF";
-        csvContent += "Date;Numero de Commande;Fournisseur;Reference;CodeBarre;Quantite;RemarqueArticle\r\n";
+        csvContent += "Date;Numero de Commande;Fournisseur;CodeBarre;Reference;Quantite;RemarqueArticle\r\n";
         listeAExporter.forEach(cmd => {
           const date = `"${(cmd.date || "").replace(/"/g, '""')}"`;
           const numero = `"${(cmd.numero || "").replace(/"/g, '""')}"`;
           cmd.articles?.forEach(art => {
             const f = `"${(art.fournisseur || "").replace(/"/g, '""')}"`;
-            const r = `"${(art.ref || "").replace(/"/g, '""')}"`;
             const b = `"${(art.codeBarre || "").replace(/"/g, '""')}"`;
+            const r = `"${(art.ref || "").replace(/"/g, '""')}"`;
             const q = art.quantite !== undefined ? art.quantite : 1;
             const ra = `"${(art.remarqueArticle || "").replace(/"/g, '""')}"`;
-            csvContent += `${date};${numero};${f};${r};${b};${q};${ra}\r\n`;
+            csvContent += `${date};${numero};${f};${b};${r};${q};${ra}\r\n`;
           });
         });
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
