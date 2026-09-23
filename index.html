@@ -5,13 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Reliquats Fleux</title>
 
-  <!-- ICÔNES ET CONFIGURATION APPLICATION -->
   <link rel="icon" type="image/png" href="https://i49.servimg.com/u/f49/11/31/89/70/img_2010.jpg?v=2">
   <link rel="apple-touch-icon" href="https://i49.servimg.com/u/f49/11/31/89/70/img_2010.jpg?v=2">
   <meta name="mobile-web-app-capable" content="yes">
 
   <style>
-    /* VARIABLES THEME SOMBRE (Défaut) */
     :root[data-theme="dark"] {
       --primary: #ff6b00;
       --primary-hover: #e05e00;
@@ -26,7 +24,6 @@
       --radius: 16px;
     }
 
-    /* VARIABLES THEME CLAIR */
     :root[data-theme="light"] {
       --primary: #ff6b00;
       --primary-hover: #e05e00;
@@ -41,797 +38,104 @@
       --radius: 16px;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: system-ui, -apple-system, sans-serif;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); min-height: 100vh; }
 
-    body {
-      background-color: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      transition: background-color 0.2s ease, color 0.2s ease;
-    }
-
-    /* --- ACCUEIL --- */
     #home-screen {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      padding: 1rem;
-      text-align: center;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      min-height: 100vh; padding: 1rem; text-align: center;
       background: radial-gradient(circle at 50% 20%, var(--secondary) 0%, var(--bg) 70%);
     }
+    .logo-container { width: 100%; display: flex; align-items: center; justify-content: center; margin-bottom: 2rem; }
+    .home-logo-img { width: 85vw !important; max-width: 420px !important; height: auto !important; max-height: 180px !important; object-fit: contain; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.15)); display: block; }
+    .app-subtitle { font-size: 1.1rem; color: var(--subtext); max-width: 480px; margin-bottom: 2rem; line-height: 1.4; }
+    .btn-start { background-color: var(--primary); color: white; border: none; padding: 1rem 2rem; border-radius: 30px; font-size: 1.2rem; font-weight: 700; cursor: pointer; box-shadow: 0 4px 14px rgba(255, 107, 0, 0.4); }
 
-    .logo-container {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 2rem;
-    }
+    #app-screen { display: none; max-width: 1400px; margin: 0 auto; padding: 1rem; }
+    header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid var(--border); gap: 0.5rem; }
+    .header-brand { display: flex; align-items: center; justify-content: center; flex: 1; margin-right: 1rem; background: white; padding: 0.4rem 0.75rem; border-radius: 12px; height: 65px; max-width: 350px; border: 1px solid var(--border); }
+    .header-brand img { height: 52px !important; width: auto !important; max-width: 100%; object-fit: contain; }
+    .header-controls { display: flex; flex-direction: column; align-items: flex-end; position: relative; gap: 0.3rem; flex-shrink: 0; }
+    .btn-nav-home, .btn-menu-hamburger { background: var(--card-bg); border: 1px solid var(--border); color: var(--text); padding: 0.5rem 0.75rem; border-radius: 8px; cursor: pointer; font-weight: 600; }
+    .dropdown-menu { display: none; position: absolute; top: 100%; right: 0; background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); z-index: 100; min-width: 230px; margin-top: 0.4rem; }
+    .dropdown-menu.show { display: block; }
+    .dropdown-item { width: 100%; padding: 0.75rem 1rem; text-align: left; background: none; border: none; font-size: 0.95rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; color: var(--text); }
+    .dropdown-item.danger { color: #f43f5e; }
+    .dropdown-item:hover { background: rgba(128,128,128,0.1); }
 
-    .home-logo-img {
-      width: 85vw !important;
-      max-width: 420px !important;
-      height: auto !important;
-      max-height: 180px !important;
-      object-fit: contain;
-      filter: drop-shadow(0 4px 12px rgba(0,0,0,0.15));
-      display: block;
-    }
+    .card { background: var(--card-bg); border-radius: var(--radius); padding: 1.25rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: 1px solid var(--border); margin-bottom: 1.5rem; }
+    .search-box { display: flex; gap: 0.5rem; align-items: center; }
+    .search-box input { flex: 1; background: var(--input-bg); }
+    .btn-search { background-color: var(--primary); color: white; border: none; padding: 0.75rem 1rem; border-radius: 8px; font-weight: 600; cursor: pointer; white-space: nowrap; }
 
-    .app-subtitle {
-      font-size: 1.1rem;
-      color: var(--subtext);
-      max-width: 480px;
-      margin-bottom: 2rem;
-      line-height: 1.4;
-    }
+    .form-group { margin-bottom: 1rem; }
+    .photo-box-container { background: var(--container-bg); padding: 0.85rem; border-radius: 10px; border: 1px dashed var(--border); margin-bottom: 1rem; position: relative; }
+    label { display: block; font-weight: 600; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--subtext); }
+    input, textarea { width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; background: var(--input-bg); color: var(--text); outline: none; }
+    .previewWrapper { position: relative; margin-bottom: 0.75rem; display: none; }
+    .photoPreview { max-height: 200px; border-radius: 8px; border: 1px solid var(--border); display: block; background: rgba(0,0,0,0.1); }
+    .btn-suppr-photo-interne { position: absolute; top: 8px; right: 8px; background: rgba(244, 63, 94, 0.9); color: white; border: none; padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: bold; cursor: pointer; }
+    .camera-controls { display: flex; gap: 0.5rem; }
+    button.btn-main { background-color: var(--primary); color: white; border: none; padding: 0.75rem 1.25rem; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%; font-size: 1rem; }
+    button.btn-secondary { background-color: var(--secondary); color: var(--text); border: 1px solid var(--border); padding: 0.75rem 1.25rem; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%; }
 
-    .btn-start {
-      background-color: var(--primary);
-      color: white;
-      border: none;
-      padding: 1rem 2rem;
-      border-radius: 30px;
-      font-size: 1.2rem;
-      font-weight: 700;
-      cursor: pointer;
-      box-shadow: 0 4px 14px rgba(255, 107, 0, 0.4);
-      transition: all 0.2s ease;
-    }
+    .export-filter-container { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.75rem; background: var(--container-bg); padding: 0.75rem; border-radius: 10px; border: 1px solid var(--border); }
+    .export-filter-label { font-size: 0.85rem; font-weight: 700; color: var(--subtext); }
+    .export-actions-row { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+    .input-date-custom { flex: 1; min-width: 140px; border: 1px solid var(--border); border-radius: 8px; padding: 0.5rem; font-size: 0.9rem; color: var(--text); background: var(--input-bg); }
+    button.btn-pdf { background-color: #0284c7; color: white; border: none; padding: 0.6rem 0.85rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
+    button.btn-select-all { background-color: var(--secondary); color: var(--text); border: 1px solid var(--border); padding: 0.6rem 0.85rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
+    button.btn-sheets { background-color: #16a34a; color: white; border: none; padding: 0.6rem 0.85rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
+    button.btn-import { background-color: #8b5cf6; color: white; border: none; padding: 0.6rem 0.85rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
 
-    /* --- APPLICATION --- */
-    #app-screen {
-      display: none;
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 1rem;
-    }
-
-    header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 1.5rem;
-      padding-bottom: 1rem;
-      border-bottom: 2px solid var(--border);
-      gap: 0.5rem;
-    }
-
-    .header-brand {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex: 1;
-      margin-right: 1rem;
-      background: white;
-      padding: 0.4rem 0.75rem;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      height: 65px;
-      max-width: 350px;
-      border: 1px solid var(--border);
-    }
-
-    .header-brand img {
-      height: 52px !important;
-      width: auto !important;
-      max-width: 100%;
-      object-fit: contain;
-    }
-
-    .header-controls {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      position: relative;
-      gap: 0.3rem;
-      flex-shrink: 0;
-    }
-
-    .btn-nav-home {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      color: var(--subtext);
-      padding: 0.5rem 0.75rem;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 600;
-      flex-shrink: 0;
-    }
-
-    .btn-menu-hamburger {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 0.25rem 0.6rem;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 1.1rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: fit-content;
-    }
-
-    .dropdown-menu {
-      display: none;
-      position: absolute;
-      top: 100%;
-      right: 0;
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-      z-index: 100;
-      min-width: 230px;
-      overflow: hidden;
-      margin-top: 0.4rem;
-    }
-
-    .dropdown-menu.show {
-      display: block;
-    }
-
-    .dropdown-item {
-      width: 100%;
-      padding: 0.75rem 1rem;
-      text-align: left;
-      background: none;
-      border: none;
-      font-size: 0.95rem;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      color: var(--text);
-      transition: background 0.2s ease;
-    }
-
-    .dropdown-item.danger {
-      color: #f43f5e;
-    }
-
-    .dropdown-item:hover {
-      background: rgba(128,128,128,0.1);
-    }
-
-    .card {
-      background: var(--card-bg);
-      border-radius: var(--radius);
-      padding: 1.25rem;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-      border: 1px solid var(--border);
-      margin-bottom: 1.5rem;
-    }
-
-    .search-box {
-      display: flex;
-      gap: 0.5rem;
-      align-items: center;
-    }
-
-    .search-box input {
-      flex: 1;
-      background: var(--input-bg);
-    }
-
-    .btn-search {
-      background-color: var(--primary);
-      color: white;
-      border: none;
-      padding: 0.75rem 1rem;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: background 0.2s ease;
-    }
-
-    .form-group {
-      margin-bottom: 1rem;
-    }
-
-    .photo-box-container {
-      background: var(--container-bg);
-      padding: 0.85rem;
-      border-radius: 10px;
-      border: 1px dashed var(--border);
-      margin-bottom: 1rem;
-      position: relative;
-    }
-
-    label {
-      display: block;
-      font-weight: 600;
-      margin-bottom: 0.5rem;
-      font-size: 0.9rem;
-      color: var(--subtext);
-    }
-
-    input, textarea {
-      width: 100%;
-      padding: 0.75rem;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      font-size: 1rem;
-      background: var(--input-bg);
-      color: var(--text);
-      outline: none;
-    }
-
-    input:focus, textarea:focus {
-      border-color: var(--primary);
-    }
-
-    .previewWrapper {
-      position: relative;
-      margin-bottom: 0.75rem;
-    }
-
-    .previewWrapper img, .modal-photo-box img {
-      max-width: 100%;
-      height: auto;
-      object-fit: contain;
-    }
-
-    .photoPreview {
-      max-height: 200px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      display: block;
-      background: rgba(0,0,0,0.1);
-    }
-
-    .btn-suppr-photo-interne {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      background: rgba(244, 63, 94, 0.9);
-      color: white;
-      border: none;
-      padding: 0.3rem 0.6rem;
-      border-radius: 6px;
-      font-size: 0.75rem;
-      font-weight: bold;
-      cursor: pointer;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-    }
-
-    .camera-controls {
-      display: flex;
-      gap: 0.5rem;
-    }
-
-    button.btn-main {
-      background-color: var(--primary);
-      color: white;
-      border: none;
-      padding: 0.75rem 1.25rem;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-      width: 100%;
-      font-size: 1rem;
-    }
-
-    button.btn-secondary {
-      background-color: var(--secondary);
-      color: var(--text);
-      border: 1px solid var(--border);
-      padding: 0.75rem 1.25rem;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-      width: 100%;
-    }
-
-    .export-filter-container {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      margin-top: 0.75rem;
-      background: var(--container-bg);
-      padding: 0.75rem;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-    }
-
-    .export-filter-label {
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: var(--subtext);
-    }
-
-    .export-actions-row {
-      display: flex;
-      gap: 0.5rem;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .input-date-custom {
-      flex: 1;
-      min-width: 140px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 0.5rem;
-      font-size: 0.9rem;
-      color: var(--text);
-      outline: none;
-      background: var(--input-bg);
-    }
-
-    button.btn-pdf {
-      background-color: #0284c7;
-      color: white;
-      border: none;
-      padding: 0.6rem 0.85rem;
-      border-radius: 8px;
-      font-size: 0.9rem;
-      font-weight: 600;
-      cursor: pointer;
-      white-space: nowrap;
-    }
-
-    button.btn-select-all {
-      background-color: var(--secondary);
-      color: var(--text);
-      border: 1px solid var(--border);
-      padding: 0.6rem 0.85rem;
-      border-radius: 8px;
-      font-size: 0.9rem;
-      font-weight: 600;
-      cursor: pointer;
-      white-space: nowrap;
-    }
-
-    button.btn-sheets {
-      background-color: #16a34a;
-      color: white;
-      border: none;
-      padding: 0.6rem 0.85rem;
-      border-radius: 8px;
-      font-size: 0.9rem;
-      font-weight: 600;
-      cursor: pointer;
-      white-space: nowrap;
-    }
-
-    button.btn-import {
-      background-color: #8b5cf6;
-      color: white;
-      border: none;
-      padding: 0.6rem 0.85rem;
-      border-radius: 8px;
-      font-size: 0.9rem;
-      font-weight: 600;
-      cursor: pointer;
-      white-space: nowrap;
-    }
-
-    .liste-commandes {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      margin-top: 1rem;
-    }
-
-    .commande-item-compact {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: var(--container-bg);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 0.75rem 1rem;
-      cursor: pointer;
-      transition: background 0.2s ease;
-      gap: 0.75rem;
-    }
-
-    .commande-item-compact:hover {
-      background: rgba(128,128,128,0.08);
-    }
-
-    .commande-select-checkbox {
-      width: 18px;
-      height: 18px;
-      cursor: pointer;
-      accent-color: var(--primary);
-      flex-shrink: 0;
-    }
-
-    .commande-main-btn {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      flex-grow: 1;
-    }
-
-    .commande-num-badge {
-      font-weight: bold;
-      font-size: 1.05rem;
-      color: var(--primary);
-    }
-
-    .commande-date-compact {
-      font-size: 0.75rem;
-      color: var(--subtext);
-    }
-
-    .commande-actions {
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-    }
-
-    .btn-edit-small {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 0.35rem 0.6rem;
-      border-radius: 6px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    .btn-delete-small {
-      background: rgba(244, 63, 94, 0.1);
-      border: 1px solid rgba(244, 63, 94, 0.2);
-      color: #f43f5e;
-      padding: 0.35rem 0.5rem;
-      border-radius: 6px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    .section-header-flex {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .badge-count {
-      background: rgba(255, 107, 0, 0.15);
-      color: var(--primary);
-      border: 1px solid rgba(255, 107, 0, 0.4);
-      padding: 0.35rem 0.75rem;
-      border-radius: 30px;
-      font-size: 0.95rem;
-      font-weight: 800;
-      white-space: nowrap;
-    }
+    .liste-commandes { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem; }
+    .commande-item-compact { display: flex; align-items: center; justify-content: space-between; background: var(--container-bg); border: 1px solid var(--border); border-radius: 10px; padding: 0.75rem 1rem; cursor: pointer; gap: 0.75rem; }
+    .commande-select-checkbox { width: 18px; height: 18px; cursor: pointer; accent-color: var(--primary); flex-shrink: 0; }
+    .commande-main-btn { display: flex; align-items: center; gap: 0.75rem; flex-grow: 1; }
+    .commande-num-badge { font-weight: bold; font-size: 1.05rem; color: var(--primary); }
+    .commande-date-compact { font-size: 0.75rem; color: var(--subtext); }
+    .commande-actions { display: flex; align-items: center; gap: 0.4rem; }
+    .btn-edit-small { background: var(--card-bg); border: 1px solid var(--border); color: var(--text); padding: 0.35rem 0.6rem; border-radius: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+    .btn-delete-small { background: rgba(244, 63, 94, 0.1); border: 1px solid rgba(244, 63, 94, 0.2); color: #f43f5e; padding: 0.35rem 0.5rem; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; }
+    .section-header-flex { display: flex; align-items: center; justify-content: space-between; }
+    .badge-count { background: rgba(255, 107, 0, 0.15); color: var(--primary); border: 1px solid rgba(255, 107, 0, 0.4); padding: 0.35rem 0.75rem; border-radius: 30px; font-size: 0.95rem; font-weight: 800; }
 
     @media (min-width: 900px) {
-      .main-layout-desktop {
-        display: grid;
-        grid-template-columns: 440px 1fr;
-        gap: 1.5rem;
-        align-items: start;
-      }
-      .column-left {
-        display: flex;
-        flex-direction: column;
-      }
-      .column-right {
-        display: flex;
-        flex-direction: column;
-      }
+      .main-layout-desktop { display: grid; grid-template-columns: 440px 1fr; gap: 1.5rem; align-items: start; }
     }
 
-    /* MODAL ZOOM */
-    .modal {
-      display: none;
-      position: fixed;
-      z-index: 1000;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.85);
-      align-items: center;
-      justify-content: center;
-      padding: 1.5rem;
-      flex-direction: column;
-      overflow-y: auto;
-    }
+    .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.85); align-items: center; justify-content: center; padding: 1.5rem; flex-direction: column; overflow-y: auto; }
+    .modal-content-container { display: flex; flex-direction: column; align-items: center; gap: 1.25rem; max-width: 95%; margin: auto; }
+    .modal-title-badge { font-size: 1.3rem; font-weight: bold; color: var(--text); background: var(--card-bg); padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid var(--border); }
+    .modal-images-row { display: flex; gap: 1.25rem; flex-wrap: wrap; justify-content: center; max-width: 100%; }
+    .modal-photo-box { display: flex; flex-direction: column; align-items: center; gap: 0.4rem; background: var(--card-bg); border: 1px solid var(--border); padding: 0.85rem; border-radius: 14px; max-width: 320px; box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
+    .modal-photo-box img { max-height: 42vh; border-radius: 8px; background: rgba(0,0,0,0.1); }
+    .modal-ref-group { display: flex; flex-direction: column; align-items: center; gap: 0.3rem; width: 100%; }
+    .modal-ref-badges { display: flex; gap: 0.4rem; flex-wrap: wrap; justify-content: center; }
+    .modal-ref-badge { background: var(--primary); color: white; padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.8rem; font-weight: 700; }
+    .modal-fournisseur-badge { background: var(--secondary); color: var(--text); padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.8rem; font-weight: 600; border: 1px solid var(--border); }
+    .modal-barcode-badge { background-color: #0284c7; color: #ffffff; font-weight: 700; padding: 0.25rem 0.65rem; border-radius: 6px; font-size: 0.8rem; font-family: monospace; }
+    .modal-qty-badge { background-color: #16a34a; color: #ffffff; font-weight: 700; padding: 0.25rem 0.65rem; border-radius: 6px; font-size: 0.85rem; }
+    .modal-article-remarque-box { background: rgba(255, 107, 0, 0.15); color: var(--text); padding: 0.35rem 0.6rem; border-radius: 6px; font-size: 0.85rem; font-weight: 600; text-align: center; border: 1px dashed var(--primary); width: 100%; word-break: break-word; }
+    .modal-close { position: absolute; top: 20px; right: 25px; color: white; font-size: 2rem; font-weight: bold; cursor: pointer; z-index: 1001; }
 
-    .modal-content-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 1.25rem;
-      max-width: 95%;
-      margin: auto;
-    }
-
-    .modal-title-badge {
-      font-size: 1.3rem;
-      font-weight: bold;
-      color: var(--text);
-      background: var(--card-bg);
-      padding: 0.5rem 1rem;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      margin-bottom: 0.5rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .modal-images-row {
-      display: flex;
-      gap: 1.25rem;
-      flex-wrap: wrap;
-      justify-content: center;
-      max-width: 100%;
-    }
-
-    .modal-photo-box {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.4rem;
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      padding: 0.85rem;
-      border-radius: 14px;
-      max-width: 320px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-    }
-
-    .modal-photo-box img {
-      max-height: 42vh;
-      border-radius: 8px;
-      background: rgba(0,0,0,0.1);
-    }
-
-    .modal-ref-group {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.3rem;
-      width: 100%;
-    }
-
-    .modal-ref-badges {
-      display: flex;
-      gap: 0.4rem;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-
-    .modal-ref-badge {
-      background: var(--primary);
-      color: white;
-      padding: 0.2rem 0.6rem;
-      border-radius: 6px;
-      font-size: 0.8rem;
-      font-weight: 700;
-    }
-
-    .modal-fournisseur-badge {
-      background: var(--secondary);
-      color: var(--text);
-      padding: 0.2rem 0.6rem;
-      border-radius: 6px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      border: 1px solid var(--border);
-    }
-
-    .modal-barcode-badge {
-      background-color: #0284c7;
-      color: #ffffff;
-      font-weight: 700;
-      padding: 0.25rem 0.65rem;
-      border-radius: 6px;
-      font-size: 0.8rem;
-      font-family: monospace;
-      border: none;
-      display: inline-block;
-    }
-
-    .modal-qty-badge {
-      background-color: #16a34a;
-      color: #ffffff;
-      font-weight: 700;
-      padding: 0.25rem 0.65rem;
-      border-radius: 6px;
-      font-size: 0.85rem;
-      display: inline-block;
-    }
-
-    .modal-article-remarque-box {
-      background: rgba(255, 107, 0, 0.15);
-      color: var(--text);
-      padding: 0.35rem 0.6rem;
-      border-radius: 6px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      text-align: center;
-      border: 1px dashed var(--primary);
-      width: 100%;
-      word-break: break-word;
-    }
-
-    @media (max-width: 600px) {
-      .modal-images-row {
-        flex-direction: column;
-      }
-      .modal-photo-box {
-        max-width: 90vw;
-      }
-    }
-
-    .modal-close {
-      position: absolute;
-      top: 20px;
-      right: 25px;
-      color: white;
-      font-size: 2rem;
-      font-weight: bold;
-      cursor: pointer;
-      z-index: 1001;
-    }
-
-    #print-area {
-      display: none;
-    }
-
+    #print-area { display: none; }
     @media print {
-      body * {
-        visibility: hidden;
-      }
-      #print-area, #print-area * {
-        visibility: visible;
-      }
-      #print-area {
-        display: block !important;
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        padding: 20px;
-        background: white;
-        color: black;
-      }
-      .print-title {
-        font-size: 22px;
-        color: #ff6b00;
-        margin-bottom: 5px;
-        font-weight: bold;
-      }
-      .print-subtitle {
-        font-size: 12px;
-        color: #64748b;
-        margin-bottom: 20px;
-        border-bottom: 2px solid #ff6b00;
-        padding-bottom: 10px;
-      }
-      .print-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 15px;
-      }
-      .print-card {
-        border: 1px solid #cbd5e1;
-        border-radius: 8px;
-        padding: 10px;
-        page-break-inside: avoid;
-        background: #ffffff;
-      }
-      .print-card h3 {
-        font-size: 16px;
-        color: #0f172a;
-        margin-bottom: 4px;
-      }
-      .print-card .date {
-        font-size: 11px;
-        color: #64748b;
-        margin-bottom: 8px;
-      }
-      .print-photos-flex {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-      }
-      .print-photo-print-item {
-        width: 48%;
-        display: flex;
-        flex-direction: column;
-        gap: 3px;
-        margin-bottom: 8px;
-      }
-      .print-photos-flex img {
-        width: 100%;
-        height: 110px;
-        object-fit: cover;
-        border-radius: 6px;
-        border: 1px solid #e2e8f0;
-      }
-      .print-fournisseur-label {
-        font-size: 10px;
-        font-weight: 600;
-        color: #334155;
-        background: #f1f5f9;
-        padding: 2px;
-        border-radius: 4px;
-        text-align: center;
-      }
-      .print-ref-label {
-        font-size: 10px;
-        font-weight: bold;
-        color: #ff6b00;
-        background: #f8fafc;
-        padding: 2px;
-        border-radius: 4px;
-        text-align: center;
-      }
-      .print-barcode-label {
-        font-size: 10px;
-        font-weight: bold;
-        color: #ffffff;
-        background-color: #0284c7;
-        font-family: monospace;
-        text-align: center;
-        padding: 2px 4px;
-        border-radius: 4px;
-      }
-      .print-qty-label {
-        font-size: 10px;
-        font-weight: bold;
-        color: #ffffff;
-        background-color: #16a34a;
-        text-align: center;
-        padding: 2px 4px;
-        border-radius: 4px;
-      }
-      .print-art-remarque-label {
-        font-size: 10px;
-        font-weight: bold;
-        color: #ff6b00;
-        background: #fff7ed;
-        padding: 2px;
-        border-radius: 4px;
-        text-align: center;
-      }
+      body * { visibility: hidden; }
+      #print-area, #print-area * { visibility: visible; }
+      #print-area { display: block !important; position: absolute; left: 0; top: 0; width: 100%; padding: 20px; background: white; color: black; }
+      .print-title { font-size: 22px; color: #ff6b00; margin-bottom: 5px; font-weight: bold; }
+      .print-subtitle { font-size: 12px; color: #64748b; margin-bottom: 20px; border-bottom: 2px solid #ff6b00; padding-bottom: 10px; }
+      .print-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+      .print-card { border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px; page-break-inside: avoid; background: #ffffff; }
+      .print-photos-flex { display: flex; flex-wrap: wrap; gap: 8px; }
+      .print-photo-print-item { width: 48%; display: flex; flex-direction: column; gap: 3px; margin-bottom: 8px; }
+      .print-photos-flex img { width: 100%; height: 110px; object-fit: cover; border-radius: 6px; border: 1px solid #e2e8f0; }
     }
   </style>
 </head>
 <body>
 
-  <!-- ACCUEIL -->
   <div id="home-screen">
     <div class="logo-container">
       <img class="home-logo-img" src="https://i49.servimg.com/u/f49/11/31/89/70/img_2010.jpg" style="border:0;" alt="Reliquats Fleux Logo" />
@@ -840,7 +144,6 @@
     <button class="btn-start" id="btnCommencer">🚀 Lancer les reliquats</button>
   </div>
 
-  <!-- APPLICATION -->
   <div id="app-screen">
     <header>
       <div class="header-brand">
@@ -852,27 +155,14 @@
         <button class="btn-menu-hamburger" id="btnMenu" title="Menu options">☰</button>
         
         <div class="dropdown-menu" id="dropdownMenu">
-          <button class="dropdown-item" id="btnToggleTheme">
-            ☀️ Mode Clair / Sombre
-          </button>
-          <button class="dropdown-item" id="btnToggleAdmin">
-            🔒 Mode Admin : OFF
-          </button>
+          <button class="dropdown-item" id="btnToggleTheme">☀️ Mode Clair / Sombre</button>
+          <button class="dropdown-item" id="btnToggleAdmin">🔒 Mode Admin : OFF</button>
           
           <div id="adminMenuOptions" style="display: none;">
-            <button class="dropdown-item" id="btnExportBackup" style="color: #0284c7;">
-              💾 Exporter une sauvegarde
-            </button>
-            <button class="dropdown-item" id="btnImportBackup" style="color: #8b5cf6;">
-              📥 Restaurer une sauvegarde
-            </button>
+            <button class="dropdown-item" id="btnExportBackup" style="color: #0284c7;">💾 Exporter une sauvegarde</button>
+            <button class="dropdown-item" id="btnImportBackup" style="color: #8b5cf6;">📥 Restaurer une sauvegarde</button>
             <input type="file" id="fileRestoreJson" accept=".json" style="display: none;">
-            <button class="dropdown-item danger" id="btnViderHistorique">
-              🗑️ Vider l'historique
-            </button>
-            <button class="dropdown-item" id="btnToggleMaintenance" style="color: #f59e0b;">
-              🛠️ Activer la maintenance
-            </button>
+            <button class="dropdown-item danger" id="btnViderHistorique">🗑️ Vider l'historique</button>
           </div>
         </div>
       </div>
@@ -901,7 +191,7 @@
           <div id="articlesContainer"></div>
 
           <div style="margin-bottom: 1rem; text-align: center;">
-            <button type="button" id="btnAjouterArticle" style="background: transparent; border: 2px dashed var(--border); color: var(--primary); padding: 0.75rem; border-radius: 10px; font-weight: 700; width: 100%; cursor: pointer; transition: all 0.2s;">
+            <button type="button" id="btnAjouterArticle" style="background: transparent; border: 2px dashed var(--border); color: var(--primary); padding: 0.75rem; border-radius: 10px; font-weight: 700; width: 100%; cursor: pointer;">
               ➕ Ajouter un article pour cette commande
             </button>
           </div>
@@ -924,7 +214,7 @@
             <span class="export-filter-label">📅 Filtrer par date ou sélection pour l'export :</span>
             <div class="export-actions-row">
               <input type="date" id="dateFiltreExport" class="input-date-custom">
-              <button class="btn-select-all" id="btnSelectAll" title="Tout cocher / décocher">☑️ Tout cocher</button>
+              <button class="btn-select-all" id="btnSelectAll">☑️ Tout cocher</button>
               <button class="btn-pdf" id="btnExportPDF">📄 Exporter PDF</button>
               
               <div id="adminExportOptions" style="display: none; gap: 0.5rem; align-items: center;">
@@ -943,7 +233,6 @@
 
   <div id="print-area"></div>
 
-  <!-- MODAL ZOOM -->
   <div id="imageModal" class="modal">
     <span class="modal-close" id="closeModal">&times;</span>
     <div class="modal-content-container">
@@ -952,7 +241,6 @@
     </div>
   </div>
 
-  <!-- MODAL CONNEXION ADMIN -->
   <div id="adminLoginModal" class="modal" style="display: none; z-index: 2000;">
     <div style="background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; width: 100%; max-width: 340px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: flex; flex-direction: column; gap: 1rem;">
       <h3 style="color: var(--primary); font-size: 1.1rem; text-align: center;">🔒 Accès Administrateur</h3>
@@ -967,14 +255,6 @@
     </div>
   </div>
 
-  <!-- OVERLAY MAINTENANCE -->
-  <div id="maintenanceOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 9999; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 2rem;">
-    <h1 style="color: var(--primary); font-size: 2rem; margin-bottom: 1rem;">🛠️ Maintenance en cours</h1>
-    <p style="color: var(--subtext); max-width: 500px; margin-bottom: 1.5rem;">L'application est temporairement en maintenance. Retour prévu très bientôt !</p>
-    <button id="btnBypassMaintenance" style="background: var(--secondary); color: var(--text); border: 1px solid var(--border); padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; font-size: 0.85rem;">Accès Admin / Contourner</button>
-  </div>
-
-  <!-- SDK FIREBASE COMPAT -->
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
@@ -992,62 +272,9 @@
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-
     const ADMIN_PASSWORD = "Fleux.reliquats!";
     let estAdmin = false;
 
-    // --- GESTION MAINTENANCE ---
-    const maintenanceOverlay = document.getElementById('maintenanceOverlay');
-    const btnToggleMaintenance = document.getElementById('btnToggleMaintenance');
-    const btnBypassMaintenance = document.getElementById('btnBypassMaintenance');
-    let maintenanceActive = false;
-
-    db.ref('config/maintenance').on('value', (snapshot) => {
-      maintenanceActive = snapshot.val() === true;
-      mettreAJourAffichageMaintenance();
-      
-      if (btnToggleMaintenance) {
-        btnToggleMaintenance.innerHTML = maintenanceActive 
-          ? "✅ Désactiver la maintenance" 
-          : "🛠️ Activer la maintenance";
-        btnToggleMaintenance.style.color = maintenanceActive ? "#16a34a" : "#f59e0b";
-      }
-    });
-
-    function mettreAJourAffichageMaintenance() {
-      if (maintenanceOverlay) {
-        if (maintenanceActive && !estAdmin) {
-          maintenanceOverlay.style.display = 'flex';
-        } else {
-          maintenanceOverlay.style.display = 'none';
-        }
-      }
-    }
-
-    if (btnToggleMaintenance) {
-      btnToggleMaintenance.addEventListener('click', () => {
-        dropdownMenu.classList.remove('show');
-        requireAdmin(() => {
-          const nouvelEtat = !maintenanceActive;
-          db.ref('config/maintenance').set(nouvelEtat).then(() => {
-            alert(nouvelEtat ? "🛠️ Mode maintenance ACTIVÉ pour les utilisateurs." : "✅ Mode maintenance DÉSACTIVÉ.");
-          });
-        });
-      });
-    }
-
-    if (btnBypassMaintenance) {
-      btnBypassMaintenance.addEventListener('click', () => {
-        ouvrirModaleAdmin((success) => {
-          if (success) {
-            alert("✅ Connecté en admin, maintenance contournée.");
-            mettreAJourAffichageMaintenance();
-          }
-        });
-      });
-    }
-
-    // --- GESTION MODALE ADMIN ---
     let adminCallback = null;
     const adminLoginModal = document.getElementById('adminLoginModal');
     const adminPasswordInput = document.getElementById('adminPasswordInput');
@@ -1063,13 +290,8 @@
     }
 
     btnTogglePasswordView.addEventListener('click', () => {
-      if (adminPasswordInput.type === 'password') {
-        adminPasswordInput.type = 'text';
-        btnTogglePasswordView.textContent = '🙈';
-      } else {
-        adminPasswordInput.type = 'password';
-        btnTogglePasswordView.textContent = '👁️';
-      }
+      adminPasswordInput.type = adminPasswordInput.type === 'password' ? 'text' : 'password';
+      btnTogglePasswordView.textContent = adminPasswordInput.type === 'password' ? '👁️' : '🙈';
     });
 
     document.getElementById('btnCancelAdminLogin').addEventListener('click', () => {
@@ -1078,20 +300,14 @@
     });
 
     function validerPasswordAdmin() {
-      const mdp = adminPasswordInput.value;
-      if (mdp === ADMIN_PASSWORD) {
+      if (adminPasswordInput.value === ADMIN_PASSWORD) {
         adminLoginModal.style.display = 'none';
         estAdmin = true;
         btnToggleAdmin.innerHTML = "🔓 Mode Admin : ON";
         btnToggleAdmin.style.color = "#16a34a";
         adminMenuOptions.style.display = "block";
         adminExportOptions.style.display = "inline-flex";
-        mettreAJourAffichageMaintenance();
-        if (adminCallback) {
-          const cb = adminCallback;
-          adminCallback = null;
-          cb(true);
-        }
+        if (adminCallback) { const cb = adminCallback; adminCallback = null; cb(true); }
       } else {
         alert("❌ Code incorrect !");
         adminPasswordInput.value = '';
@@ -1100,51 +316,31 @@
     }
 
     document.getElementById('btnSubmitAdminLogin').addEventListener('click', validerPasswordAdmin);
-    adminPasswordInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') validerPasswordAdmin();
-    });
+    adminPasswordInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') validerPasswordAdmin(); });
 
     function requireAdmin(actionFn) {
-      if (estAdmin) {
-        actionFn();
-      } else {
-        ouvrirModaleAdmin((success) => {
-          if (success) {
-            actionFn();
-          }
-        });
-      }
+      if (estAdmin) { actionFn(); } else { ouvrirModaleAdmin((succ) => { if (succ) actionFn(); }); }
     }
 
     const htmlRoot = document.documentElement;
     const btnToggleTheme = document.getElementById('btnToggleTheme');
-
     const savedTheme = localStorage.getItem('reliquats_theme') || 'dark';
     htmlRoot.setAttribute('data-theme', savedTheme);
-    mettreAJourTexteTheme(savedTheme);
+    btnToggleTheme.innerHTML = savedTheme === 'dark' ? "🌙 Mode Sombre (Actif)" : "☀️ Mode Clair (Actif)";
 
     btnToggleTheme.addEventListener('click', () => {
       const currentTheme = htmlRoot.getAttribute('data-theme');
       const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
       htmlRoot.setAttribute('data-theme', newTheme);
       localStorage.setItem('reliquats_theme', newTheme);
-      mettreAJourTexteTheme(newTheme);
+      btnToggleTheme.innerHTML = newTheme === 'dark' ? "🌙 Mode Sombre (Actif)" : "☀️ Mode Clair (Actif)";
       dropdownMenu.classList.remove('show');
     });
-
-    function mettreAJourTexteTheme(theme) {
-      if (theme === 'dark') {
-        btnToggleTheme.innerHTML = "🌙 Mode Sombre (Actif)";
-      } else {
-        btnToggleTheme.innerHTML = "☀️ Mode Clair (Actif)";
-      }
-    }
 
     const homeScreen = document.getElementById('home-screen');
     const appScreen = document.getElementById('app-screen');
     const btnCommencer = document.getElementById('btnCommencer');
     const btnRetourAccueil = document.getElementById('btnRetourAccueil');
-
     const btnMenu = document.getElementById('btnMenu');
     const dropdownMenu = document.getElementById('dropdownMenu');
     const btnToggleAdmin = document.getElementById('btnToggleAdmin');
@@ -1152,33 +348,20 @@
     const adminExportOptions = document.getElementById('adminExportOptions');
     const badgeCount = document.getElementById('badgeCount');
 
-    btnMenu.addEventListener('click', (e) => {
-      e.stopPropagation();
-      dropdownMenu.classList.toggle('show');
-    });
-
-    document.addEventListener('click', () => {
-      dropdownMenu.classList.remove('show');
-    });
+    btnMenu.addEventListener('click', (e) => { e.stopPropagation(); dropdownMenu.classList.toggle('show'); });
+    document.addEventListener('click', () => dropdownMenu.classList.remove('show'));
 
     btnToggleAdmin.addEventListener('click', () => {
       dropdownMenu.classList.remove('show');
       if (!estAdmin) {
-        ouvrirModaleAdmin((success) => {
-          if (success) {
-            alert("✅ Mode Administrateur activé !");
-            mettreAJourAffichageMaintenance();
-            afficherGalerie(inputRecherche.value);
-          }
-        });
+        ouvrirModaleAdmin((succ) => { if (succ) { alert("✅ Mode Admin ON"); afficherGalerie(inputRecherche.value); } });
       } else {
         estAdmin = false;
         btnToggleAdmin.innerHTML = "🔒 Mode Admin : OFF";
         btnToggleAdmin.style.color = "var(--text)";
         adminMenuOptions.style.display = "none";
         adminExportOptions.style.display = "none";
-        mettreAJourAffichageMaintenance();
-        alert("🔒 Mode Administrateur désactivé.");
+        alert("🔒 Mode Admin OFF");
         afficherGalerie(inputRecherche.value);
       }
     });
@@ -1205,7 +388,6 @@
     const btnNouvelleCommande = document.getElementById('btnNouvelleCommande');
     const articlesContainer = document.getElementById('articlesContainer');
     const btnAjouterArticle = document.getElementById('btnAjouterArticle');
-
     const btnEnregistrer = document.getElementById('btnEnregistrer');
     const btnAnnulerEdit = document.getElementById('btnAnnulerEdit');
     const formTitle = document.getElementById('formTitle');
@@ -1222,7 +404,6 @@
     const btnImportSheets = document.getElementById('btnImportSheets');
     const fileImportCSV = document.getElementById('fileImportCSV');
     const dateFiltreExport = document.getElementById('dateFiltreExport');
-
     const modal = document.getElementById('imageModal');
     const modalTitleBadge = document.getElementById('modalTitleBadge');
     const modalImagesRow = document.getElementById('modalImagesRow');
@@ -1232,22 +413,12 @@
       if (!cmd) return cmd;
       let rawNum = String(cmd.numero || '').trim();
       let rawDate = String(cmd.date || '').trim();
-
-      let parts = [];
-      if (rawNum.includes(';')) parts = rawNum.split(';');
-      else if (rawNum.includes(',')) parts = rawNum.split(',');
-
+      let parts = rawNum.includes(';') ? rawNum.split(';') : (rawNum.includes(',') ? rawNum.split(',') : []);
       if (parts.length >= 2) {
         let p0 = parts[0].trim();
-        let p1 = parts.trim();
-        if (p0.includes('/')) {
-          if (!rawDate || rawDate === 'undefined') rawDate = p0;
-          rawNum = p1;
-        } else {
-          rawNum = p0;
-        }
+        let p1 = parts[parts.length - 1].trim();
+        if (p0.includes('/')) { if (!rawDate || rawDate === 'undefined') rawDate = p0; rawNum = p1; } else { rawNum = p0; }
       }
-
       cmd.numero = rawNum;
       if (rawDate) cmd.date = rawDate;
       return cmd;
@@ -1261,13 +432,10 @@
           if (item) {
             if (item.refOriginale) catalogueArticles[item.refOriginale] = item;
             catalogueArticles[cle] = item;
-            if (cle.startsWith("REF_")) {
-              catalogueArticles[cle.replace("REF_", "")] = item;
-            }
+            if (cle.startsWith("REF_")) catalogueArticles[cle.replace("REF_", "")] = item;
           }
         });
       });
-
       db.ref('commandes').once('value').then((snapshot) => {
         const data = snapshot.val() || {};
         Object.keys(data).forEach(key => {
@@ -1276,11 +444,7 @@
             cmd.articles.forEach(art => {
               if (art.ref && art.photo) {
                 if (!catalogueArticles[art.ref]) catalogueArticles[art.ref] = {};
-                catalogueArticles[art.ref].photo = art.photo;
-                if (art.fournisseur) catalogueArticles[art.ref].fournisseur = art.fournisseur;
-                if (art.codeBarre) catalogueArticles[art.ref].codeBarre = art.codeBarre;
-                if (art.quantite !== undefined) catalogueArticles[art.ref].quantite = art.quantite;
-                if (art.remarqueArticle) catalogueArticles[art.ref].remarqueArticle = art.remarqueArticle;
+                Object.assign(catalogueArticles[art.ref], art);
               }
             });
           }
@@ -1295,9 +459,7 @@
         if (item) {
           if (item.refOriginale) catalogueArticles[item.refOriginale] = item;
           catalogueArticles[cle] = item;
-          if (cle.startsWith("REF_")) {
-            catalogueArticles[cle.replace("REF_", "")] = item;
-          }
+          if (cle.startsWith("REF_")) catalogueArticles[cle.replace("REF_", "")] = item;
         }
       });
     });
@@ -1306,22 +468,12 @@
       const img = new Image();
       img.onload = () => {
         const canvas = document.createElement('canvas');
-        let width = img.width;
-        let height = img.height;
+        let width = img.width, height = img.height;
         const maxDimension = 600;
-
-        if (width > height && width > maxDimension) {
-          height *= maxDimension / width;
-          width = maxDimension;
-        } else if (height > maxDimension) {
-          width *= maxDimension / height;
-          height = maxDimension;
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, width, height);
+        if (width > height && width > maxDimension) { height *= maxDimension / width; width = maxDimension; }
+        else if (height > maxDimension) { width *= maxDimension / height; height = maxDimension; }
+        canvas.width = width; canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
         callback(canvas.toDataURL('image/jpeg', 0.5));
       };
       img.src = dataUrl;
@@ -1331,57 +483,33 @@
       const index = articlesContainer.children.length + 1;
       const bloc = document.createElement('div');
       bloc.className = 'photo-box-container article-block';
-      
-      const photoInit = dataArticle ? (dataArticle.photo || "") : "";
-      const fournisseurInit = dataArticle ? (dataArticle.fournisseur || "") : "";
-      const refInit = dataArticle ? (dataArticle.ref || "") : "";
-      const barcodeInit = dataArticle ? (dataArticle.codeBarre || "") : "";
-      const qteInit = dataArticle && dataArticle.quantite !== undefined ? dataArticle.quantite : 1;
-      const remArticleInit = dataArticle ? (dataArticle.remarqueArticle || "") : "";
+      const photoInit = dataArticle?.photo || "";
+      const fournisseurInit = dataArticle?.fournisseur || "";
+      const refInit = dataArticle?.ref || "";
+      const barcodeInit = dataArticle?.codeBarre || "";
+      const qteInit = dataArticle?.quantite !== undefined ? dataArticle.quantite : 1;
+      const remArticleInit = dataArticle?.remarqueArticle || "";
 
       bloc.innerHTML = `
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
           <label style="margin-bottom: 0;">📸 Article n°<span class="article-index">${index}</span></label>
           <button type="button" class="btn-retirer-article" style="background: rgba(244, 63, 94, 0.2); border: none; color: #f43f5e; padding: 0.2rem 0.5rem; border-radius: 6px; font-size: 0.75rem; font-weight: bold; cursor: pointer;">🗑️ Retirer</button>
         </div>
-
-        <div class="previewWrapper" style="position: relative; margin-bottom: 0.75rem; display: ${photoInit ? 'block' : 'none'};">
+        <div class="previewWrapper" style="display: ${photoInit ? 'block' : 'none'};">
           <img class="photoPreview" src="${photoInit}" alt="Aperçu Photo">
-          <button type="button" class="btn-suppr-photo-interne" style="position: absolute; top: 8px; right: 8px; background: rgba(244, 63, 94, 0.9); color: white; border: none; padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: bold; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.3);">❌ Supprimer cette photo</button>
+          <button type="button" class="btn-suppr-photo-interne">❌ Supprimer</button>
         </div>
-        
         <input type="file" class="fileGallery" accept="image/*" style="display: none;">
         <input type="file" class="fileCamera" accept="image/*" capture="environment" style="display: none;">
-        
         <div class="camera-controls">
           <button type="button" class="btn-secondary btn-galerie">📁 Galerie</button>
           <button type="button" class="btn-secondary btn-photo-directe">📸 Photo</button>
         </div>
-
-        <div class="form-group" style="margin-top: 0.75rem; margin-bottom: 0.75rem;">
-          <label>Fournisseur</label>
-          <input type="text" class="input-fournisseur" placeholder="Ex: Nom du fournisseur" autocomplete="off" value="${fournisseurInit}">
-        </div>
-
-        <div class="form-group" style="margin-bottom: 0.75rem;">
-          <label>Référence article</label>
-          <input type="text" class="input-ref" placeholder="Ex: QM6214" autocomplete="off" value="${refInit}">
-        </div>
-
-        <div class="form-group" style="margin-bottom: 0.75rem;">
-          <label>Code-barres ligne (EAN)</label>
-          <input type="text" class="input-barcode" placeholder="Ex: 5711173353217" autocomplete="off" value="${barcodeInit}">
-        </div>
-
-        <div class="form-group" style="margin-bottom: 0.75rem;">
-          <label>Quantité</label>
-          <input type="number" min="1" class="input-qte" placeholder="Ex: 3" autocomplete="off" value="${qteInit}">
-        </div>
-
-        <div class="form-group" style="margin-bottom: 0;">
-          <label>💬 Remarque spécifique article</label>
-          <input type="text" class="input-article-remarque" placeholder="Ex: Couleur spécifique, set incomplet..." autocomplete="off" value="${remArticleInit}">
-        </div>
+        <div class="form-group" style="margin-top: 0.75rem;"><label>Fournisseur</label><input type="text" class="input-fournisseur" value="${fournisseurInit}"></div>
+        <div class="form-group"><label>Référence article</label><input type="text" class="input-ref" value="${refInit}"></div>
+        <div class="form-group"><label>Code-barres ligne (EAN)</label><input type="text" class="input-barcode" value="${barcodeInit}"></div>
+        <div class="form-group"><label>Quantité</label><input type="number" min="1" class="input-qte" value="${qteInit}"></div>
+        <div class="form-group" style="margin-bottom: 0;"><label>💬 Remarque spécifique article</label><input type="text" class="input-article-remarque" value="${remArticleInit}"></div>
       `;
 
       const inputRef = bloc.querySelector('.input-ref');
@@ -1392,430 +520,165 @@
       const previewWrapper = bloc.querySelector('.previewWrapper');
       const photoPreview = bloc.querySelector('.photoPreview');
       const btnSupprPhoto = bloc.querySelector('.btn-suppr-photo-interne');
-      const fileGallery = bloc.querySelector('.fileGallery');
-      const fileCamera = bloc.querySelector('.fileCamera');
-      const btnGalerie = bloc.querySelector('.btn-galerie');
-      const btnPhotoDirecte = bloc.querySelector('.btn-photo-directe');
-      const btnRetirer = bloc.querySelector('.btn-retirer-article');
-
       let photoData = photoInit;
 
       function verifierAutocompletion() {
         const ref = inputRef.value.trim();
         if (!ref) return;
-
         const cleNorm = "REF_" + ref.replace(/[.#$\/\[\]]/g, "_");
-        let item = catalogueArticles[ref] || catalogueArticles[cleNorm] || catalogueArticles["REF_" + ref];
-
-        if (!item) {
-          for (let c of commandes) {
-            if (c.articles) {
-              const foundArt = c.articles.find(a => a.ref === ref);
-              if (foundArt) {
-                item = { 
-                  photo: foundArt.photo, 
-                  fournisseur: foundArt.fournisseur, 
-                  codeBarre: foundArt.codeBarre, 
-                  quantite: foundArt.quantite,
-                  remarqueArticle: foundArt.remarqueArticle
-                };
-                break;
-              }
-            }
-          }
-        }
-
-        if (item && item.photo && !photoData) {
-          photoData = item.photo;
-          photoPreview.src = photoData;
-          previewWrapper.style.display = 'block';
-        }
-        if (item && item.fournisseur && !inputFournisseur.value.trim()) {
-          inputFournisseur.value = item.fournisseur;
-        }
-        if (item && item.codeBarre && !inputBarcode.value.trim()) {
-          inputBarcode.value = item.codeBarre;
-        }
-        if (item && item.quantite !== undefined && inputQte.value == "1") {
-          inputQte.value = item.quantite;
-        }
-        if (item && item.remarqueArticle && !inputArtRemarque.value.trim()) {
-          inputArtRemarque.value = item.remarqueArticle;
-        }
+        let item = catalogueArticles[ref] || catalogueArticles[cleNorm];
+        if (item && item.photo && !photoData) { photoData = item.photo; photoPreview.src = photoData; previewWrapper.style.display = 'block'; }
+        if (item && item.fournisseur && !inputFournisseur.value.trim()) inputFournisseur.value = item.fournisseur;
+        if (item && item.codeBarre && !inputBarcode.value.trim()) inputBarcode.value = item.codeBarre;
+        if (item && item.quantite !== undefined && inputQte.value == "1") inputQte.value = item.quantite;
+        if (item && item.remarqueArticle && !inputArtRemarque.value.trim()) inputArtRemarque.value = item.remarqueArticle;
       }
-
       inputRef.addEventListener('input', verifierAutocompletion);
       inputRef.addEventListener('blur', verifierAutocompletion);
 
-      btnGalerie.addEventListener('click', () => fileGallery.click());
-      btnPhotoDirecte.addEventListener('click', () => fileCamera.click());
+      bloc.querySelector('.btn-galerie').addEventListener('click', () => bloc.querySelector('.fileGallery').click());
+      bloc.querySelector('.btn-photo-directe').addEventListener('click', () => bloc.querySelector('.fileCamera').click());
 
-      function chargerFichiersArticle(e) {
+      const handleFile = (e) => {
         const file = e.target.files[0];
         if (file) {
           const reader = new FileReader();
           reader.onload = (event) => {
-            compresserImage(event.target.result, (imageCompressee) => {
-              photoData = imageCompressee;
-              photoPreview.src = photoData;
-              previewWrapper.style.display = 'block';
-
+            compresserImage(event.target.result, (comp) => {
+              photoData = comp; photoPreview.src = photoData; previewWrapper.style.display = 'block';
               const ref = inputRef.value.trim();
               if (ref) {
-                const cle = "REF_" + ref.replace(/[.#$\/\[\]]/g, "_");
-                db.ref('catalogue_photos/' + cle).update({
-                  refOriginale: ref,
-                  photo: photoData,
-                  fournisseur: inputFournisseur.value.trim(),
-                  codeBarre: inputBarcode.value.trim(),
-                  quantite: Number(inputQte.value) || 1,
-                  remarqueArticle: inputArtRemarque.value.trim()
+                db.ref('catalogue_photos/REF_' + ref.replace(/[.#$\/\[\]]/g, "_")).update({
+                  refOriginale: ref, photo: photoData, fournisseur: inputFournisseur.value.trim(), codeBarre: inputBarcode.value.trim(), quantite: Number(inputQte.value) || 1, remarqueArticle: inputArtRemarque.value.trim()
                 }).catch(() => {});
               }
             });
           };
           reader.readAsDataURL(file);
         }
-      }
-
-      fileGallery.addEventListener('change', chargerFichiersArticle);
-      fileCamera.addEventListener('change', chargerFichiersArticle);
-
-      btnSupprPhoto.addEventListener('click', () => {
-        photoData = "";
-        photoPreview.src = "";
-        previewWrapper.style.display = 'none';
-        fileGallery.value = "";
-        fileCamera.value = "";
-      });
-
-      btnRetirer.addEventListener('click', () => {
-        bloc.remove();
-        mettreAJourIndiceArticles();
-      });
-
-      bloc.getArticleData = () => {
-        return {
-          photo: photoData,
-          fournisseur: inputFournisseur.value.trim(),
-          ref: inputRef.value.trim(),
-          codeBarre: inputBarcode.value.trim(),
-          quantite: Number(inputQte.value) || 1,
-          remarqueArticle: inputArtRemarque.value.trim()
-        };
       };
+      bloc.querySelector('.fileGallery').addEventListener('change', handleFile);
+      bloc.querySelector('.fileCamera').addEventListener('change', handleFile);
+      btnSupprPhoto.addEventListener('click', () => { photoData = ""; photoPreview.src = ""; previewWrapper.style.display = 'none'; });
+      bloc.querySelector('.btn-retirer-article').addEventListener('click', () => { bloc.remove(); mettreAJourIndiceArticles(); });
+
+      bloc.getArticleData = () => ({
+        photo: photoData, fournisseur: inputFournisseur.value.trim(), ref: inputRef.value.trim(), codeBarre: inputBarcode.value.trim(), quantite: Number(inputQte.value) || 1, remarqueArticle: inputArtRemarque.value.trim()
+      });
 
       articlesContainer.appendChild(bloc);
       mettreAJourIndiceArticles();
     }
 
     function mettreAJourIndiceArticles() {
-      const blocs = articlesContainer.querySelectorAll('.article-block');
-      blocs.forEach((b, idx) => {
-        b.querySelector('.article-index').textContent = idx + 1;
-      });
+      articlesContainer.querySelectorAll('.article-block').forEach((b, idx) => { b.querySelector('.article-index').textContent = idx + 1; });
     }
 
-    btnAjouterArticle.addEventListener('click', () => {
-      ajouterBlocArticle();
-    });
+    btnAjouterArticle.addEventListener('click', () => ajouterBlocArticle());
 
     db.ref('commandes').on('value', (snapshot) => {
       const data = snapshot.val();
       commandes = [];
       if (data) {
-        if (Array.isArray(data)) {
-          commandes = data.filter(Boolean).map(nettoyerCommandeObjet);
-        } else {
-          Object.keys(data).forEach(key => {
-            let cmd = data[key];
-            if (cmd) {
-              if (!cmd.id) cmd.id = Number(key) || Date.now();
-              cmd = nettoyerCommandeObjet(cmd);
-              commandes.push(cmd);
-            }
-          });
-        }
+        if (Array.isArray(data)) { commandes = data.filter(Boolean).map(nettoyerCommandeObjet); }
+        else { Object.keys(data).forEach(key => { let cmd = data[key]; if (cmd) { if (!cmd.id) cmd.id = Number(key) || Date.now(); commandes.push(nettoyerCommandeObjet(cmd)); } }); }
         commandes.sort((a, b) => (Number(b.id) || 0) - (Number(a.id) || 0));
       }
       afficherGalerie(inputRecherche.value);
-    }, (error) => {
-      alert("Erreur de lecture Firebase : " + error.message);
     });
 
-    function executerEnregistrement() {
-      const numero = inputNumero.value.trim();
-      const blocsArticles = articlesContainer.querySelectorAll('.article-block');
-
-      if (!numero || blocsArticles.length === 0) {
-        alert("Veuillez renseigner un numéro de commande et ajouter au moins un article.");
-        return;
-      }
-
-      let articlesList = [];
-      let hasValidRef = false;
-
-      blocsArticles.forEach(b => {
-        const data = b.getArticleData();
-        if (data.ref) hasValidRef = true;
-        articlesList.push(data);
-
-        if (data.ref && data.photo) {
-          const cle = "REF_" + data.ref.replace(/[.#$\/\[\]]/g, "_");
-          db.ref('catalogue_photos/' + cle).update({
-            refOriginale: data.ref,
-            photo: data.photo,
-            fournisseur: data.fournisseur,
-            codeBarre: data.codeBarre,
-            quantite: data.quantite,
-            remarqueArticle: data.remarqueArticle
-          }).catch(() => {});
-        }
-      });
-
-      if (!hasValidRef) {
-        alert("Veuillez renseigner au moins une référence article.");
-        return;
-      }
-
-      btnEnregistrer.disabled = true;
-      btnEnregistrer.textContent = "Enregistrement...";
-
-      const idObjet = modeEditionId !== null ? modeEditionId : Date.now();
-      const existingCmd = commandes.find(c => c.id === idObjet);
-      
-      const commandeData = {
-        id: idObjet,
-        numero: numero,
-        articles: articlesList,
-        date: modeEditionId !== null && existingCmd ? existingCmd.date : new Date().toLocaleDateString('fr-FR'),
-        isNew: false 
-      };
-
-      db.ref('commandes/' + idObjet).set(commandeData)
-        .then(() => {
-          reinitialiserFormulaire();
-          btnEnregistrer.disabled = false;
-        })
-        .catch((error) => {
-          btnEnregistrer.disabled = false;
-          btnEnregistrer.textContent = "Enregistrer les reliquats";
-          alert("❌ ÉCHEC FIREBASE : " + error.message);
-        });
-    }
-
     btnEnregistrer.addEventListener('click', () => {
-      requireAdmin(executerEnregistrement);
+      requireAdmin(() => {
+        const numero = inputNumero.value.trim();
+        const blocsArticles = articlesContainer.querySelectorAll('.article-block');
+        if (!numero || blocsArticles.length === 0) { alert("Numéro et au moins 1 article requis."); return; }
+        let articlesList = Array.from(blocsArticles).map(b => b.getArticleData());
+        btnEnregistrer.disabled = true; btnEnregistrer.textContent = "Enregistrement...";
+        const idObjet = modeEditionId !== null ? modeEditionId : Date.now();
+        const existingCmd = commandes.find(c => c.id === idObjet);
+        const commandeData = { id: idObjet, numero, articles: articlesList, date: existingCmd?.date || new Date().toLocaleDateString('fr-FR'), isNew: false };
+        db.ref('commandes/' + idObjet).set(commandeData).then(() => { reinitialiserFormulaire(); btnEnregistrer.disabled = false; }).catch(err => { btnEnregistrer.disabled = false; alert(err.message); });
+      });
     });
 
     function reinitialiserFormulaire() {
-      modeEditionId = null;
-      inputNumero.value = "";
-      articlesContainer.innerHTML = "";
-
-      btnEnregistrer.textContent = "Enregistrer les reliquats";
-      btnEnregistrer.disabled = false;
-      btnAnnulerEdit.style.display = "none";
-      formTitle.textContent = "Nvx reliquats";
+      modeEditionId = null; inputNumero.value = ""; articlesContainer.innerHTML = "";
+      btnEnregistrer.textContent = "Enregistrer les reliquats"; btnEnregistrer.disabled = false;
+      btnAnnulerEdit.style.display = "none"; formTitle.textContent = "Nvx reliquats";
     }
 
-    btnNouvelleCommande.addEventListener('click', () => {
-      reinitialiserFormulaire();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
-
+    btnNouvelleCommande.addEventListener('click', () => { reinitialiserFormulaire(); window.scrollTo({ top: 0, behavior: 'smooth' }); });
     btnAnnulerEdit.addEventListener('click', reinitialiserFormulaire);
 
     window.editerCommande = function(id, event) {
       if (event) event.stopPropagation();
-      
       requireAdmin(() => {
-        const item = commandes.find(c => c.id === id);
-        if (!item) return;
-
-        inputRecherche.value = "";
-        modeEditionId = id;
-        
-        inputNumero.value = String(item.numero || '').trim();
-        
-        articlesContainer.innerHTML = "";
-        if (item.articles && item.articles.length > 0) {
-          item.articles.forEach(art => {
-            ajouterBlocArticle({
-              photo: art.photo || "",
-              fournisseur: art.fournisseur || "",
-              ref: art.ref || "",
-              codeBarre: art.codeBarre || "",
-              quantite: art.quantite !== undefined ? art.quantite : 1,
-              remarqueArticle: art.remarqueArticle || ""
-            });
-          });
-        }
-
-        btnEnregistrer.textContent = "💾 Sauvegarder les modifications";
-        btnAnnulerEdit.style.display = "inline-block";
-        formTitle.textContent = "✏️ Modifier le reliquat " + inputNumero.value;
-        
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        const item = commandes.find(c => c.id === id); if (!item) return;
+        modeEditionId = id; inputNumero.value = String(item.numero || '').trim(); articlesContainer.innerHTML = "";
+        item.articles?.forEach(art => ajouterBlocArticle(art));
+        btnEnregistrer.textContent = "💾 Sauvegarder les modifications"; btnAnnulerEdit.style.display = "inline-block";
+        formTitle.textContent = "✏️ Modifier " + inputNumero.value; window.scrollTo({ top: 0, behavior: 'smooth' });
       });
     };
 
     window.supprimerCommande = function(id, event) {
       if (event) event.stopPropagation();
-      
       requireAdmin(() => {
         const item = commandes.find(c => c.id === id);
-        if (!item) return;
-
-        if (confirm(`Voulez-vous vraiment supprimer le reliquat ${item.numero} ?`)) {
-          db.ref('commandes/' + id).remove()
-            .then(() => {
-              if (modeEditionId === id) reinitialiserFormulaire();
-            });
-        }
+        if (item && confirm(`Supprimer reliquat ${item.numero} ?`)) { db.ref('commandes/' + id).remove().then(() => { if (modeEditionId === id) reinitialiserFormulaire(); }); }
       });
     };
 
     btnExportBackup.addEventListener('click', () => {
       dropdownMenu.classList.remove('show');
       requireAdmin(() => {
-        db.ref('/').once('value').then(snapshot => {
-          const fullData = snapshot.val() || {};
-          const jsonString = JSON.stringify(fullData, null, 2);
-          
-          const blob = new Blob([jsonString], { type: "application/json;charset=utf-8;" });
+        db.ref('/').once('value').then(snap => {
+          const blob = new Blob([JSON.stringify(snap.val() || {}, null, 2)], { type: "application/json;charset=utf-8;" });
           const url = URL.createObjectURL(blob);
-          const downloadAnchor = document.createElement('a');
-          downloadAnchor.href = url;
-          
-          const dateJour = new Date().toISOString().slice(0, 10);
-          downloadAnchor.download = `sauvegarde_reliquats_fleux_${dateJour}.json`;
-          
-          document.body.appendChild(downloadAnchor);
-          downloadAnchor.click();
-          
-          setTimeout(() => {
-            document.body.removeChild(downloadAnchor);
-            URL.revokeObjectURL(url);
-          }, 100);
+          const a = document.createElement('a'); a.href = url; a.download = `backup_${new Date().toISOString().slice(0,10)}.json`; document.body.appendChild(a); a.click(); document.body.removeChild(a);
         });
       });
     });
 
-    btnImportBackup.addEventListener('click', () => {
-      dropdownMenu.classList.remove('show');
-      requireAdmin(() => {
-        fileRestoreJson.click();
-      });
-    });
-
+    btnImportBackup.addEventListener('click', () => { dropdownMenu.classList.remove('show'); requireAdmin(() => fileRestoreJson.click()); });
     fileRestoreJson.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-
+      const file = e.target.files[0]; if (!file) return;
       const reader = new FileReader();
-      reader.onload = function(event) {
+      reader.onload = (evt) => {
         try {
-          const importedData = JSON.parse(event.target.result);
-          if (confirm("⚠️ ATTENTION : Restaurer cette sauvegarde va remplacer les nœuds de données par ceux du fichier. Voulez-vous continuer ?")) {
-            const updates = {};
-            if (importedData.commandes) updates['commandes'] = importedData.commandes;
-            if (importedData.catalogue_photos) updates['catalogue_photos'] = importedData.catalogue_photos;
-            
-            const payload = Object.keys(updates).length > 0 ? db.ref('/').update(updates) : db.ref('/').set(importedData);
-
-            payload
-              .then(() => {
-                alert("✅ Restauration de la sauvegarde réussie !");
-                fileRestoreJson.value = "";
-                chargerToutesLesDonnees();
-              })
-              .catch(err => {
-                alert("❌ Erreur lors de la restauration Firebase : " + err.message);
-                fileRestoreJson.value = "";
-              });
-          } else {
-            fileRestoreJson.value = "";
-          }
-        } catch (err) {
-          alert("❌ Fichier de sauvegarde invalide.");
-          fileRestoreJson.value = "";
-        }
+          const data = JSON.parse(evt.target.result);
+          db.ref('/').set(data).then(() => { alert("Restauration OK"); chargerToutesLesDonnees(); }).catch(err => alert(err.message));
+        } catch { alert("JSON invalide"); }
       };
-      reader.readAsText(file, 'UTF-8');
+      reader.readAsText(file);
     });
 
-    btnViderHistorique.addEventListener('click', () => {
-      dropdownMenu.classList.remove('show');
-      requireAdmin(() => {
-        if (confirm("Voulez-vous vraiment effacer TOUT l'historique de la base de données ?")) {
-          db.ref('commandes').remove()
-            .then(() => {
-              reinitialiserFormulaire();
-            });
-        }
-      });
-    });
+    btnViderHistorique.addEventListener('click', () => { dropdownMenu.classList.remove('show'); requireAdmin(() => { if (confirm("Effacer tout ?")) db.ref('commandes').remove(); }); });
 
     function afficherGalerie(filtre = "") {
       galerieCommandes.innerHTML = "";
       const dateFilterVal = dateFiltreExport ? dateFiltreExport.value : "";
       let targetDateFormatted = "";
-      if (dateFilterVal) {
-        const parts = dateFilterVal.split('-');
-        if (parts.length === 3) {
-          targetDateFormatted = `${parts}/${parts}/${parts[0]}`;
-        }
-      }
-
+      if (dateFilterVal) { const p = dateFilterVal.split('-'); if (p.length === 3) targetDateFormatted = `${p}/${p}/${p[0]}`; }
       const liste = commandes.filter(c => {
-        if (!c) return false;
-        if (targetDateFormatted && c.date !== targetDateFormatted) {
-          return false;
-        }
-        const numeroStr = String(c.numero || '').toLowerCase();
-        const filtreStr = String(filtre || '').toLowerCase();
-        const numMatch = numeroStr.includes(filtreStr);
-        const matchArt = c.articles && c.articles.some(art => 
-          (art.fournisseur && String(art.fournisseur).toLowerCase().includes(filtreStr)) ||
-          (art.ref && String(art.ref).toLowerCase().includes(filtreStr)) ||
-          (art.codeBarre && String(art.codeBarre).toLowerCase().includes(filtreStr)) ||
-          (art.remarqueArticle && String(art.remarqueArticle).toLowerCase().includes(filtreStr))
-        );
-        return numMatch || matchArt;
+        if (!c || (targetDateFormatted && c.date !== targetDateFormatted)) return false;
+        const fStr = String(filtre || '').toLowerCase();
+        return String(c.numero || '').toLowerCase().includes(fStr) || c.articles?.some(a => String(a.fournisseur||'').toLowerCase().includes(fStr) || String(a.ref||'').toLowerCase().includes(fStr) || String(a.codeBarre||'').toLowerCase().includes(fStr));
       });
-
-      const nbCmd = liste.length;
-      const totalArt = liste.reduce((acc, cmd) => {
-        if (!cmd || !cmd.articles) return acc;
-        return acc + cmd.articles.reduce((sum, art) => sum + (Number(art.quantite) || 1), 0);
-      }, 0);
-      badgeCount.textContent = `${nbCmd} cmd • ${totalArt} art`;
-
-      if (liste.length === 0) {
-        galerieCommandes.innerHTML = `<p style="text-align:center; color:var(--subtext); padding:1rem;">Aucun reliquat trouvé.</p>`;
-        return;
-      }
-
+      badgeCount.textContent = `${liste.length} cmd • ${liste.reduce((acc, c) => acc + (c.articles?.reduce((s, a) => s + (Number(a.quantite)||1), 0)||0), 0)} art`;
+      if (liste.length === 0) { galerieCommandes.innerHTML = `<p style="text-align:center; color:var(--subtext); padding:1rem;">Aucun reliquat trouvé.</p>`; return; }
       liste.forEach(cmd => {
-        const item = document.createElement('div');
-        item.className = 'commande-item-compact';
-        
-        const nbArticles = cmd.articles ? cmd.articles.reduce((acc, a) => acc + (Number(a.quantite) || 1), 0) : 0;
-        const nbArticlesText = `📦 (${nbArticles} article${nbArticles > 1 ? 's' : ''})`;
-
+        const item = document.createElement('div'); item.className = 'commande-item-compact';
+        const nbA = cmd.articles?.reduce((acc, a) => acc + (Number(a.quantite)||1), 0)||0;
         item.innerHTML = `
           <input type="checkbox" class="commande-select-checkbox" data-id="${cmd.id}" onclick="event.stopPropagation()">
           <div class="commande-main-btn" onclick='ouvrirModal(${JSON.stringify(cmd).replace(/'/g, "&#39;")})'>
-            <span>${nbArticlesText}</span>
-            <div>
-              <div class="commande-num-badge">N° ${cmd.numero || ''}</div>
-              <div class="commande-date-compact">${cmd.date || ''}</div>
-            </div>
+            <span>📦 (${nbA} art)</span>
+            <div><div class="commande-num-badge">N° ${cmd.numero || ''}</div><div class="commande-date-compact">${cmd.date || ''}</div></div>
           </div>
           <div class="commande-actions">
-            <button class="btn-edit-small" onclick="editerCommande(${cmd.id}, event)">✏️ Modifier</button>
-            <button class="btn-delete-small" onclick="supprimerCommande(${cmd.id}, event)" title="Supprimer">❌</button>
+            <button class="btn-edit-small" onclick="editerCommande(${cmd.id}, event)">✏️</button>
+            <button class="btn-delete-small" onclick="supprimerCommande(${cmd.id}, event)">❌</button>
           </div>
         `;
         galerieCommandes.appendChild(item);
@@ -1824,284 +687,81 @@
 
     let toutCoche = false;
     btnSelectAll.addEventListener('click', () => {
-      const checkboxes = document.querySelectorAll('.commande-select-checkbox');
       toutCoche = !toutCoche;
-      checkboxes.forEach(cb => cb.checked = toutCoche);
+      document.querySelectorAll('.commande-select-checkbox').forEach(cb => cb.checked = toutCoche);
       btnSelectAll.innerHTML = toutCoche ? "☑️ Tout décocher" : "☑️ Tout cocher";
     });
-
-    dateFiltreExport.addEventListener('change', () => {
-      afficherGalerie(inputRecherche.value);
-    });
+    dateFiltreExport.addEventListener('change', () => afficherGalerie(inputRecherche.value));
 
     window.ouvrirModal = function(cmd) {
-      modal.style.display = "flex";
-      modalTitleBadge.innerHTML = `📦 N° ${cmd.numero || ''}`;
-      modalImagesRow.innerHTML = "";
-
-      if (cmd.articles) {
-        cmd.articles.forEach(art => {
-          const qte = art.quantite !== undefined ? art.quantite : 1;
-          const texteRemarque = art.remarqueArticle || "";
-          const box = document.createElement('div');
-          box.className = 'modal-photo-box';
-          box.innerHTML = `
-            ${art.photo ? `<img src="${art.photo}" alt="Article">` : ''}
-            <div class="modal-ref-group">
-              <div class="modal-ref-badges">
-                ${art.fournisseur ? `<div class="modal-fournisseur-badge">Fournisseur: ${art.fournisseur}</div>` : ''}
-                ${art.ref ? `<div class="modal-ref-badge">Réf: ${art.ref}</div>` : ''}
-              </div>
-              <div style="display: flex; gap: 0.4rem; justify-content: center; flex-wrap: wrap;">
-                ${art.codeBarre ? `<div class="modal-barcode-badge">EAN: ${art.codeBarre}</div>` : ''}
-                <div class="modal-qty-badge">Qte: ${qte}</div>
-              </div>
-              ${texteRemarque ? `<div class="modal-article-remarque-box">💬 ${texteRemarque}</div>` : ''}
-            </div>
-          `;
-          modalImagesRow.appendChild(box);
-        });
-      }
+      modal.style.display = "flex"; modalTitleBadge.innerHTML = `📦 N° ${cmd.numero || ''}`; modalImagesRow.innerHTML = "";
+      cmd.articles?.forEach(art => {
+        const box = document.createElement('div'); box.className = 'modal-photo-box';
+        box.innerHTML = `${art.photo ? `<img src="${art.photo}">` : ''}<div class="modal-ref-group"><div class="modal-ref-badges">${art.fournisseur?`<div class="modal-fournisseur-badge">${art.fournisseur}</div>`:''}${art.ref?`<div class="modal-ref-badge">${art.ref}</div>`:''}</div><div style="display:flex;gap:0.4rem;"><span class="modal-barcode-badge">${art.codeBarre||''}</span><span class="modal-qty-badge">Qte: ${art.quantite||1}</span></div>${art.remarqueArticle?`<div class="modal-article-remarque-box">💬 ${art.remarqueArticle}</div>`:''}</div>`;
+        modalImagesRow.appendChild(box);
+      });
     };
-
     closeModal.addEventListener('click', () => modal.style.display = "none");
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) modal.style.display = "none";
-    });
+    modal.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = "none"; });
 
-    function executerRecherche() {
-      const valeur = inputRecherche.value.trim();
-      afficherGalerie(valeur);
-    }
-
+    function executerRecherche() { afficherGalerie(inputRecherche.value.trim()); }
     btnLancerRecherche.addEventListener('click', executerRecherche);
     inputRecherche.addEventListener('input', executerRecherche);
-    inputRecherche.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') executerRecherche();
-    });
+    inputRecherche.addEventListener('keypress', (e) => { if (e.key === 'Enter') executerRecherche(); });
 
-    // --- IMPORT CSV SÉCURISÉ ---
     fileImportCSV.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-
+      const file = e.target.files[0]; if (!file) return;
       const reader = new FileReader();
-      reader.onload = function(event) {
-        let text = event.target.result;
-        if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+      reader.onload = (event) => {
+        let text = event.target.result; if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
         const lines = text.split(/\r\n|\n/).filter(l => l.trim() !== '');
-        
-        if (lines.length < 2) {
-          alert("Le fichier CSV est vide ou invalide.");
-          fileImportCSV.value = "";
-          return;
-        }
-
-        db.ref('commandes').once('value').then(snapshot => {
-          const existingData = snapshot.val() || {};
+        if (lines.length < 2) { alert("CSV vide"); fileImportCSV.value = ""; return; }
+        db.ref('commandes').once('value').then(snap => {
+          let existingData = snap.val() || {};
           let groupCommandes = {};
-
-          Object.keys(existingData).forEach(key => {
-            const item = existingData[key];
-            if (item && item.numero) {
-              groupCommandes[String(item.numero).trim()] = item;
-            }
-          });
-
-          let parsedRowsCount = 0;
-
+          Object.keys(existingData).forEach(k => { if (existingData[k]?.numero) groupCommandes[String(existingData[k].numero).trim()] = existingData[k]; });
+          let parsedCount = 0;
           for (let i = 1; i < lines.length; i++) {
-            const line = lines[i].trim();
-            if (!line) continue;
-
-            let cols = [];
-            if (line.includes(';')) {
-              cols = line.split(';').map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
-            } else {
-              cols = line.split(',').map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
-            }
-
+            const cols = lines[i].split(lines[i].includes(';') ? ';' : ',').map(c => c.replace(/^"|"$/g, '').trim());
             if (cols.length < 7) continue;
-
-            const dateCSV = String(cols[0] || '').trim();
-            const numeroClean = String(cols || '').trim();
-            const fournisseurCSV = String(cols || '').trim();
-            const barcodeCSV = String(cols || '').trim();
-            const refCSV = String(cols || '').trim();
-            const remArtCSV = String(cols || '').trim();
+            const [dateCSV, numeroClean, fournisseurCSV, barcodeCSV, refCSV, remArtCSV] = [cols[0], cols, cols, cols, cols, cols];
             const qteCSV = Number(cols) || 1;
-
             if (!numeroClean || !refCSV) continue;
-            parsedRowsCount++;
-
-            let photoAuto = "";
-            const cleNorm = "REF_" + String(refCSV).replace(/[.#$\/\[\]]/g, "_");
-            let catalogItem = catalogueArticles[refCSV] || catalogueArticles[cleNorm] || catalogueArticles["REF_" + refCSV];
-
-            if (catalogItem && catalogItem.photo) {
-              photoAuto = catalogItem.photo;
-            } else {
-              for (let c of commandes) {
-                if (c.articles) {
-                  const foundArt = c.articles.find(a => String(a.ref).trim() === String(refCSV).trim());
-                  if (foundArt && foundArt.photo) {
-                    photoAuto = foundArt.photo;
-                    break;
-                  }
-                }
-              }
-            }
-
+            parsedCount++;
             const numClean = String(numeroClean).trim();
-
             if (!groupCommandes[numClean]) {
-              const newId = Date.now() + i;
-              groupCommandes[numClean] = {
-                id: newId,
-                numero: numClean,
-                date: dateCSV.includes('/') ? dateCSV : new Date().toLocaleDateString('fr-FR'),
-                articles: [{
-                  photo: photoAuto,
-                  fournisseur: fournisseurCSV,
-                  ref: String(refCSV),
-                  codeBarre: barcodeCSV,
-                  quantite: qteCSV,
-                  remarqueArticle: remArtCSV
-                }]
-              };
-            } else {
-              const cmd = groupCommandes[numClean];
-              if (dateCSV) cmd.date = dateCSV;
-              if (!cmd.articles) cmd.articles = [];
-              const alreadyExists = cmd.articles.some(a => String(a.ref).trim() === String(refCSV).trim());
-              if (!alreadyExists) {
-                cmd.articles.push({
-                  photo: photoAuto,
-                  fournisseur: fournisseurCSV,
-                  ref: String(refCSV),
-                  codeBarre: barcodeCSV,
-                  quantite: qteCSV,
-                  remarqueArticle: remArtCSV
-                });
-              }
+              groupCommandes[numClean] = { id: Date.now() + i, numero: numClean, date: dateCSV.includes('/') ? dateCSV : new Date().toLocaleDateString('fr-FR'), articles: [] };
+            }
+            if (!groupCommandes[numClean].articles.some(a => a.ref === refCSV)) {
+              groupCommandes[numClean].articles.push({ photo: "", fournisseur: fournisseurCSV, ref: refCSV, codeBarre: barcodeCSV, quantite: qteCSV, remarqueArticle: remArtCSV });
             }
           }
-
           const keys = Object.keys(groupCommandes);
-          if (keys.length === 0) {
-            alert("Aucune donnée valide n'a pu être lue dans ce fichier.");
-            fileImportCSV.value = "";
-            return;
-          }
-
-          if (confirm(`Voulez-vous importer et fusionner ces commandes ? (${parsedRowsCount} ligne(s) valide(s) traitée(s))`)) {
-            let updates = {};
-            keys.forEach(num => {
-              const cmd = groupCommandes[num];
-              updates[cmd.id] = cmd;
+          if (keys.length > 0 && confirm(`Importer ${parsedCount} ligne(s) validée(s) sur ${keys.length} commande(s) ?`)) {
+            let updates = {}; keys.forEach(k => updates[groupCommandes[k].id] = groupCommandes[k]);
+            db.ref('commandes').update(updates).then(() => { 
+              alert("Import réussi !"); 
+              fileImportCSV.value = ""; 
+              chargerToutesLesDonnees();
             });
-
-            db.ref('commandes').update(updates)
-              .then(() => {
-                alert(`Importation réussie : ${keys.length} commande(s) mise(s) à jour / ajoutée(s) !`);
-                fileImportCSV.value = "";
-                if (dateFiltreExport) dateFiltreExport.value = "";
-                db.ref('commandes').once('value').then(snap => {
-                  const val = snap.val() || {};
-                  commandes = [];
-                  if (Array.isArray(val)) {
-                    commandes = val.filter(Boolean).map(nettoyerCommandeObjet);
-                  } else {
-                    Object.keys(val).forEach(k => {
-                      let c = val[k];
-                      if (c) { if (!c.id) c.id = Number(k) || Date.now(); commandes.push(nettoyerCommandeObjet(c)); }
-                    });
-                  }
-                  commandes.sort((a, b) => (Number(b.id) || 0) - (Number(a.id) || 0));
-                  afficherGalerie(inputRecherche.value);
-                });
-              })
-              .catch(err => {
-                alert("Erreur lors de l'enregistrement Firebase : " + err.message);
-                fileImportCSV.value = "";
-              });
-          } else {
-            fileImportCSV.value = "";
-          }
+          } else { fileImportCSV.value = ""; }
         });
       };
       reader.readAsText(file, 'utf-8');
     });
 
-    btnImportSheets.addEventListener('click', () => {
-      fileImportCSV.click();
-    });
+    btnImportSheets.addEventListener('click', () => fileImportCSV.click());
 
-    btnExportSheets.addEventListener('click', () => {
-      const dateSelect = dateFiltreExport.value;
-      let listeAExporter = commandes;
-
-      if (dateSelect) {
-        const parts = dateSelect.split('-');
-        const dateFormatee = `${parts}/${parts}/${parts[0]}`;
-        listeAExporter = commandes.filter(cmd => cmd.date === dateFormatee);
-
-        if (listeAExporter.length === 0) {
-          alert(`Aucun reliquat trouvé pour la date du ${dateFormatee}.`);
-          return;
-        }
-      } else {
-        if (commandes.length === 0) {
-          alert("L'historique est vide, aucun document à exporter.");
-          return;
-        }
-      }
-
-      let csvContent = "\uFEFF";
-      csvContent += "Date;Numero de Commande;Fournisseur;Reference;CodeBarre;Quantite;RemarqueArticle\r\n";
-
-      listeAExporter.forEach(cmd => {
-        const date = `"${(cmd.date || "").replace(/"/g, '""')}"`;
-        const numero = `"${(cmd.numero || "").replace(/"/g, '""')}"`;
-
-        if (cmd.articles) {
-          cmd.articles.forEach(art => {
-            const f = `"${(art.fournisseur || "").replace(/"/g, '""')}"`;
-            const r = `"${(art.ref || "").replace(/"/g, '""')}"`;
-            const b = `"${(art.codeBarre || "").replace(/"/g, '""')}"`;
-            const q = art.quantite !== undefined ? art.quantite : 1;
-            const ra = `"${(art.remarqueArticle || "").replace(/"/g, '""')}"`;
-            csvContent += `${date};${numero};${f};${r};${b};${q};${ra}\r\n`;
-          });
-        }
-      });
-
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.setAttribute("href", url);
-      link.setAttribute("download", `reliquats_export_${dateSelect || 'complet'}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    });
-
-    btnExportPDF.addEventListener('click', () => {
-      const checkboxesCochees = document.querySelectorAll('.commande-select-checkbox:checked');
-      let listeAExporter = [];
-      let titreExport = "Historique Reliquats";
-
-      if (checkboxesCochees.length > 0) {
-        const idsCoches = Array.from(checkboxesCochees).map(cb => Number(cb.getAttribute('data-id')));
-        listeAExporter = commandes.filter(cmd => idsCoches.includes(cmd.id));
-        titreExport = "Sélection de Reliquats";
-      } else {
+    btnExportExportCSV = document.getElementById('btnExportSheets');
+    if(btnExportExportCSV) {
+      btnExportExportCSV.addEventListener('click', () => {
         const dateSelect = dateFiltreExport.value;
+        let listeAExporter = commandes;
+
         if (dateSelect) {
           const parts = dateSelect.split('-');
           const dateFormatee = `${parts}/${parts}/${parts[0]}`;
           listeAExporter = commandes.filter(cmd => cmd.date === dateFormatee);
-          titreExport = `Historique Reliquats - Date : ${dateFormatee}`;
 
           if (listeAExporter.length === 0) {
             alert(`Aucun reliquat trouvé pour la date du ${dateFormatee}.`);
@@ -2112,62 +772,56 @@
             alert("L'historique est vide, aucun document à exporter.");
             return;
           }
-          listeAExporter = commandes;
-        }
-      }
-
-      const printArea = document.getElementById('print-area');
-      const dateHeureExport = new Date().toLocaleString('fr-FR');
-
-      let html = `
-        <div class="print-title">${titreExport}</div>
-        <div class="print-subtitle">Document généré le ${dateHeureExport} - Total : ${listeAExporter.length} enregistrement(s)</div>
-        <div class="print-grid">
-      `;
-
-      listeAExporter.forEach(cmd => {
-        html += `
-          <div class="print-card">
-            <h3>Commande : ${cmd.numero || ''}</h3>
-            <div class="date">Date : ${cmd.date || ''}</div>
-            <div class="print-photos-flex">
-        `;
-
-        if (cmd.articles) {
-          cmd.articles.forEach(art => {
-            const qte = art.quantite !== undefined ? art.quantite : 1;
-            const texteRem = art.remarqueArticle || "";
-            html += `
-              <div class="print-photo-print-item">
-                ${art.photo ? `<img src="${art.photo}" alt="Article">` : ''}
-                ${art.fournisseur ? `<div class="print-fournisseur-label">Fournisseur: ${art.fournisseur}</div>` : ''}
-                ${art.ref ? `<div class="print-ref-label">Réf: ${art.ref}</div>` : ''}
-                <div style="display:flex; gap:2px; flex-wrap:wrap; justify-content:center;">
-                  ${art.codeBarre ? `<div class="print-barcode-label">EAN: ${art.codeBarre}</div>` : ''}
-                  <div class="print-qty-label">Qte: ${qte}</div>
-                </div>
-                ${texteRem ? `<div class="print-art-remarque-label">💬 ${texteRem}</div>` : ''}
-              </div>
-            `;
-          });
         }
 
-        html += `
-            </div>
-          </div>
-        `;
+        let csvContent = "\uFEFF";
+        csvContent += "Date;Numero de Commande;Fournisseur;Reference;CodeBarre;Quantite;RemarqueArticle\r\n";
+
+        listeAExporter.forEach(cmd => {
+          const date = `"${(cmd.date || "").replace(/"/g, '""')}"`;
+          const numero = `"${(cmd.numero || "").replace(/"/g, '""')}"`;
+
+          if (cmd.articles) {
+            cmd.articles.forEach(art => {
+              const f = `"${(art.fournisseur || "").replace(/"/g, '""')}"`;
+              const r = `"${(art.ref || "").replace(/"/g, '""')}"`;
+              const b = `"${(art.codeBarre || "").replace(/"/g, '""')}"`;
+              const q = art.quantite !== undefined ? art.quantite : 1;
+              const ra = `"${(art.remarqueArticle || "").replace(/"/g, '""')}"`;
+              csvContent += `${date};${numero};${f};${r};${b};${q};${ra}\r\n`;
+            });
+          }
+        });
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", `reliquats_export_${dateSelect || 'complet'}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
       });
+    }
 
+    btnExportPDF.addEventListener('click', () => {
+      const checked = document.querySelectorAll('.commande-select-checkbox:checked');
+      let list = checked.length > 0 ? commandes.filter(c => Array.from(checked).map(cb => Number(cb.getAttribute('data-id'))).includes(c.id)) : commandes;
+      if (list.length === 0) { alert("Rien à exporter."); return; }
+      let html = `<div class="print-title">Export Reliquats</div><div class="print-subtitle">Généré le ${new Date().toLocaleString('fr-FR')}</div><div class="print-grid">`;
+      list.forEach(cmd => {
+        html += `<div class="print-card"><h3>Réf: ${cmd.numero}</h3><div class="date">${cmd.date}</div><div class="print-photos-flex">`;
+        cmd.articles?.forEach(art => {
+          html += `<div class="print-photo-print-item">${art.photo?`<img src="${art.photo}">`:''}<div style="font-size:10px;"><b>${art.ref}</b> (Qté: ${art.quantite||1})</div></div>`;
+        });
+        html += `</div></div>`;
+      });
       html += `</div>`;
-      printArea.innerHTML = html;
-
-      setTimeout(() => {
-        window.print();
-      }, 300);
+      document.getElementById('print-area').innerHTML = html;
+      setTimeout(() => window.print(), 300);
     });
 
     reinitialiserFormulaire();
   </script>
-
 </body>
 </html>
