@@ -1918,15 +1918,15 @@
               cols = line.split(',').map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
             }
 
-            if (cols.length < 7) continue;
+            if (cols.length < 6) continue;
 
-            // CORRECTIF MAPPING CSV (0: date, 1: num cmd, 2: fournisseur, 3: ean, 4: ref, 5: remarque/designation, 6: qte)
-            let dateCSV = cols[0] || '';
-            let numeroClean = cols || '';
-            let fournisseurCSV = cols || '';
-            let barcodeCSV = cols || '';
-            let refCSV = cols[4] || '';
-            let remArtCSV = cols[5] || '';
+            // CORRECTIF STRICT MAPPING & STRING CAST FORCÉ
+            let dateCSV = String(cols[0] || '').trim();
+            let numeroClean = String(cols || cols[0] || '').trim();
+            let fournisseurCSV = String(cols || '').trim();
+            let barcodeCSV = String(cols || '').trim();
+            let refCSV = String(cols[4] || '').trim();
+            let remArtCSV = String(cols[5] || '').trim();
             let qteCSV = Number(cols[6]) || 1;
 
             if (!numeroClean || !refCSV) continue;
