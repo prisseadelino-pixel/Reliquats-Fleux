@@ -413,12 +413,6 @@
       if (!cmd) return cmd;
       let rawNum = String(cmd.numero || '').trim();
       let rawDate = String(cmd.date || '').trim();
-      let parts = rawNum.includes(';') ? rawNum.split(';') : (rawNum.includes(',') ? rawNum.split(',') : []);
-      if (parts.length >= 2) {
-        let p0 = parts[0].trim();
-        let p1 = parts[parts.length - 1].trim();
-        if (p0.includes('/')) { if (!rawDate || rawDate === 'undefined') rawDate = p0; rawNum = p1; } else { rawNum = p0; }
-      }
       cmd.numero = rawNum;
       if (rawDate) cmd.date = rawDate;
       return cmd;
@@ -617,7 +611,7 @@
         modeEditionId = id; inputNumero.value = String(item.numero || '').trim(); articlesContainer.innerHTML = "";
         item.articles?.forEach(art => ajouterBlocArticle(art));
         btnEnregistrer.textContent = "💾 Sauvegarder les modifications"; btnAnnulerEdit.style.display = "inline-block";
-        formTitle.textContent = "✏️ Modifier " + inputNumero.value; window.scrollTo({ top: 0, behavior: 'smooth' });
+        formTitle.textContent = "✏️ Modifier le reliquat " + inputNumero.value; window.scrollTo({ top: 0, behavior: 'smooth' });
       });
     };
 
@@ -659,9 +653,13 @@
       galerieCommandes.innerHTML = "";
       const dateFilterVal = dateFiltreExport ? dateFiltreExport.value : "";
       let targetDateFormatted = "";
-      if (dateFilterVal) { const p = dateFilterVal.split('-'); if (p.length === 3) targetDateFormatted = `${p}/${p}/${p[0]}`; }
+      if (dateFilterVal) {
+        const p = dateFilterVal.split('-');
+        if (p.length === 3) targetDateFormatted = `${p}/${p}/${p[0]}`;
+      }
       const liste = commandes.filter(c => {
-        if (!c || (targetDateFormatted && c.date !== targetDateFormatted)) return false;
+        if (!c) return false;
+        if (targetDateFormatted && c.date !== targetDateFormatted) return false;
         const fStr = String(filtre || '').toLowerCase();
         return String(c.numero || '').toLowerCase().includes(fStr) || c.articles?.some(a => String(a.fournisseur||'').toLowerCase().includes(fStr) || String(a.ref||'').toLowerCase().includes(fStr) || String(a.codeBarre||'').toLowerCase().includes(fStr));
       });
@@ -673,11 +671,11 @@
         item.innerHTML = `
           <input type="checkbox" class="commande-select-checkbox" data-id="${cmd.id}" onclick="event.stopPropagation()">
           <div class="commande-main-btn" onclick='ouvrirModal(${JSON.stringify(cmd).replace(/'/g, "&#39;")})'>
-            <span>📦 (${nbA} art)</span>
+            <span>📦 (${nbA} article${nbA > 1 ? 's' : ''})</span>
             <div><div class="commande-num-badge">N° ${cmd.numero || ''}</div><div class="commande-date-compact">${cmd.date || ''}</div></div>
           </div>
           <div class="commande-actions">
-            <button class="btn-edit-small" onclick="editerCommande(${cmd.id}, event)">✏️</button>
+            <button class="btn-edit-small" onclick="editerCommande(${cmd.id}, event)">✏️ Modifier</button>
             <button class="btn-delete-small" onclick="supprimerCommande(${cmd.id}, event)">❌</button>
           </div>
         `;
@@ -697,7 +695,7 @@
       modal.style.display = "flex"; modalTitleBadge.innerHTML = `📦 N° ${cmd.numero || ''}`; modalImagesRow.innerHTML = "";
       cmd.articles?.forEach(art => {
         const box = document.createElement('div'); box.className = 'modal-photo-box';
-        box.innerHTML = `${art.photo ? `<img src="${art.photo}">` : ''}<div class="modal-ref-group"><div class="modal-ref-badges">${art.fournisseur?`<div class="modal-fournisseur-badge">${art.fournisseur}</div>`:''}${art.ref?`<div class="modal-ref-badge">${art.ref}</div>`:''}</div><div style="display:flex;gap:0.4rem;"><span class="modal-barcode-badge">${art.codeBarre||''}</span><span class="modal-qty-badge">Qte: ${art.quantite||1}</span></div>${art.remarqueArticle?`<div class="modal-article-remarque-box">💬 ${art.remarqueArticle}</div>`:''}</div>`;
+        box.innerHTML = `${art.photo ? `<img src="${art.photo}">` : ''}<div class="modal-ref-group"><div class="modal-ref-badges">${art.fournisseur?`<div class="modal-fournisseur-badge">Fournisseur: ${art.fournisseur}</div>`:''}${art.ref?`<div class="modal-ref-badge">Réf: ${art.ref}</div>`:''}</div><div style="display:flex;gap:0.4rem;flex-wrap:wrap;justify-content:center;">${art.codeBarre?`<span class="modal-barcode-badge">EAN: ${art.codeBarre}</span>`:''}<span class="modal-qty-badge">Qte: ${art.quantite||1}</span></div>${art.remarqueArticle?`<div class="modal-article-remarque-box">💬 ${art.remarqueArticle}</div>`:''}</div>`;
         modalImagesRow.appendChild(box);
       });
     };
@@ -709,6 +707,7 @@
     inputRecherche.addEventListener('input', executerRecherche);
     inputRecherche.addEventListener('keypress', (e) => { if (e.key === 'Enter') executerRecherche(); });
 
+    // --- IMPORT CSV MAPPING STRICT CORRIGÉ ---
     fileImportCSV.addEventListener('change', (e) => {
       const file = e.target.files[0]; if (!file) return;
       const reader = new FileReader();
@@ -722,18 +721,58 @@
           Object.keys(existingData).forEach(k => { if (existingData[k]?.numero) groupCommandes[String(existingData[k].numero).trim()] = existingData[k]; });
           let parsedCount = 0;
           for (let i = 1; i < lines.length; i++) {
-            const cols = lines[i].split(lines[i].includes(';') ? ';' : ',').map(c => c.replace(/^"|"$/g, '').trim());
-            if (cols.length < 7) continue;
-            const [dateCSV, numeroClean, fournisseurCSV, barcodeCSV, refCSV, remArtCSV] = [cols[0], cols, cols, cols, cols, cols];
-            const qteCSV = Number(cols) || 1;
+            const line = lines[i].trim();
+            if (!line) continue;
+            const cols = line.split(line.includes(';') ? ';' : ',').map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
+            if (cols.length < 6) continue;
+
+            // Structure type attendue : [Date, N° de commande, Fournisseur, EAN, Réf, Désignation/Remarque, Quantité(optionnel)]
+            // Ajustement indices pour correspondre à ton modèle visuel :
+            // 0: Date, 1: Numéro de commande, 2: Fournisseur, 3: EAN, 4: Réf, 5: Remarque, 6: Quantité (ou 5 si pas de Qte)
+            let dateCSV = cols[0] || '';
+            let numeroClean = cols || '';
+            let fournisseurCSV = cols || '';
+            let barcodeCSV = cols || '';
+            let refCSV = cols || '';
+            let remArtCSV = cols || '';
+            let qteCSV = cols !== undefined && !isNaN(cols) ? Number(cols) : 1;
+
             if (!numeroClean || !refCSV) continue;
             parsedCount++;
+
+            // Récupération auto photo du catalogue si existe
+            let photoAuto = "";
+            const cleNorm = "REF_" + String(refCSV).replace(/[.#$\/\[\]]/g, "_");
+            const catalogItem = catalogueArticles[refCSV] || catalogueArticles[cleNorm];
+            if (catalogItem && catalogItem.photo) {
+              photoAuto = catalogItem.photo;
+            } else {
+              for (let c of commandes) {
+                if (c.articles) {
+                  const foundArt = c.articles.find(a => String(a.ref).trim() === String(refCSV).trim());
+                  if (foundArt && foundArt.photo) { photoAuto = foundArt.photo; break; }
+                }
+              }
+            }
+
             const numClean = String(numeroClean).trim();
             if (!groupCommandes[numClean]) {
-              groupCommandes[numClean] = { id: Date.now() + i, numero: numClean, date: dateCSV.includes('/') ? dateCSV : new Date().toLocaleDateString('fr-FR'), articles: [] };
+              groupCommandes[numClean] = { 
+                id: Date.now() + i, 
+                numero: numClean, 
+                date: dateCSV.includes('/') ? dateCSV : new Date().toLocaleDateString('fr-FR'), 
+                articles: [] 
+              };
             }
-            if (!groupCommandes[numClean].articles.some(a => a.ref === refCSV)) {
-              groupCommandes[numClean].articles.push({ photo: "", fournisseur: fournisseurCSV, ref: refCSV, codeBarre: barcodeCSV, quantite: qteCSV, remarqueArticle: remArtCSV });
+            if (!groupCommandes[numClean].articles.some(a => String(a.ref).trim() === String(refCSV).trim())) {
+              groupCommandes[numClean].articles.push({ 
+                photo: photoAuto, 
+                fournisseur: fournisseurCSV, 
+                ref: refCSV, 
+                codeBarre: barcodeCSV, 
+                quantite: qteCSV, 
+                remarqueArticle: remArtCSV 
+              });
             }
           }
           const keys = Object.keys(groupCommandes);
@@ -757,50 +796,33 @@
       btnExportExportCSV.addEventListener('click', () => {
         const dateSelect = dateFiltreExport.value;
         let listeAExporter = commandes;
-
         if (dateSelect) {
           const parts = dateSelect.split('-');
           const dateFormatee = `${parts}/${parts}/${parts[0]}`;
           listeAExporter = commandes.filter(cmd => cmd.date === dateFormatee);
-
-          if (listeAExporter.length === 0) {
-            alert(`Aucun reliquat trouvé pour la date du ${dateFormatee}.`);
-            return;
-          }
-        } else {
-          if (commandes.length === 0) {
-            alert("L'historique est vide, aucun document à exporter.");
-            return;
-          }
-        }
+          if (listeAExporter.length === 0) { alert(`Aucun reliquat trouvé pour la date du ${dateFormatee}.`); return; }
+        } else if (commandes.length === 0) { alert("L'historique est vide."); return; }
 
         let csvContent = "\uFEFF";
         csvContent += "Date;Numero de Commande;Fournisseur;Reference;CodeBarre;Quantite;RemarqueArticle\r\n";
-
         listeAExporter.forEach(cmd => {
           const date = `"${(cmd.date || "").replace(/"/g, '""')}"`;
           const numero = `"${(cmd.numero || "").replace(/"/g, '""')}"`;
-
-          if (cmd.articles) {
-            cmd.articles.forEach(art => {
-              const f = `"${(art.fournisseur || "").replace(/"/g, '""')}"`;
-              const r = `"${(art.ref || "").replace(/"/g, '""')}"`;
-              const b = `"${(art.codeBarre || "").replace(/"/g, '""')}"`;
-              const q = art.quantite !== undefined ? art.quantite : 1;
-              const ra = `"${(art.remarqueArticle || "").replace(/"/g, '""')}"`;
-              csvContent += `${date};${numero};${f};${r};${b};${q};${ra}\r\n`;
-            });
-          }
+          cmd.articles?.forEach(art => {
+            const f = `"${(art.fournisseur || "").replace(/"/g, '""')}"`;
+            const r = `"${(art.ref || "").replace(/"/g, '""')}"`;
+            const b = `"${(art.codeBarre || "").replace(/"/g, '""')}"`;
+            const q = art.quantite !== undefined ? art.quantite : 1;
+            const ra = `"${(art.remarqueArticle || "").replace(/"/g, '""')}"`;
+            csvContent += `${date};${numero};${f};${r};${b};${q};${ra}\r\n`;
+          });
         });
-
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.setAttribute("href", url);
         link.setAttribute("download", `reliquats_export_${dateSelect || 'complet'}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        document.body.appendChild(link); link.click(); document.body.removeChild(link);
       });
     }
 
