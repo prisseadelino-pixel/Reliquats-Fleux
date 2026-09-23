@@ -1783,7 +1783,6 @@
         return numMatch || matchArt;
       });
 
-      // Calcul réel des 2 totaux (commandes et articles cumulés)
       const nbCmd = liste.length;
       const totalArt = liste.reduce((acc, cmd) => {
         if (!cmd || !cmd.articles) return acc;
@@ -1919,10 +1918,11 @@
               cols = line.split(',').map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
             }
 
-            if (cols.length < 5) continue;
+            if (cols.length < 7) continue;
 
+            // CORRECTIF MAPPING CSV (0: date, 1: num cmd, 2: fournisseur, 3: ean, 4: ref, 5: remarque/designation, 6: qte)
             let dateCSV = cols[0] || '';
-            let numeroClean = cols || cols[0];
+            let numeroClean = cols || '';
             let fournisseurCSV = cols || '';
             let barcodeCSV = cols || '';
             let refCSV = cols[4] || '';
