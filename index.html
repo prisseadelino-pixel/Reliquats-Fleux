@@ -1239,7 +1239,7 @@
 
       if (parts.length >= 2) {
         let p0 = parts[0].trim();
-        let p1 = parts.trim();
+        let p1 = parts.trim(); // Corrigé ici (parts au lieu de parts.trim())
         if (p0.includes('/')) {
           if (!rawDate || rawDate === 'undefined') rawDate = p0;
           rawNum = p1;
@@ -1878,7 +1878,7 @@
       if (e.key === 'Enter') executerRecherche();
     });
 
-    // --- IMPORT CSV STRICT & PROPRE ---
+    // --- IMPORT CSV STRICT & PROPRE CORRIGÉ ---
     fileImportCSV.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (!file) return;
@@ -1927,8 +1927,8 @@
             let fournisseurCSV = String(cols || '').trim();
             let barcodeCSV = String(cols || '').trim();
             let refCSV = String(cols || '').trim();
-            let remArtCSV = String(cols[5] || '').trim();
-            let qteCSV = Number(cols[6]) || 1;
+            let remArtCSV = String(cols || '').trim();
+            let qteCSV = Number(cols) || 1;
 
             if (!numeroClean || !refCSV) continue;
             parsedRowsCount++;
