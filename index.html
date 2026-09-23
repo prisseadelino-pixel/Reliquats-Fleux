@@ -172,7 +172,7 @@
       <div class="column-left">
         <section class="card" style="padding: 1rem;">
           <div class="search-box">
-            <input type="text" id="recherche" placeholder="🔍 Rechercher par numéro, fournisseur, EAN..." autocomplete="off">
+            <input type="text" id="recherche" placeholder="🔍 Rechercher par numéro, fournisseur..." autocomplete="off">
             <button type="button" class="btn-search" id="btnLancerRecherche">Rechercher</button>
           </div>
         </section>
@@ -411,10 +411,8 @@
 
     function nettoyerCommandeObjet(cmd) {
       if (!cmd) return cmd;
-      let rawNum = String(cmd.numero || '').trim();
-      let rawDate = String(cmd.date || '').trim();
-      cmd.numero = rawNum;
-      if (rawDate) cmd.date = rawDate;
+      cmd.numero = String(cmd.numero || '').trim();
+      cmd.date = String(cmd.date || '').trim();
       return cmd;
     }
 
@@ -707,7 +705,7 @@
     inputRecherche.addEventListener('input', executerRecherche);
     inputRecherche.addEventListener('keypress', (e) => { if (e.key === 'Enter') executerRecherche(); });
 
-    // --- IMPORT CSV BLINDÉ ---
+    // --- IMPORT CSV MAPPING EXACT (Date=0, Num=1, Fournisseur=2, EAN=3, Réf=4, Désignation=5, Quantité=6) ---
     fileImportCSV.addEventListener('change', (e) => {
       const file = e.target.files[0]; if (!file) return;
       const reader = new FileReader();
@@ -729,25 +727,14 @@
             const parts = (isSemi ? line.split(';') : line.split(',')).map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
             if (parts.length < 5) continue;
 
-            // Découpage flexible pour s'adapter à ton format d'export CSV
-            // Format supposé: Date (0), Numéro (1), Fournisseur (2), EAN/Codebarre (3), Réf (4), Remarque/Désignation (5...), Quantité (dernier si nombre)
+            // Mapping exact testé pour ton format CSV (ex: 02/04/2026, S-96713, OPJET, 3460000064438, 017899, SET 4..., 1)
             let dateCSV = parts[0] || new Date().toLocaleDateString('fr-FR');
-            let numeroClean = parts || '';
-            let fournisseurCSV = parts || '';
-            let barcodeCSV = parts;
-            let refCSV = parts;
-            
-            // Quantité = dernier élément si c'est un nombre, sinon 1
-            const lastPart = parts[parts.length - 1];
-            let qteCSV = 1;
-            let remEndIdx = parts.length;
-            if (!isNaN(lastPart) && lastPart !== '') {
-              qteCSV = Number(lastPart);
-              remEndIdx = parts.length - 1;
-            }
-
-            // Remarque/Désignation = ce qui est entre la réf (indice 4) et la fin
-            let remArtCSV = parts.slice(5, remEndIdx).join(' ');
+            let numeroClean = String(parts || '').trim();
+            let fournisseurCSV = String(parts || '').trim();
+            let barcodeCSV = String(parts || '').trim();
+            let refCSV = String(parts || '').trim();
+            let remArtCSV = String(parts || '').trim();
+            let qteCSV = parts.length > 6 && !isNaN(parts) ? Number(parts) : 1;
 
             if (!numeroClean || !refCSV) continue;
             parsedCount++;
