@@ -1878,6 +1878,7 @@
       if (e.key === 'Enter') executerRecherche();
     });
 
+    // --- IMPORT CSV STRICT & PROPRE ---
     fileImportCSV.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (!file) return;
@@ -1918,14 +1919,14 @@
               cols = line.split(',').map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
             }
 
-            if (cols.length < 6) continue;
+            if (cols.length < 7) continue;
 
-            // CORRECTIF STRICT MAPPING & STRING CAST FORCÉ
+            // MAPPING PROPRE : 0=Date, 1=Numéro doc, 2=Fournisseur, 3=Code barres, 4=Code article, 5=Désignation, 6=Qté
             let dateCSV = String(cols[0] || '').trim();
-            let numeroClean = String(cols || cols[0] || '').trim();
+            let numeroClean = String(cols || '').trim();
             let fournisseurCSV = String(cols || '').trim();
             let barcodeCSV = String(cols || '').trim();
-            let refCSV = String(cols[4] || '').trim();
+            let refCSV = String(cols || '').trim();
             let remArtCSV = String(cols[5] || '').trim();
             let qteCSV = Number(cols[6]) || 1;
 
