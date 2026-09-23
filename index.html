@@ -676,7 +676,7 @@
           </div>
           <div class="commande-actions">
             <button class="btn-edit-small" onclick="editerCommande(${cmd.id}, event)">✏️ Modifier</button>
-            <button class="btn-delete-small" onclick="supprimerCommande(${cmd.id}, event)">❌</button>
+            <button class="btn-delete-small" onclick="supprimerCommande(${cmd.id}, event)" title="Supprimer">❌</button>
           </div>
         `;
         galerieCommandes.appendChild(item);
@@ -707,7 +707,7 @@
     inputRecherche.addEventListener('input', executerRecherche);
     inputRecherche.addEventListener('keypress', (e) => { if (e.key === 'Enter') executerRecherche(); });
 
-    // --- IMPORT CSV MAPPING STRICT CORRIGÉ ---
+    // --- IMPORT CSV BLINDÉ ---
     fileImportCSV.addEventListener('change', (e) => {
       const file = e.target.files[0]; if (!file) return;
       const reader = new FileReader();
@@ -720,27 +720,38 @@
           let groupCommandes = {};
           Object.keys(existingData).forEach(k => { if (existingData[k]?.numero) groupCommandes[String(existingData[k].numero).trim()] = existingData[k]; });
           let parsedCount = 0;
+
           for (let i = 1; i < lines.length; i++) {
             const line = lines[i].trim();
             if (!line) continue;
-            const cols = line.split(line.includes(';') ? ';' : ',').map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
-            if (cols.length < 6) continue;
 
-            // Structure type attendue : [Date, N° de commande, Fournisseur, EAN, Réf, Désignation/Remarque, Quantité(optionnel)]
-            // Ajustement indices pour correspondre à ton modèle visuel :
-            // 0: Date, 1: Numéro de commande, 2: Fournisseur, 3: EAN, 4: Réf, 5: Remarque, 6: Quantité (ou 5 si pas de Qte)
-            let dateCSV = cols[0] || '';
-            let numeroClean = cols || '';
-            let fournisseurCSV = cols || '';
-            let barcodeCSV = cols || '';
-            let refCSV = cols || '';
-            let remArtCSV = cols || '';
-            let qteCSV = cols !== undefined && !isNaN(cols) ? Number(cols) : 1;
+            const isSemi = line.includes(';');
+            const parts = (isSemi ? line.split(';') : line.split(',')).map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
+            if (parts.length < 5) continue;
+
+            // Découpage flexible pour s'adapter à ton format d'export CSV
+            // Format supposé: Date (0), Numéro (1), Fournisseur (2), EAN/Codebarre (3), Réf (4), Remarque/Désignation (5...), Quantité (dernier si nombre)
+            let dateCSV = parts[0] || new Date().toLocaleDateString('fr-FR');
+            let numeroClean = parts || '';
+            let fournisseurCSV = parts || '';
+            let barcodeCSV = parts;
+            let refCSV = parts;
+            
+            // Quantité = dernier élément si c'est un nombre, sinon 1
+            const lastPart = parts[parts.length - 1];
+            let qteCSV = 1;
+            let remEndIdx = parts.length;
+            if (!isNaN(lastPart) && lastPart !== '') {
+              qteCSV = Number(lastPart);
+              remEndIdx = parts.length - 1;
+            }
+
+            // Remarque/Désignation = ce qui est entre la réf (indice 4) et la fin
+            let remArtCSV = parts.slice(5, remEndIdx).join(' ');
 
             if (!numeroClean || !refCSV) continue;
             parsedCount++;
 
-            // Récupération auto photo du catalogue si existe
             let photoAuto = "";
             const cleNorm = "REF_" + String(refCSV).replace(/[.#$\/\[\]]/g, "_");
             const catalogItem = catalogueArticles[refCSV] || catalogueArticles[cleNorm];
@@ -760,7 +771,7 @@
               groupCommandes[numClean] = { 
                 id: Date.now() + i, 
                 numero: numClean, 
-                date: dateCSV.includes('/') ? dateCSV : new Date().toLocaleDateString('fr-FR'), 
+                date: dateCSV, 
                 articles: [] 
               };
             }
@@ -775,6 +786,7 @@
               });
             }
           }
+
           const keys = Object.keys(groupCommandes);
           if (keys.length > 0 && confirm(`Importer ${parsedCount} ligne(s) validée(s) sur ${keys.length} commande(s) ?`)) {
             let updates = {}; keys.forEach(k => updates[groupCommandes[k].id] = groupCommandes[k]);
