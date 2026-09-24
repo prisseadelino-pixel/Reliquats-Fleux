@@ -93,7 +93,12 @@
     .commande-item-compact { display: flex; align-items: center; justify-content: space-between; background: var(--container-bg); border: 1px solid var(--border); border-radius: 10px; padding: 0.75rem 1rem; cursor: grab; gap: 0.75rem; user-select: none; }
     .commande-item-compact:active { cursor: grabbing; }
     .commande-item-compact.dragging { opacity: 0.4; border: 2px dashed var(--primary); }
+    .commande-item-compact. urgente { background: rgba(244, 63, 94, 0.12); border: 1px solid rgba(244, 63, 94, 0.5); }
+    
     .drag-handle { color: var(--subtext); font-size: 1.2rem; cursor: grab; padding: 0 0.25rem; font-weight: bold; }
+    .btn-urgent-toggle { background: none; border: none; font-size: 1.2rem; cursor: pointer; padding: 0.2rem; transition: transform 0.1s; }
+    .btn-urgent-toggle:active { transform: scale(1.2); }
+
     .commande-select-checkbox { width: 18px; height: 18px; cursor: pointer; accent-color: var(--primary); flex-shrink: 0; }
     .commande-main-btn { display: flex; align-items: center; gap: 0.75rem; flex-grow: 1; }
     .commande-num-badge { font-weight: bold; font-size: 1.05rem; color: var(--primary); }
@@ -432,6 +437,7 @@
       if (!cmd) return cmd;
       cmd.numero = cmd.numero !== undefined && cmd.numero !== null ? String(cmd.numero).trim() : '';
       cmd.date = String(cmd.date || '').trim();
+      cmd.urgente = Boolean(cmd.urgente);
       return cmd;
     }
 
@@ -632,7 +638,7 @@
         btnEnregistrer.disabled = true; btnEnregistrer.textContent = "Enregistrement...";
         const idObjet = modeEditionId !== null ? modeEditionId : Date.now();
         const existingCmd = commandes.find(c => c.id === idObjet);
-        const commandeData = { id: idObjet, numero, articles: articlesList, date: existingCmd?.date || new Date().toLocaleDateString('fr-FR'), isNew: false };
+        const commandeData = { id: idObjet, numero, articles: articlesList, date: existingCmd?.date || new Date().toLocaleDateString('fr-FR'), urgente: existingCmd?.urgente || false, isNew: false };
         db.ref('commandes/' + idObjet).set(commandeData).then(() => { reinitialiserFormulaire(); btnEnregistrer.disabled = false; }).catch(err => { btnEnregistrer.disabled = false; alert(err.message); });
       });
     });
@@ -662,6 +668,20 @@
       requireAdmin(() => {
         const item = commandes.find(c => c.id === id);
         if (item && confirm(`Supprimer reliquat ${item.numero} ?`)) { db.ref('commandes/' + id).remove().then(() => { if (modeEditionId === id) reinitialiserFormulaire(); }); }
+      });
+    };
+
+    window.basculerUrgence = function(id, event) {
+      if (event) event.stopPropagation();
+      requireAdmin(() => {
+        const item = commandes.find(c => c.id === id);
+        if (item) {
+          const newVal = !item.urgente;
+          db.ref('commandes/' + id).update({ urgente: newVal }).then(() => {
+            item.urgente = newVal;
+            afficherGalerie(inputRecherche.value);
+          });
+        }
       });
     };
 
@@ -721,7 +741,7 @@
       
       liste.forEach(cmd => {
         const item = document.createElement('div');
-        item.className = 'commande-item-compact';
+        item.className = `commande-item-compact ${cmd.urgente ? 'urgente' : ''}`;
         item.setAttribute('draggable', 'true');
         item.dataset.id = cmd.id;
 
@@ -730,10 +750,13 @@
         
         item.innerHTML = `
           <span class="drag-handle" title="Glisser pour réorganiser">☰</span>
+          <button type="button" class="btn-urgent-toggle" onclick="basculerUrgence(${cmd.id}, event)" title="${cmd.urgente ? 'Marquer comme normal' : 'Marquer comme urgent'}">
+            ${cmd.urgente ? '🔴' : '⚪'}
+          </button>
           <input type="checkbox" class="commande-select-checkbox" data-id="${cmd.id}" onclick="event.stopPropagation()">
           <div class="commande-main-btn" onclick='ouvrirModal(${JSON.stringify(cmd).replace(/'/g, "&#39;")})'>
             <span>📦 (${nbA} article${nbA > 1 ? 's' : ''})</span>
-            <div><div class="commande-num-badge">N° ${displayNum}</div><div class="commande-date-compact">${cmd.date || ''}</div></div>
+            <div><div class="commande-num-badge">N° ${displayNum} ${cmd.urgente ? '⚠️' : ''}</div><div class="commande-date-compact">${cmd.date || ''}</div></div>
           </div>
           <div class="commande-actions">
             <button class="btn-edit-small" onclick="editerCommande(${cmd.id}, event)">Modifier</button>
@@ -741,7 +764,6 @@
           </div>
         `;
 
-        // Événements Drag and Drop
         item.addEventListener('dragstart', (e) => {
           item.classList.add('dragging');
           e.dataTransfer.setData('text/plain', cmd.id);
@@ -755,7 +777,6 @@
       });
     }
 
-    // Gestion du dépôt (Drop) dans la liste
     galerieCommandes.addEventListener('dragover', (e) => {
       e.preventDefault();
       const draggingItem = document.querySelector('.dragging');
@@ -774,7 +795,6 @@
 
     galerieCommandes.addEventListener('drop', (e) => {
       e.preventDefault();
-      // Recalcule l'ordre du tableau principal 'commandes' selon le nouvel ordre visuel des éléments HTML
       const currentIdsInDOM = [...galerieCommandes.querySelectorAll('.commande-item-compact')].map(el => Number(el.dataset.id));
       
       let reordered = [];
@@ -782,7 +802,6 @@
         const found = commandes.find(c => c.id === id);
         if (found) reordered.push(found);
       });
-      // Ajoute ceux qui étaient filtrés/cachés s'il y en a
       commandes.forEach(c => {
         if (!reordered.some(r => r.id === c.id)) reordered.push(c);
       });
@@ -799,7 +818,7 @@
     dateFiltreExport.addEventListener('change', () => afficherGalerie(inputRecherche.value));
 
     window.ouvrirModal = function(cmd) {
-      modal.style.display = "flex"; modalTitleBadge.innerHTML = `📦 N° ${cmd.numero || ''}`; modalImagesRow.innerHTML = "";
+      modal.style.display = "flex"; modalTitleBadge.innerHTML = `📦 N° ${cmd.numero || ''} ${cmd.urgente ? '⚠️ (URGENT)' : ''}`; modalImagesRow.innerHTML = "";
       cmd.articles?.forEach(art => {
         const box = document.createElement('div'); box.className = 'modal-photo-box';
         box.innerHTML = `${art.photo ? `<img src="${art.photo}">` : ''}${art.fournisseur?`<div class="modal-fournisseur-badge">Fournisseur: ${art.fournisseur}</div>`:''}${art.ref?`<div class="modal-ref-badge">Réf: ${art.ref}</div>`:''}<div style="display:flex;gap:0.4rem;flex-wrap:wrap;justify-content:center;">${art.codeBarre?`<span class="modal-barcode-badge">EAN: ${art.codeBarre}</span>`:''}<span class="modal-qty-badge">Qte: ${art.quantite||1}</span></div>${art.remarqueArticle?`<div class="modal-article-remarque-box">💬 ${art.remarqueArticle}</div>`:''}`;
@@ -890,7 +909,7 @@
             if (photoAuto) photoLinkedCount++;
 
             if (!groupCommandes[numeroClean]) {
-              groupCommandes[numeroClean] = { id: Date.now() + i, numero: numeroClean, date: dateCSV, articles: [] };
+              groupCommandes[numeroClean] = { id: Date.now() + i, numero: numeroClean, date: dateCSV, urgente: false, articles: [] };
             }
             if (!groupCommandes[numeroClean].articles.some(a => String(a.ref).trim() === cleanRefKey)) {
               groupCommandes[numeroClean].articles.push({ 
@@ -956,7 +975,6 @@
       });
     }
 
-    btnExportPDF.appendEventListener = ('click', () => {}); // placeholder safe
     btnExportPDF.addEventListener('click', () => {
       const checked = document.querySelectorAll('.commande-select-checkbox:checked');
       let list = checked.length > 0 ? commandes.filter(c => Array.from(checked).map(cb => Number(cb.getAttribute('data-id'))).includes(c.id)) : commandes;
