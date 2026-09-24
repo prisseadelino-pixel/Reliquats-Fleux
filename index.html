@@ -86,7 +86,6 @@
     button.btn-pdf { background-color: #0284c7; color: white; border: none; padding: 0.6rem 0.85rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
     button.btn-select-all { background-color: var(--secondary); color: var(--text); border: 1px solid var(--border); padding: 0.6rem 0.85rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
     button.btn-sheets { background-color: #16a34a; color: white; border: none; padding: 0.6rem 0.85rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
-    button.btn-import { background-color: #8b5cf6; color: white; border: none; padding: 0.6rem 0.85rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
     button.btn-paste { background-color: #d97706; color: white; border: none; padding: 0.6rem 0.85rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
 
     .liste-commandes { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem; }
@@ -220,8 +219,6 @@
               
               <div id="adminExportOptions" style="display: none; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
                 <button class="btn-sheets" id="btnExportSheets">🟢 Google Sheets</button>
-                <input type="file" id="fileImportCSV" accept=".csv,.txt" style="display: none;">
-                <button class="btn-import" id="btnImportSheets">📥 CSV</button>
                 <button class="btn-paste" id="btnOpenPasteModal">📋 Coller tableau</button>
               </div>
             </div>
@@ -235,11 +232,11 @@
 
   <div id="print-area"></div>
 
-  <!-- Modale de collage intelligent Regex -->
+  <!-- Modale de collage intelligent -->
   <div id="pasteModal" class="modal" style="display: none; z-index: 3000;">
     <div style="background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; width: 90%; max-width: 600px; display: flex; flex-direction: column; gap: 1rem;">
       <h3 style="color: var(--primary); font-size: 1.1rem;">📋 Coller un tableau (Extraction intelligente)</h3>
-      <p style="font-size: 0.85rem; color: var(--subtext);">Colle ta ligne brute (ex: <code>23/09/2026,S-103707,HINDBAG...</code>) :</p>
+      <p style="font-size: 0.85rem; color: var(--subtext);">Colle ta ligne brute ci-dessous :</p>
       <textarea id="pasteTextarea" rows="8" placeholder="Colle ton texte ici (Ctrl+V)..." style="width: 100%; font-family: monospace; font-size: 0.85rem; padding: 0.5rem;"></textarea>
       <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
         <button type="button" class="btn-secondary" id="btnCancelPaste" style="width: auto;">Annuler</button>
@@ -416,8 +413,6 @@
     const btnExportPDF = document.getElementById('btnExportPDF');
     const btnSelectAll = document.getElementById('btnSelectAll');
     const btnExportSheets = document.getElementById('btnExportSheets');
-    const btnImportSheets = document.getElementById('btnImportSheets');
-    const fileImportCSV = document.getElementById('fileImportCSV');
     const dateFiltreExport = document.getElementById('dateFiltreExport');
     const modal = document.getElementById('imageModal');
     const modalTitleBadge = document.getElementById('modalTitleBadge');
@@ -732,96 +727,7 @@
     inputRecherche.addEventListener('input', executerRecherche);
     inputRecherche.addEventListener('keypress', (e) => { if (e.key === 'Enter') executerRecherche(); });
 
-    // --- IMPORT CSV CLASSIQUE ---
-    fileImportCSV.addEventListener('change', (e) => {
-      const file = e.target.files[0]; if (!file) return;
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        let text = event.target.result; if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
-        const lines = text.split(/\r\n|\n/).filter(l => l.trim() !== '');
-        if (lines.length < 2) { alert("CSV vide"); fileImportCSV.value = ""; return; }
-        
-        db.ref('commandes').once('value').then(snap => {
-          let existingData = snap.val() || {};
-          let groupCommandes = {};
-          Object.keys(existingData).forEach(k => { if (existingData[k]?.numero) groupCommandes[String(existingData[k].numero).trim()] = existingData[k]; });
-          let parsedCount = 0;
-
-          for (let i = 1; i < lines.length; i++) {
-            const line = lines[i].trim();
-            if (!line) continue;
-
-            const isSemi = line.includes(';');
-            let parts = (isSemi ? line.split(';') : line.split(',')).map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
-            if (parts.length < 5) continue;
-
-            const dateCSV = parts[0] || new Date().toLocaleDateString('fr-FR');
-            let numeroClean = String(parts || '').trim();
-            const fournisseurCSV = String(parts || '').trim();
-            const barcodeCSV = String(parts || '').trim();
-            const refCSV = String(parts || '').trim();
-            const remArtCSV = String(parts || '').trim();
-            const qteCSV = !isNaN(parts[6]) && parts[6] !== '' ? Number(parts[6]) : 1;
-
-            if (!numeroClean || !refCSV) continue;
-            parsedCount++;
-
-            let photoAuto = "";
-            const cleanRefKey = String(refCSV).trim();
-            const cleNorm = "REF_" + cleanRefKey.replace(/[.#$\/\[\]]/g, "_");
-            
-            if (catalogueArticles[cleanRefKey]?.photo) {
-              photoAuto = catalogueArticles[cleanRefKey].photo;
-            } else if (catalogueArticles[cleNorm]?.photo) {
-              photoAuto = catalogueArticles[cleNorm].photo;
-            } else if (barcodeCSV && catalogueArticles[barcodeCSV]?.photo) {
-              photoAuto = catalogueArticles[barcodeCSV].photo;
-            } else {
-              for (let c of Object.values(groupCommandes)) {
-                if (c.articles) {
-                  const foundArt = c.articles.find(a => String(a.ref).trim() === cleanRefKey || (barcodeCSV && String(a.codeBarre).trim() === barcodeCSV));
-                  if (foundArt && foundArt.photo) { photoAuto = foundArt.photo; break; }
-                }
-              }
-            }
-
-            if (!groupCommandes[numeroClean]) {
-              groupCommandes[numeroClean] = { 
-                id: Date.now() + i, 
-                numero: numeroClean, 
-                date: dateCSV, 
-                articles: [] 
-              };
-            }
-            if (!groupCommandes[numeroClean].articles.some(a => String(a.ref).trim() === cleanRefKey)) {
-              groupCommandes[numeroClean].articles.push({ 
-                photo: photoAuto, 
-                fournisseur: fournisseurCSV, 
-                ref: cleanRefKey, 
-                codeBarre: barcodeCSV, 
-                quantite: qteCSV, 
-                remarqueArticle: remArtCSV 
-              });
-            }
-          }
-
-          const keys = Object.keys(groupCommandes);
-          if (keys.length > 0 && confirm(`Importer ${parsedCount} ligne(s) validée(s) sur ${keys.length} commande(s) ?`)) {
-            let updates = {}; keys.forEach(k => updates[groupCommandes[k].id] = groupCommandes[k]);
-            db.ref('commandes').update(updates).then(() => { 
-              alert("Import réussi !"); 
-              fileImportCSV.value = ""; 
-              chargerToutesLesDonnees();
-            });
-          } else { fileImportCSV.value = ""; }
-        });
-      };
-      reader.readAsText(file, 'utf-8');
-    });
-
-    btnImportSheets.addEventListener('click', () => fileImportCSV.click());
-
-    // --- ALTERNATIVE : COPIER-COLLER PAR EXTRACTION INTELLIGENTE REGEX ---
+    // --- COPIER-COLLER PAR EXTRACTION INTELLIGENTE REGEX ---
     const pasteModal = document.getElementById('pasteModal');
     const btnOpenPasteModal = document.getElementById('btnOpenPasteModal');
     const btnCancelPaste = document.getElementById('btnCancelPaste');
@@ -860,19 +766,15 @@
             const cleanLine = line.trim();
             if (!cleanLine) return;
 
-            // 1. Extraction date (ex: 23/09/2026)
             const dateMatch = cleanLine.match(/\b\d{2}\/\d{2}\/\d{4}\b/);
             const dateCSV = dateMatch ? dateMatch[0] : new Date().toLocaleDateString('fr-FR');
 
-            // 2. Extraction N° de commande (ex: S-103707)
             const cmdMatch = cleanLine.match(/\bS-\d+\b/i);
             const numeroClean = cmdMatch ? cmdMatch[0].toUpperCase() : 'VRAC';
 
-            // 3. Extraction EAN (13 chiffres)
             const eanMatch = cleanLine.match(/\b\d{13}\b/);
             const eanCSV = eanMatch ? eanMatch[0] : '';
 
-            // 4. Extraction Quantité
             const partsComma = cleanLine.split(/,|\t|;/).map(p => p.trim());
             let qteCSV = 1;
             const qteCandidate = partsComma[partsComma.length - 1];
@@ -880,7 +782,6 @@
               qteCSV = Number(qteCandidate);
             }
 
-            // 5. Extraction Référence (ex: SIMON_L)
             let refCSV = '';
             let fournisseurCSV = 'HINDBAG ANKORSTORE';
             if (cleanLine.toUpperCase().includes('HINDBAG')) fournisseurCSV = 'HINDBAG ANKORSTORE';
@@ -893,7 +794,6 @@
               refCSV = filteredParts.find(p => p.includes('_') || p.length >= 5) || filteredParts[filteredParts.length - 2] || 'REF_INCONNUE';
             }
 
-            // 6. Remarque
             const remArtCSV = partsComma.find(p => p.toLowerCase().includes('sac') || p.toLowerCase().includes('polochon') || (p.length > 10 && !p.includes('/'))) || '';
 
             if (!refCSV && !eanCSV) return;
