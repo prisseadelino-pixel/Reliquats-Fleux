@@ -87,6 +87,7 @@
     button.btn-select-all { background-color: var(--secondary); color: var(--text); border: 1px solid var(--border); padding: 0.6rem 0.85rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
     button.btn-sheets { background-color: #16a34a; color: white; border: none; padding: 0.6rem 0.85rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
     button.btn-paste { background-color: #d97706; color: white; border: none; padding: 0.6rem 0.85rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
+    button.btn-sort { background-color: #6366f1; color: white; border: none; padding: 0.6rem 0.85rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
 
     .liste-commandes { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem; }
     .commande-item-compact { display: flex; align-items: center; justify-content: space-between; background: var(--container-bg); border: 1px solid var(--border); border-radius: 10px; padding: 0.75rem 1rem; cursor: pointer; gap: 0.75rem; }
@@ -207,7 +208,10 @@
         <section class="card" style="margin-bottom: 0;">
           <div class="section-header-flex">
             <h2>Historique Reliquats</h2>
-            <span id="badgeCount" class="badge-count">0</span>
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+              <button class="btn-sort" id="btnTrierDate" title="Inverser l'ordre de tri">🔄 Trier : Récent</button>
+              <span id="badgeCount" class="badge-count">0</span>
+            </div>
           </div>
 
           <div class="export-filter-container">
@@ -232,11 +236,11 @@
 
   <div id="print-area"></div>
 
-  <!-- Modale de collage par position exacte -->
+  <!-- Modale de collage -->
   <div id="pasteModal" class="modal" style="display: none; z-index: 3000;">
     <div style="background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; width: 90%; max-width: 600px; display: flex; flex-direction: column; gap: 1rem;">
       <h3 style="color: var(--primary); font-size: 1.1rem;">📋 Coller un tableau Excel</h3>
-      <p style="font-size: 0.85rem; color: var(--subtext);">Copie tes lignes Excel (dans l'ordre : Date | N° Commande | Fournisseur | EAN | Référence | Remarque | Quantité) et colle-les ci-dessous :</p>
+      <p style="font-size: 0.85rem; color: var(--subtext);">Copie tes lignes Excel (Date | N° Commande | Fournisseur | EAN | Référence | Remarque | Quantité) et colle-les ci-dessous :</p>
       <textarea id="pasteTextarea" rows="8" placeholder="Colle ton tableau ici (Ctrl+V)..." style="width: 100%; font-family: monospace; font-size: 0.85rem; padding: 0.5rem;"></textarea>
       <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
         <button type="button" class="btn-secondary" id="btnCancelPaste" style="width: auto;">Annuler</button>
@@ -286,6 +290,7 @@
     const db = firebase.database();
     const ADMIN_PASSWORD = "Fleux.reliquats!";
     let estAdmin = false;
+    let ordreCroissant = false; // false = plus récent en premier, true = plus ancien en premier
 
     let adminCallback = null;
     const adminLoginModal = document.getElementById('adminLoginModal');
@@ -414,6 +419,7 @@
     const btnSelectAll = document.getElementById('btnSelectAll');
     const btnExportSheets = document.getElementById('btnExportSheets');
     const dateFiltreExport = document.getElementById('dateFiltreExport');
+    const btnTrierDate = document.getElementById('btnTrierDate');
     const modal = document.getElementById('imageModal');
     const modalTitleBadge = document.getElementById('modalTitleBadge');
     const modalImagesRow = document.getElementById('modalImagesRow');
@@ -584,9 +590,34 @@
       if (data) {
         if (Array.isArray(data)) { commandes = data.filter(Boolean).map(nettoyerCommandeObjet); }
         else { Object.keys(data).forEach(key => { let cmd = data[key]; if (cmd) { if (!cmd.id) cmd.id = Number(key) || Date.now(); commandes.push(nettoyerCommandeObjet(cmd)); } }); }
-        commandes.sort((a, b) => (Number(b.id) || 0) - (Number(a.id) || 0));
       }
+      trierEtAfficherGalerie();
+    });
+
+    function convertirDateEnTimestamp(dateStr) {
+      if (!dateStr || !dateStr.includes('/')) return 0;
+      const parts = dateStr.split('/');
+      if (parts.length !== 3) return 0;
+      return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`).getTime() || 0;
+    }
+
+    function trierEtAfficherGalerie() {
+      commandes.sort((a, b) => {
+        const timeA = convertirDateEnTimestamp(a.date) || Number(a.id) || 0;
+        const timeB = convertirDateEnTimestamp(b.date) || Number(b.id) || 0;
+        if (ordreCroissant) {
+          return timeA - timeB; // Plus ancien au plus récent
+        } else {
+          return timeB - timeA; // Plus récent au plus ancien
+        }
+      });
       afficherGalerie(inputRecherche.value);
+    }
+
+    btnTrierDate.addEventListener('click', () => {
+      ordreCroissant = !ordreCroissant;
+      btnTrierDate.innerHTML = ordreCroissant ? "🔄 Trier : Ancien" : "🔄 Trier : Récent";
+      trierEtAfficherGalerie();
     });
 
     btnEnregistrer.addEventListener('click', () => {
@@ -674,7 +705,7 @@
       let targetDateFormatted = "";
       if (dateFilterVal) {
         const p = dateFilterVal.split('-');
-        if (p.length === 3) targetDateFormatted = `${p}/${p}/${p}`.slice(0,10);
+        if (p.length === 3) targetDateFormatted = `${p[2]}/${p[1]}/${p[0]}`;
       }
       const liste = commandes.filter(c => {
         if (!c) return false;
@@ -727,7 +758,7 @@
     inputRecherche.addEventListener('input', executerRecherche);
     inputRecherche.addEventListener('keypress', (e) => { if (e.key === 'Enter') executerRecherche(); });
 
-    // --- COLLAGE STRICT PAR POSITION DE COLONNE EXCEL ---
+    // --- COLLAGE EXCEL ---
     const pasteModal = document.getElementById('pasteModal');
     const btnOpenPasteModal = document.getElementById('btnOpenPasteModal');
     const btnCancelPaste = document.getElementById('btnCancelPaste');
@@ -766,13 +797,10 @@
             const cleanLine = line.trim();
             if (!cleanLine) return;
 
-            // Découpage strict par tabulation (\t) ou point-virgule/virgule
             const sep = cleanLine.includes('\t') ? '\t' : (cleanLine.includes(';') ? ';' : ',');
             let parts = cleanLine.split(sep).map(c => c.trim().replace(/^"|"$/g, ''));
             if (parts.length < 5) return;
 
-            // Ordre exact de ton Excel :
-            // [0] Date, [1] N° Commande, [2] Fournisseur, [3] EAN, [4] Référence, [5] Remarque, [6] Quantité
             const dateCSV = parts[0] || new Date().toLocaleDateString('fr-FR');
             const numeroClean = String(parts[1] || 'VRAC').replace(/^N°\s*/i, '').trim();
             const fournisseurCSV = String(parts[2] || '').trim();
