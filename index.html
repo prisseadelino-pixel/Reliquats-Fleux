@@ -131,17 +131,37 @@
     .modal-close { position: absolute; top: 20px; right: 25px; color: white; font-size: 2rem; font-weight: bold; cursor: pointer; z-index: 1001; }
 
     #print-area { display: none; }
+
     @media print {
+      @page {
+        size: A4;
+        margin: 10mm;
+      }
+      body, html {
+        background: white !important;
+        color: black !important;
+        height: auto !important;
+        overflow: visible !important;
+      }
       body * { visibility: hidden; }
       #print-area, #print-area * { visibility: visible; }
-      #print-area { display: block !important; position: absolute; left: 0; top: 0; width: 100%; padding: 20px; background: white; color: black; }
-      .print-title { font-size: 22px; color: #ff6b00; margin-bottom: 5px; font-weight: bold; }
-      .print-subtitle { font-size: 12px; color: #64748b; margin-bottom: 20px; border-bottom: 2px solid #ff6b00; padding-bottom: 10px; }
-      .print-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
-      .print-card { border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px; page-break-inside: avoid; background: #ffffff; }
-      .print-photos-flex { display: flex; flex-wrap: wrap; gap: 8px; }
-      .print-photo-print-item { width: 48%; display: flex; flex-direction: column; gap: 3px; margin-bottom: 8px; background: #f8fafc; padding: 4px; border-radius: 6px; border: 1px solid #e2e8f0; }
-      .print-photos-flex img { width: 100%; height: 110px; object-fit: cover; border-radius: 4px; border: 1px solid #cbd5e1; }
+      #print-area {
+        display: block !important;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        padding: 0;
+        background: white;
+        color: black;
+      }
+      .print-title { font-size: 20px; color: #ff6b00; margin-bottom: 2px; font-weight: bold; }
+      .print-subtitle { font-size: 11px; color: #64748b; margin-bottom: 12px; border-bottom: 2px solid #ff6b00; padding-bottom: 5px; }
+      .print-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; page-break-inside: auto; }
+      .print-card { border: 1px solid #cbd5e1; border-radius: 6px; padding: 8px; page-break-inside: avoid; break-inside: avoid; background: #ffffff; }
+      .print-photos-flex { display: flex; flex-wrap: wrap; gap: 6px; }
+      .print-photo-print-item { width: 48%; display: flex; flex-direction: column; gap: 3px; margin-bottom: 4px; background: #f8fafc; padding: 4px; border-radius: 4px; border: 1px solid #e2e8f0; page-break-inside: avoid; break-inside: avoid; }
+      .print-photos-flex img { width: 100%; height: 95px; object-fit: cover; border-radius: 4px; border: 1px solid #cbd5e1; }
     }
   </style>
 </head>
@@ -899,7 +919,7 @@
             } else if (catalogueArticles[cleNorm]?.photo) {
               photoAuto = catalogueArticles[cleNorm].photo;
             } else if (eanCSV && catalogueArticles[eanCSV]?.photo) {
-              photoAuto = catalogueArticles[eanCSV]?.photo;
+              photoAuto = catalogueArticles[eanCSV].photo;
             } else {
               for (let c of Object.values(groupCommandes)) {
                 if (c.articles) {
