@@ -182,7 +182,7 @@
       <img class="home-logo-img" src="https://i49.servimg.com/u/f49/11/31/89/70/img_2010.jpg" style="border:0;" alt="Reliquats Fleux Logo" />
     </div>
     <p class="app-subtitle">Prenez en photo vos articles manquants et suivez vos numéros de commande.</p>
-    <button class="btn-start" id="btnCommencer">🚀 Lancer les reliquats</button>
+    <button class="btn-start" id="btnCommencer" type="button">🚀 Lancer les reliquats</button>
   </div>
 
   <div id="app-screen">
@@ -192,18 +192,18 @@
       </div>
       
       <div class="header-controls">
-        <button class="btn-nav-home" id="btnRetourAccueil">🏠 Accueil</button>
-        <button class="btn-menu-hamburger" id="btnMenu" title="Menu options">☰</button>
+        <button class="btn-nav-home" id="btnRetourAccueil" type="button">🏠 Accueil</button>
+        <button class="btn-menu-hamburger" id="btnMenu" type="button" title="Menu options">☰</button>
         
         <div class="dropdown-menu" id="dropdownMenu">
-          <button class="dropdown-item" id="btnToggleTheme">☀️ Mode Clair / Sombre</button>
-          <button class="dropdown-item" id="btnToggleAdmin">🔒 Mode Admin : OFF</button>
+          <button class="dropdown-item" id="btnToggleTheme" type="button">☀️ Mode Clair / Sombre</button>
+          <button class="dropdown-item" id="btnToggleAdmin" type="button">🔒 Mode Admin : OFF</button>
           
           <div id="adminMenuOptions" style="display: none;">
-            <button class="dropdown-item" id="btnExportBackup" style="color: #0284c7;">💾 Exporter une sauvegarde</button>
-            <button class="dropdown-item" id="btnImportBackup" style="color: #8b5cf6;">📥 Restaurer une sauvegarde</button>
+            <button class="dropdown-item" id="btnExportBackup" type="button" style="color: #0284c7;">💾 Exporter une sauvegarde</button>
+            <button class="dropdown-item" id="btnImportBackup" type="button" style="color: #8b5cf6;">📥 Restaurer une sauvegarde</button>
             <input type="file" id="fileRestoreJson" accept=".json" style="display: none;">
-            <button class="dropdown-item danger" id="btnViderHistorique">🗑️ Vider l'historique</button>
+            <button class="dropdown-item danger" id="btnViderHistorique" type="button">🗑️ Vider l'historique</button>
           </div>
         </div>
       </div>
@@ -238,8 +238,8 @@
           </div>
 
           <div style="display:flex; gap:0.5rem; margin-top: 1rem;">
-            <button class="btn-main" id="btnEnregistrer">Enregistrer les reliquats</button>
-            <button class="btn-secondary" id="btnAnnulerEdit" style="display:none; width:auto;">Annuler</button>
+            <button class="btn-main" id="btnEnregistrer" type="button">Enregistrer les reliquats</button>
+            <button class="btn-secondary" id="btnAnnulerEdit" type="button" style="display:none; width:auto;">Annuler</button>
           </div>
         </section>
       </div>
@@ -249,7 +249,7 @@
           <div class="section-header-flex">
             <h2>Historique Reliquats</h2>
             <div style="display: flex; gap: 0.5rem; align-items: center;">
-              <button class="btn-sort" id="btnTrierDate" title="Inverser l'ordre de tri">🔄 Trier : Récent</button>
+              <button class="btn-sort" id="btnTrierDate" type="button" title="Inverser l'ordre de tri">🔄 Trier : Récent</button>
               <span id="badgeCount" class="badge-count">0</span>
             </div>
           </div>
@@ -258,12 +258,12 @@
             <span class="export-filter-label">📅 Filtrer par date ou sélection pour l'export :</span>
             <div class="export-actions-row">
               <input type="date" id="dateFiltreExport" class="input-date-custom">
-              <button class="btn-select-all" id="btnSelectAll">☑️ Tout cocher</button>
-              <button class="btn-pdf" id="btnExportPDF">📄 Exporter PDF</button>
+              <button class="btn-select-all" id="btnSelectAll" type="button">☑️ Tout cocher</button>
+              <button class="btn-pdf" id="btnExportPDF" type="button">📄 Exporter PDF</button>
               
               <div id="adminExportOptions" style="display: none; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
-                <button class="btn-sheets" id="btnExportSheets">📊 Exporter Excel</button>
-                <button class="btn-paste" id="btnOpenPasteModal">📋 Coller tableau</button>
+                <button class="btn-sheets" id="btnExportSheets" type="button">📊 Exporter Excel</button>
+                <button class="btn-paste" id="btnOpenPasteModal" type="button">📋 Coller tableau</button>
               </div>
             </div>
           </div>
@@ -484,20 +484,16 @@
             if (cle.startsWith("REF_")) catalogueArticles[cle.replace("REF_", "")] = item;
           }
         });
-      });
-      db.ref('commandes').once('value').then((snapshot) => {
-        const data = snapshot.val() || {};
-        Object.keys(data).forEach(key => {
-          const cmd = data[key];
-          if (cmd && cmd.articles) {
-            cmd.articles.forEach(art => {
-              if (art.ref && art.photo) {
-                if (!catalogueArticles[art.ref]) catalogueArticles[art.ref] = {};
-                Object.assign(catalogueArticles[art.ref], art);
-              }
-            });
-          }
-        });
+      }).catch(() => {});
+
+      db.ref('commandes').on('value', (snapshot) => {
+        const data = snapshot.val();
+        commandes = [];
+        if (data) {
+          if (Array.isArray(data)) { commandes = data.filter(Boolean).map(nettoyerCommandeObjet); }
+          else { Object.keys(data).forEach(key => { let cmd = data[key]; if (cmd) { if (!cmd.id) cmd.id = Number(key) || Date.now(); commandes.push(nettoyerCommandeObjet(cmd)); } }); }
+        }
+        trierEtAfficherGalerie();
       });
     }
 
@@ -546,7 +542,7 @@
         </div>
         <div class="previewWrapper" style="display: ${photoInit ? 'block' : 'none'};">
           <img class="photoPreview" src="${photoInit}" alt="Aperçu Photo">
-          <button type="button" class="btn-suppr-photo-interne">❌ Supprimer</button>
+          <button type="button" class="btn-suppr-photo-interne" type="button">❌ Supprimer</button>
         </div>
         <input type="file" class="fileGallery" accept="image/*" style="display: none;">
         <input type="file" class="fileCamera" accept="image/*" capture="environment" style="display: none;">
@@ -624,16 +620,6 @@
     }
 
     btnAjouterArticle.addEventListener('click', () => ajouterBlocArticle());
-
-    db.ref('commandes').on('value', (snapshot) => {
-      const data = snapshot.val();
-      commandes = [];
-      if (data) {
-        if (Array.isArray(data)) { commandes = data.filter(Boolean).map(nettoyerCommandeObjet); }
-        else { Object.keys(data).forEach(key => { let cmd = data[key]; if (cmd) { if (!cmd.id) cmd.id = Number(key) || Date.now(); commandes.push(nettoyerCommandeObjet(cmd)); } }); }
-      }
-      trierEtAfficherGalerie();
-    });
 
     function convertirDateEnTimestamp(dateStr) {
       if (!dateStr || !dateStr.includes('/')) return 0;
@@ -797,8 +783,8 @@
             </div>
           </div>
           <div class="commande-actions">
-            <button class="btn-edit-small" onclick="editerCommande(${cmd.id}, event)">Modifier</button>
-            <button class="btn-delete-small" onclick="supprimerCommande(${cmd.id}, event)" title="Supprimer">✕</button>
+            <button class="btn-edit-small" onclick="editerCommande(${cmd.id}, event)" type="button">Modifier</button>
+            <button class="btn-delete-small" onclick="supprimerCommande(${cmd.id}, event)" type="button" title="Supprimer">✕</button>
           </div>
         `;
 
@@ -935,7 +921,7 @@
             } else if (catalogueArticles[cleNorm]?.photo) {
               photoAuto = catalogueArticles[cleNorm].photo;
             } else if (eanCSV && catalogueArticles[eanCSV]?.photo) {
-              photoAuto = catalogueArticles[eanCSV]?.photo;
+              photoAuto = catalogueArticles[eanCSV].photo;
             } else {
               for (let c of Object.values(groupCommandes)) {
                 if (c.articles) {
