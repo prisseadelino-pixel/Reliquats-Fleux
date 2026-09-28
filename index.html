@@ -9,9 +9,6 @@
   <link rel="apple-touch-icon" href="https://i49.servimg.com/u/f49/11/31/89/70/img_2010.jpg?v=2">
   <meta name="mobile-web-app-capable" content="yes">
 
-  <!-- Inclusion de la bibliothèque SheetJS pour la génération de fichiers Excel (.xlsx) -->
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-
   <style>
     :root[data-theme="dark"] {
       --primary: #ff6b00;
@@ -647,11 +644,9 @@
 
     function trierEtAfficherGalerie() {
       commandes.sort((a, b) => {
-        // Priorité absolue aux urgences
         if (a.urgente && !b.urgente) return -1;
         if (!a.urgente && b.urgente) return 1;
 
-        // Tri par date ensuite
         const timeA = convertirDateEnTimestamp(a.date) || Number(a.id) || 0;
         const timeB = convertirDateEnTimestamp(b.date) || Number(b.id) || 0;
         if (ordreCroissant) {
@@ -983,7 +978,7 @@
       });
     }
 
-    // --- EXPORT EXCEL (.xlsx) ---
+    // --- EXPORT EXCEL NATIF PROPRE (.xls / .xlsx XML) ---
     const btnExportSheets = document.getElementById('btnExportSheets');
     if(btnExportSheets) {
       btnExportSheets.addEventListener('click', () => {
@@ -996,47 +991,52 @@
           if (listeAExporter.length === 0) { alert(`Aucun reliquat trouvé pour la date.`); return; }
         } else if (commandes.length === 0) { alert("L'historique est vide."); return; }
 
-        let excelData = [];
+        let tableHTML = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+        <head><meta charset="UTF-8"><style>table { border-collapse: collapse; } th, td { border: 1px solid #cbd5e1; padding: 6px 10px; font-family: Arial, sans-serif; font-size: 11pt; } th { background-color: #ff6b00; color: #ffffff; font-weight: bold; }</style></head>
+        <body>
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Urgent</th>
+              <th>N° Commande</th>
+              <th>Fournisseur</th>
+              <th>Code-Barre (EAN)</th>
+              <th>Référence Article</th>
+              <th>Quantité</th>
+              <th>Remarque Article</th>
+            </tr>
+          </thead>
+          <tbody>`;
+
         listeAExporter.forEach(cmd => {
           const date = cmd.date || "";
           const numero = cmd.numero || "";
           const statutUrgent = cmd.urgente ? "OUI" : "NON";
           cmd.articles?.forEach(art => {
-            excelData.push({
-              "Date": date,
-              "Urgent": statutUrgent,
-              "N° Commande": numero,
-              "Fournisseur": art.fournisseur || "",
-              "Code-Barre (EAN)": art.codeBarre || "",
-              "Référence Article": art.ref || "",
-              "Quantité": art.quantite !== undefined ? art.quantite : 1,
-              "Remarque Article": art.remarqueArticle || ""
-            });
+            tableHTML += `<tr>
+              <td>${date}</td>
+              <td>${statutUrgent}</td>
+              <td>${numero}</td>
+              <td>${art.fournisseur || ""}</td>
+              <td>${art.codeBarre || ""}</td>
+              <td>${art.ref || ""}</td>
+              <td>${art.quantite !== undefined ? art.quantite : 1}</td>
+              <td>${art.remarqueArticle || ""}</td>
+            </tr>`;
           });
         });
 
-        if (excelData.length === 0) { alert("Aucune donnée à exporter."); return; }
+        tableHTML += `</tbody></table></body></html>`;
 
-        const worksheet = XLSX.utils.json_to_sheet(excelData);
-        
-        // Ajustement automatique de la largeur des colonnes
-        const colWidths = [
-          {wch: 12}, // Date
-          {wch: 8},  // Urgent
-          {wch: 18}, // N° Commande
-          {wch: 18}, // Fournisseur
-          {wch: 16}, // Code-Barre
-          {wch: 20}, // Référence
-          {wch: 10}, // Quantité
-          {wch: 30}  // Remarque
-        ];
-        worksheet['!cols'] = colWidths;
-
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Reliquats");
-
-        const fileName = dateSelect ? `reliquats_${dateSelect}.xlsx` : `reliquats_export.xlsx`;
-        XLSX.writeFile(workbook, fileName);
+        const blob = new Blob([tableHTML], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = dateSelect ? `reliquats_${dateSelect}.xls` : `reliquats_export.xls`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
       });
     }
 
