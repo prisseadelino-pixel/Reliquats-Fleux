@@ -139,32 +139,11 @@
     #print-area { display: none; }
 
     @media print {
-      @page {
-        size: A4 portrait;
-        margin: 5mm;
-      }
-      body, html {
-        background: white !important;
-        color: black !important;
-        height: 100% !important;
-        overflow: hidden !important;
-        margin: 0 !important;
-        padding: 0 !important;
-      }
+      @page { size: A4 portrait; margin: 5mm; }
+      body, html { background: white !important; color: black !important; height: 100% !important; overflow: hidden !important; margin: 0 !important; padding: 0 !important; }
       body * { visibility: hidden !important; }
       #print-area, #print-area * { visibility: visible !important; }
-      #print-area {
-        display: block !important;
-        position: absolute !important;
-        left: 0 !important;
-        top: 0 !important;
-        width: 100% !important;
-        height: auto !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        background: white !important;
-        color: black !important;
-      }
+      #print-area { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; height: auto !important; padding: 0 !important; margin: 0 !important; background: white !important; color: black !important; }
       .print-title { font-size: 18px; color: #ff6b00; margin-bottom: 2px; font-weight: bold; }
       .print-subtitle { font-size: 10px; color: #64748b; margin-bottom: 8px; border-bottom: 2px solid #ff6b00; padding-bottom: 3px; }
       .print-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; page-break-inside: avoid; }
@@ -331,6 +310,9 @@
     const ADMIN_PASSWORD = "Fleux.reliquats!";
     let estAdmin = false;
     let ordreCroissant = false;
+    let commandes = [];
+    let catalogueArticles = {};
+    let modeEditionId = null;
 
     let adminCallback = null;
     const adminLoginModal = document.getElementById('adminLoginModal');
@@ -362,8 +344,8 @@
         estAdmin = true;
         btnToggleAdmin.innerHTML = "🔓 Mode Admin : ON";
         btnToggleAdmin.style.color = "#16a34a";
-        adminMenuOptions.style.display = "block";
-        adminExportOptions.style.display = "inline-flex";
+        document.getElementById('adminMenuOptions').style.display = "block";
+        document.getElementById('adminExportOptions').style.display = "inline-flex";
         if (adminCallback) { const cb = adminCallback; adminCallback = null; cb(true); }
       } else {
         alert("❌ Code incorrect !");
@@ -391,7 +373,7 @@
       htmlRoot.setAttribute('data-theme', newTheme);
       localStorage.setItem('reliquats_theme', newTheme);
       btnToggleTheme.innerHTML = newTheme === 'dark' ? "🌙 Mode Sombre (Actif)" : "☀️ Mode Clair (Actif)";
-      dropdownMenu.classList.remove('show');
+      document.getElementById('dropdownMenu').classList.remove('show');
     });
 
     const homeScreen = document.getElementById('home-screen');
@@ -401,8 +383,6 @@
     const btnMenu = document.getElementById('btnMenu');
     const dropdownMenu = document.getElementById('dropdownMenu');
     const btnToggleAdmin = document.getElementById('btnToggleAdmin');
-    const adminMenuOptions = document.getElementById('adminMenuOptions');
-    const adminExportOptions = document.getElementById('adminExportOptions');
     const badgeCount = document.getElementById('badgeCount');
 
     btnMenu.addEventListener('click', (e) => { e.stopPropagation(); dropdownMenu.classList.toggle('show'); });
@@ -411,18 +391,19 @@
     btnToggleAdmin.addEventListener('click', () => {
       dropdownMenu.classList.remove('show');
       if (!estAdmin) {
-        ouvrirModaleAdmin((succ) => { if (succ) { alert("✅ Mode Admin ON"); afficherGalerie(inputRecherche.value); } });
+        ouvrirModaleAdmin((succ) => { if (succ) { alert("✅ Mode Admin ON"); afficherGalerie(document.getElementById('recherche').value); } });
       } else {
         estAdmin = false;
         btnToggleAdmin.innerHTML = "🔒 Mode Admin : OFF";
         btnToggleAdmin.style.color = "var(--text)";
-        adminMenuOptions.style.display = "none";
-        adminExportOptions.style.display = "none";
+        document.getElementById('adminMenuOptions').style.display = "none";
+        document.getElementById('adminExportOptions').style.display = "none";
         alert("🔒 Mode Admin OFF");
-        afficherGalerie(inputRecherche.value);
+        afficherGalerie(document.getElementById('recherche').value);
       }
     });
 
+    // Clic sur le bouton de lancement (Garanti sans blocage)
     btnCommencer.addEventListener('click', () => {
       homeScreen.style.display = 'none';
       appScreen.style.display = 'block';
@@ -432,14 +413,11 @@
 
     btnRetourAccueil.addEventListener('click', () => {
       reinitialiserFormulaire();
-      inputRecherche.value = "";
-      afficherGalerie();
+      document.getElementById('recherche').value = "";
+      appScreen.style.display = 'none';
+      homeScreen.style.display = 'flex';
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
-
-    let commandes = [];
-    let catalogueArticles = {};
-    let modeEditionId = null;
 
     const inputNumero = document.getElementById('numeroCommande');
     const btnNouvelleCommande = document.getElementById('btnNouvelleCommande');
@@ -451,13 +429,6 @@
     const galerieCommandes = document.getElementById('galerieCommandes');
     const inputRecherche = document.getElementById('recherche');
     const btnLancerRecherche = document.getElementById('btnLancerRecherche');
-    const btnViderHistorique = document.getElementById('btnViderHistorique');
-    const btnExportBackup = document.getElementById('btnExportBackup');
-    const btnImportBackup = document.getElementById('btnImportBackup');
-    const fileRestoreJson = document.getElementById('fileRestoreJson');
-    const btnExportPDF = document.getElementById('btnExportPDF');
-    const btnSelectAll = document.getElementById('btnSelectAll');
-    const btnExportSheets = document.getElementById('btnExportSheets');
     const dateFiltreExport = document.getElementById('dateFiltreExport');
     const btnTrierDate = document.getElementById('btnTrierDate');
     const modal = document.getElementById('imageModal');
@@ -496,18 +467,6 @@
         trierEtAfficherGalerie();
       });
     }
-
-    db.ref('catalogue_photos').on('value', (snapshot) => {
-      const data = snapshot.val() || {};
-      Object.keys(data).forEach(cle => {
-        const item = data[cle];
-        if (item) {
-          if (item.refOriginale) catalogueArticles[item.refOriginale] = item;
-          catalogueArticles[cle] = item;
-          if (cle.startsWith("REF_")) catalogueArticles[cle.replace("REF_", "")] = item;
-        }
-      });
-    });
 
     function compresserImage(dataUrl, callback) {
       const img = new Image();
@@ -706,7 +665,7 @@
       });
     };
 
-    btnExportBackup.addEventListener('click', () => {
+    document.getElementById('btnExportBackup').addEventListener('click', () => {
       dropdownMenu.classList.remove('show');
       requireAdmin(() => {
         db.ref('/').once('value').then(snap => {
@@ -717,9 +676,9 @@
       });
     });
 
-    btnImportBackup.addEventListener('click', () => { dropdownMenu.classList.remove('show'); requireAdmin(() => fileRestoreJson.click()); });
+    document.getElementById('btnImportBackup').addEventListener('click', () => { dropdownMenu.classList.remove('show'); requireAdmin(() => document.getElementById('fileRestoreJson').click()); });
     
-    fileRestoreJson.addEventListener('change', (e) => {
+    document.getElementById('fileRestoreJson').addEventListener('change', (e) => {
       const file = e.target.files[0]; if (!file) return;
       const reader = new FileReader();
       reader.onload = (evt) => {
@@ -741,7 +700,7 @@
       reader.readAsText(file);
     });
 
-    btnViderHistorique.addEventListener('click', () => { dropdownMenu.classList.remove('show'); requireAdmin(() => { if (confirm("Effacer tout ?")) db.ref('commandes').remove(); }); });
+    document.getElementById('btnViderHistorique').addEventListener('click', () => { dropdownMenu.classList.remove('show'); requireAdmin(() => { if (confirm("Effacer tout ?")) db.ref('commandes').remove(); }); });
 
     function afficherGalerie(filtre = "") {
       galerieCommandes.innerHTML = "";
@@ -834,10 +793,10 @@
     });
 
     let toutCoche = false;
-    btnSelectAll.addEventListener('click', () => {
+    document.getElementById('btnSelectAll').addEventListener('click', () => {
       toutCoche = !toutCoche;
       document.querySelectorAll('.commande-select-checkbox').forEach(cb => cb.checked = toutCoche);
-      btnSelectAll.innerHTML = toutCoche ? "☑️ Tout décocher" : "☑️ Tout cocher";
+      document.getElementById('btnSelectAll').innerHTML = toutCoche ? "☑️ Tout décocher" : "☑️ Tout cocher";
     });
     dateFiltreExport.addEventListener('change', () => afficherGalerie(inputRecherche.value));
 
@@ -860,111 +819,104 @@
     // --- COLLAGE EXCEL ---
     const pasteModal = document.getElementById('pasteModal');
     const btnOpenPasteModal = document.getElementById('btnOpenPasteModal');
-    const btnCancelPaste = document.getElementById('btnCancelPaste');
-    const btnProcessPaste = document.getElementById('btnProcessPaste');
-    const pasteTextarea = document.getElementById('pasteTextarea');
 
     if (btnOpenPasteModal) {
       btnOpenPasteModal.addEventListener('click', () => {
         dropdownMenu.classList.remove('show');
-        pasteTextarea.value = '';
+        document.getElementById('pasteTextarea').value = '';
         pasteModal.style.display = 'flex';
-        setTimeout(() => pasteTextarea.focus(), 50);
+        setTimeout(() => document.getElementById('pasteTextarea').focus(), 50);
       });
     }
 
-    if (btnCancelPaste) {
-      btnCancelPaste.addEventListener('click', () => { pasteModal.style.display = 'none'; });
-    }
+    document.getElementById('btnCancelPaste').addEventListener('click', () => { pasteModal.style.display = 'none'; });
 
-    if (btnProcessPaste) {
-      btnProcessPaste.addEventListener('click', () => {
-        const rawText = pasteTextarea.value.trim();
-        if (!rawText) { alert("Zone vide !"); return; }
-        const lines = rawText.split(/\r\n|\n/).filter(l => l.trim() !== '');
-        if (lines.length === 0) { alert("Aucune ligne détectée."); return; }
+    document.getElementById('btnProcessPaste').addEventListener('click', () => {
+      const rawText = document.getElementById('pasteTextarea').value.trim();
+      if (!rawText) { alert("Zone vide !"); return; }
+      const lines = rawText.split(/\r\n|\n/).filter(l => l.trim() !== '');
+      if (lines.length === 0) { alert("Aucune ligne détectée."); return; }
 
-        db.ref('commandes').once('value').then(snap => {
-          let existingData = snap.val() || {};
-          let groupCommandes = {};
-          Object.keys(existingData).forEach(k => { if (existingData[k]?.numero) groupCommandes[String(existingData[k].numero).trim()] = existingData[k]; });
+      db.ref('commandes').once('value').then(snap => {
+        let existingData = snap.val() || {};
+        let groupCommandes = {};
+        Object.keys(existingData).forEach(k => { if (existingData[k]?.numero) groupCommandes[String(existingData[k].numero).trim()] = existingData[k]; });
+        
+        let parsedCount = 0;
+        let photoLinkedCount = 0;
+
+        lines.forEach((line, i) => {
+          const cleanLine = line.trim();
+          if (!cleanLine) return;
+
+          const sep = cleanLine.includes('\t') ? '\t' : (cleanLine.includes(';') ? ';' : ',');
+          let parts = cleanLine.split(sep).map(c => c.trim().replace(/^"|"$/g, ''));
+          if (parts.length < 5) return;
+
+          const dateCSV = parts[0] || new Date().toLocaleDateString('fr-FR');
+          const numeroClean = String(parts[1] || 'VRAC').replace(/^N°\s*/i, '').trim();
+          const fournisseurCSV = String(parts[2] || '').trim();
+          const eanCSV = String(parts[3] || '').trim();
+          const refCSV = String(parts[4] || '').trim();
+          const remArtCSV = String(parts[5] || '').trim();
+          const qteRaw = parts[6];
+          const qteCSV = !isNaN(qteRaw) && qteRaw !== '' ? Number(qteRaw) : 1;
+
+          if (!refCSV) return;
+          parsedCount++;
+
+          let photoAuto = "";
+          const cleanRefKey = refCSV.trim();
+          const cleNorm = "REF_" + cleanRefKey.replace(/[.#$\/\[\]]/g, "_");
           
-          let parsedCount = 0;
-          let photoLinkedCount = 0;
-
-          lines.forEach((line, i) => {
-            const cleanLine = line.trim();
-            if (!cleanLine) return;
-
-            const sep = cleanLine.includes('\t') ? '\t' : (cleanLine.includes(';') ? ';' : ',');
-            let parts = cleanLine.split(sep).map(c => c.trim().replace(/^"|"$/g, ''));
-            if (parts.length < 5) return;
-
-            const dateCSV = parts[0] || new Date().toLocaleDateString('fr-FR');
-            const numeroClean = String(parts[1] || 'VRAC').replace(/^N°\s*/i, '').trim();
-            const fournisseurCSV = String(parts[2] || '').trim();
-            const eanCSV = String(parts[3] || '').trim();
-            const refCSV = String(parts[4] || '').trim();
-            const remArtCSV = String(parts[5] || '').trim();
-            const qteRaw = parts[6];
-            const qteCSV = !isNaN(qteRaw) && qteRaw !== '' ? Number(qteRaw) : 1;
-
-            if (!refCSV) return;
-            parsedCount++;
-
-            let photoAuto = "";
-            const cleanRefKey = refCSV.trim();
-            const cleNorm = "REF_" + cleanRefKey.replace(/[.#$\/\[\]]/g, "_");
-            
-            if (catalogueArticles[cleanRefKey]?.photo) {
-              photoAuto = catalogueArticles[cleanRefKey].photo;
-            } else if (catalogueArticles[cleNorm]?.photo) {
-              photoAuto = catalogueArticles[cleNorm].photo;
-            } else if (eanCSV && catalogueArticles[eanCSV]?.photo) {
-              photoAuto = catalogueArticles[eanCSV].photo;
-            } else {
-              for (let c of Object.values(groupCommandes)) {
-                if (c.articles) {
-                  const foundArt = c.articles.find(a => String(a.ref).trim() === cleanRefKey || (eanCSV && String(a.codeBarre).trim() === eanCSV));
-                  if (foundArt && foundArt.photo) { photoAuto = foundArt.photo; break; }
-                }
+          if (catalogueArticles[cleanRefKey]?.photo) {
+            photoAuto = catalogueArticles[cleanRefKey].photo;
+          } else if (catalogueArticles[cleNorm]?.photo) {
+            photoAuto = catalogueArticles[cleNorm].photo;
+          } else if (eanCSV && catalogueArticles[eanCSV]?.photo) {
+            photoAuto = catalogueArticles[eanCSV]?.photo;
+          } else {
+            for (let c of Object.values(groupCommandes)) {
+              if (c.articles) {
+                const foundArt = c.articles.find(a => String(a.ref).trim() === cleanRefKey || (eanCSV && String(a.codeBarre).trim() === eanCSV));
+                if (foundArt && foundArt.photo) { photoAuto = foundArt.photo; break; }
               }
             }
-            if (photoAuto) photoLinkedCount++;
+          }
+          if (photoAuto) photoLinkedCount++;
 
-            if (!groupCommandes[numeroClean]) {
-              groupCommandes[numeroClean] = { id: Date.now() + i, numero: numeroClean, date: dateCSV, urgente: false, articles: [] };
-            }
-            if (!groupCommandes[numeroClean].articles.some(a => String(a.ref).trim() === cleanRefKey)) {
-              groupCommandes[numeroClean].articles.push({ 
-                photo: photoAuto, fournisseur: fournisseurCSV, ref: cleanRefKey, codeBarre: eanCSV, quantite: qteCSV, remarqueArticle: remArtCSV 
-              });
-            }
-          });
-
-          const keys = Object.keys(groupCommandes);
-          if (keys.length > 0) {
-            const msg = `📊 RAPPORT COLLAGE EXCEL :\n` +
-                        `- ${parsedCount} lignes analysées\n` +
-                        `- 🖼️ ${photoLinkedCount} photos rattachées\n` +
-                        `- 📦 ${keys.length} commandes\n\n` +
-                        `Enregistrer ?`;
-            if (confirm(msg)) {
-              let updates = {}; keys.forEach(k => updates[groupCommandes[k].id] = groupCommandes[k]);
-              db.ref('commandes').update(updates).then(() => { 
-                alert("✅ Import réussi !"); 
-                pasteModal.style.display = 'none';
-                chargerToutesLesDonnees();
-              });
-            }
-          } else {
-            alert("⚠️ Impossible de lire les colonnes. Vérifie que tu as bien copié les lignes depuis Excel.");
+          if (!groupCommandes[numeroClean]) {
+            groupCommandes[numeroClean] = { id: Date.now() + i, numero: numeroClean, date: dateCSV, urgente: false, articles: [] };
+          }
+          if (!groupCommandes[numeroClean].articles.some(a => String(a.ref).trim() === cleanRefKey)) {
+            groupCommandes[numeroClean].articles.push({ 
+              photo: photoAuto, fournisseur: fournisseurCSV, ref: cleanRefKey, codeBarre: eanCSV, quantite: qteCSV, remarqueArticle: remArtCSV 
+            });
           }
         });
-      });
-    }
 
-    // --- EXPORT EXCEL NATIF PROPRE (.xls / .xlsx XML) ---
+        const keys = Object.keys(groupCommandes);
+        if (keys.length > 0) {
+          const msg = `📊 RAPPORT COLLAGE EXCEL :\n` +
+                      `- ${parsedCount} lignes analysées\n` +
+                      `- 🖼️ ${photoLinkedCount} photos rattachées\n` +
+                      `- 📦 ${keys.length} commandes\n\n` +
+                      `Enregistrer ?`;
+          if (confirm(msg)) {
+            let updates = {}; keys.forEach(k => updates[groupCommandes[k].id] = groupCommandes[k]);
+            db.ref('commandes').update(updates).then(() => { 
+              alert("✅ Import réussi !"); 
+              pasteModal.style.display = 'none';
+              chargerToutesLesDonnees();
+            });
+          }
+        } else {
+          alert("⚠️ Impossible de lire les colonnes. Vérifie que tu as bien copié les lignes depuis Excel.");
+        }
+      });
+    });
+
+    // --- EXPORT EXCEL ---
     const btnExportSheets = document.getElementById('btnExportSheets');
     if(btnExportSheets) {
       btnExportSheets.addEventListener('click', () => {
@@ -1026,7 +978,7 @@
       });
     }
 
-    btnExportPDF.addEventListener('click', () => {
+    document.getElementById('btnExportPDF').addEventListener('click', () => {
       const checked = document.querySelectorAll('.commande-select-checkbox:checked');
       let list = checked.length > 0 ? commandes.filter(c => Array.from(checked).map(cb => Number(cb.getAttribute('data-id'))).includes(c.id)) : commandes;
       if (list.length === 0) { alert("Rien à exporter."); return; }
