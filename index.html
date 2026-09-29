@@ -247,7 +247,9 @@
             </div>
           </div>
 
-          <div class="liste-commandes" id="galerieCommandes"></div>
+          <div class="liste-commandes" id="galerieCommandes">
+            <p style="text-align:center; color:var(--subtext); padding:1rem;">Chargement en cours...</p>
+          </div>
         </section>
       </div>
     </div>
@@ -403,12 +405,12 @@
       }
     });
 
-    // Clic sur le bouton de lancement (Garanti sans blocage)
+    // Lancement instantané et écoute en arrière-plan
     btnCommencer.addEventListener('click', () => {
       homeScreen.style.display = 'none';
       appScreen.style.display = 'block';
       reinitialiserFormulaire();
-      chargerToutesLesDonnees();
+      chargerDonneesEnTempsReel();
     });
 
     btnRetourAccueil.addEventListener('click', () => {
@@ -444,7 +446,19 @@
       return cmd;
     }
 
-    function chargerToutesLesDonnees() {
+    function chargerDonneesEnTempsReel() {
+      // Écoute directe et légère des commandes
+      db.ref('commandes').on('value', (snapshot) => {
+        const data = snapshot.val();
+        commandes = [];
+        if (data) {
+          if (Array.isArray(data)) { commandes = data.filter(Boolean).map(nettoyerCommandeObjet); }
+          else { Object.keys(data).forEach(key => { let cmd = data[key]; if (cmd) { if (!cmd.id) cmd.id = Number(key) || Date.now(); commandes.push(nettoyerCommandeObjet(cmd)); } }); }
+        }
+        trierEtAfficherGalerie();
+      });
+
+      // Chargement différé du catalogue photos pour ne pas bloquer l'affichage initial
       db.ref('catalogue_photos').once('value').then((snapshot) => {
         const data = snapshot.val() || {};
         Object.keys(data).forEach(cle => {
@@ -456,16 +470,6 @@
           }
         });
       }).catch(() => {});
-
-      db.ref('commandes').on('value', (snapshot) => {
-        const data = snapshot.val();
-        commandes = [];
-        if (data) {
-          if (Array.isArray(data)) { commandes = data.filter(Boolean).map(nettoyerCommandeObjet); }
-          else { Object.keys(data).forEach(key => { let cmd = data[key]; if (cmd) { if (!cmd.id) cmd.id = Number(key) || Date.now(); commandes.push(nettoyerCommandeObjet(cmd)); } }); }
-        }
-        trierEtAfficherGalerie();
-      });
     }
 
     function compresserImage(dataUrl, callback) {
@@ -691,9 +695,9 @@
           if (payload.catalogue_photos) updates['catalogue_photos'] = payload.catalogue_photos;
 
           if (!payload.commandes && !payload.catalogue_photos) {
-            db.ref('/').set(rawData).then(() => { alert("Restauration OK !"); chargerToutesLesDonnees(); }).catch(err => alert(err.message));
+            db.ref('/').set(rawData).then(() => { alert("Restauration OK !"); }).catch(err => alert(err.message));
           } else {
-            db.ref('/').update(updates).then(() => { alert("Restauration OK !"); chargerToutesLesDonnees(); }).catch(err => alert(err.message));
+            db.ref('/').update(updates).then(() => { alert("Restauration OK !"); }).catch(err => alert(err.message));
           }
         } catch { alert("JSON invalide"); }
       };
@@ -874,7 +878,7 @@
           } else if (catalogueArticles[cleNorm]?.photo) {
             photoAuto = catalogueArticles[cleNorm].photo;
           } else if (eanCSV && catalogueArticles[eanCSV]?.photo) {
-            photoAuto = catalogueArticles[eanCSV]?.photo;
+            photoAuto = catalogueArticles[eanCSV].photo;
           } else {
             for (let c of Object.values(groupCommandes)) {
               if (c.articles) {
@@ -907,7 +911,6 @@
             db.ref('commandes').update(updates).then(() => { 
               alert("✅ Import réussi !"); 
               pasteModal.style.display = 'none';
-              chargerToutesLesDonnees();
             });
           }
         } else {
