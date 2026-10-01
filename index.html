@@ -100,10 +100,11 @@
     .commande-item-compact:active { cursor: grabbing; }
     .commande-item-compact.dragging { opacity: 0.4; border: 2px dashed var(--primary); }
     .commande-item-compact.urgente { background: rgba(244, 63, 94, 0.12); border: 1px solid rgba(244, 63, 94, 0.5); }
+    .commande-item-compact.controle { background: rgba(2, 132, 199, 0.12); border: 1px solid rgba(2, 132, 199, 0.5); }
     
     .drag-handle { color: var(--subtext); font-size: 1.1rem; cursor: grab; padding: 0 0.1rem; font-weight: bold; }
-    .btn-urgent-toggle { background: none; border: none; font-size: 1.1rem; cursor: pointer; padding: 0.1rem; transition: transform 0.1s; }
-    .btn-urgent-toggle:active { transform: scale(1.2); }
+    .btn-urgent-toggle, .btn-controle-toggle { background: none; border: none; font-size: 1.1rem; cursor: pointer; padding: 0.1rem; transition: transform 0.1s; }
+    .btn-urgent-toggle:active, .btn-controle-toggle:active { transform: scale(1.2); }
 
     .commande-select-checkbox { width: 16px; height: 16px; cursor: pointer; accent-color: var(--primary); flex-shrink: 0; }
     .commande-main-btn { display: flex; align-items: center; gap: 0.5rem; flex-grow: 1; min-width: 0; cursor: pointer; }
@@ -448,6 +449,7 @@
       cmd.numero = cmd.numero !== undefined && cmd.numero !== null ? String(cmd.numero).trim() : '';
       cmd.date = String(cmd.date || '').trim();
       cmd.urgente = Boolean(cmd.urgente);
+      cmd.controle = Boolean(cmd.controle);
       return cmd;
     }
 
@@ -625,7 +627,15 @@
         btnEnregistrer.disabled = true; btnEnregistrer.textContent = "Enregistrement...";
         const idObjet = modeEditionId !== null ? modeEditionId : Date.now();
         const existingCmd = commandes.find(c => c.id === idObjet);
-        const commandeData = { id: idObjet, numero, articles: articlesList, date: existingCmd?.date || new Date().toLocaleDateString('fr-FR'), urgente: existingCmd?.urgente || false, isNew: false };
+        const commandeData = { 
+          id: idObjet, 
+          numero, 
+          articles: articlesList, 
+          date: existingCmd?.date || new Date().toLocaleDateString('fr-FR'), 
+          urgente: existingCmd?.urgente || false, 
+          controle: existingCmd?.controle || false,
+          isNew: false 
+        };
         db.ref('commandes/' + idObjet).set(commandeData).then(() => { reinitialiserFormulaire(); btnEnregistrer.disabled = false; }).catch(err => { btnEnregistrer.disabled = false; alert(err.message); });
       });
     });
@@ -666,6 +676,20 @@
           const newVal = !item.urgente;
           db.ref('commandes/' + id).update({ urgente: newVal }).then(() => {
             item.urgente = newVal;
+            trierEtAfficherGalerie();
+          });
+        }
+      });
+    };
+
+    window.basculerControle = function(id, event) {
+      if (event) event.stopPropagation();
+      requireAdmin(() => {
+        const item = commandes.find(c => c.id === id);
+        if (item) {
+          const newVal = !item.controle;
+          db.ref('commandes/' + id).update({ controle: newVal }).then(() => {
+            item.controle = newVal;
             trierEtAfficherGalerie();
           });
         }
@@ -728,7 +752,11 @@
       
       liste.forEach(cmd => {
         const item = document.createElement('div');
-        item.className = `commande-item-compact ${cmd.urgente ? 'urgente' : ''}`;
+        let cssClass = '';
+        if (cmd.urgente) cssClass = 'urgente';
+        else if (cmd.controle) cssClass = 'controle';
+        
+        item.className = `commande-item-compact ${cssClass}`;
         item.setAttribute('draggable', 'true');
         item.dataset.id = cmd.id;
 
@@ -740,11 +768,14 @@
           <button type="button" class="btn-urgent-toggle" onclick="basculerUrgence(${cmd.id}, event)" title="${cmd.urgente ? 'Marquer comme normal' : 'Marquer comme urgent'}">
             ${cmd.urgente ? '🔴' : '⚪'}
           </button>
+          <button type="button" class="btn-controle-toggle" onclick="basculerControle(${cmd.id}, event)" title="${cmd.controle ? 'Retirer le contrôle' : 'Marquer à contrôler'}">
+            ${cmd.controle ? '🔵' : '⚪'}
+          </button>
           <input type="checkbox" class="commande-select-checkbox" data-id="${cmd.id}" onclick="event.stopPropagation()">
           <div class="commande-main-btn" onclick='ouvrirModal(${JSON.stringify(cmd).replace(/'/g, "&#39;")})'>
             <span class="commande-articles-badge">${nbA} art.</span>
             <div style="min-width: 0; flex: 1;">
-              <div class="commande-num-badge">N° ${displayNum} ${cmd.urgente ? '⚠️' : ''}</div>
+              <div class="commande-num-badge">N° ${displayNum} ${cmd.urgente ? '⚠️' : ''} ${cmd.controle ? '🔍' : ''}</div>
               <div class="commande-date-compact">${cmd.date || ''}</div>
             </div>
           </div>
@@ -808,7 +839,7 @@
     dateFiltreExport.addEventListener('change', () => afficherGalerie(inputRecherche.value));
 
     window.ouvrirModal = function(cmd) {
-      modal.style.display = "flex"; modalTitleBadge.innerHTML = `📦 N° ${cmd.numero || ''} ${cmd.urgente ? '⚠️ (URGENT)' : ''}`; modalImagesRow.innerHTML = "";
+      modal.style.display = "flex"; modalTitleBadge.innerHTML = `📦 N° ${cmd.numero || ''} ${cmd.urgente ? '⚠️ (URGENT)' : ''} ${cmd.controle ? '🔍 (À CONTRÔLER)' : ''}`; modalImagesRow.innerHTML = "";
       cmd.articles?.forEach(art => {
         const box = document.createElement('div'); box.className = 'modal-photo-box';
         box.innerHTML = `${art.photo ? `<img src="${art.photo}">` : ''}${art.fournisseur?`<div class="modal-fournisseur-badge">Fournisseur: ${art.fournisseur}</div>`:''}${art.ref?`<div class="modal-ref-badge">Réf: ${art.ref}</div>`:''}<div style="display:flex;gap:0.4rem;flex-wrap:wrap;justify-content:center;">${art.codeBarre?`<span class="modal-barcode-badge">EAN: ${art.codeBarre}</span>`:''}<span class="modal-qty-badge">Qte: ${art.quantite||1}</span></div>${art.remarqueArticle?`<div class="modal-article-remarque-box">💬 ${art.remarqueArticle}</div>`:''}`;
@@ -823,7 +854,7 @@
     inputRecherche.addEventListener('input', executerRecherche);
     inputRecherche.addEventListener('keypress', (e) => { if (e.key === 'Enter') executerRecherche(); });
 
-    // --- COLLAGE EXCEL (AVEC CONSERVATION DE L'URGENCE) ---
+    // --- COLLAGE EXCEL (AVEC CONSERVATION DES STATUTS) ---
     const pasteModal = document.getElementById('pasteModal');
     const btnOpenPasteModal = document.getElementById('btnOpenPasteModal');
 
@@ -848,7 +879,6 @@
         let existingData = snap.val() || {};
         let groupCommandes = {};
         
-        // On récupère les commandes existantes pour préserver leur ID et leur état d'urgence (si déjà présentes)
         Object.keys(existingData).forEach(k => { 
           if (existingData[k]?.numero) {
             let numKey = String(existingData[k].numero).trim();
@@ -899,17 +929,14 @@
           }
           if (photoAuto) photoLinkedCount++;
 
-          // Si la commande existe déjà, on conserve son ID et son statut urgent existant. Sinon, on l'initialise.
           if (!groupCommandes[numeroClean]) {
-            groupCommandes[numeroClean] = { id: Date.now() + i, numero: numeroClean, date: dateCSV, urgente: false, articles: [] };
+            groupCommandes[numeroClean] = { id: Date.now() + i, numero: numeroClean, date: dateCSV, urgente: false, controle: false, articles: [] };
           }
 
-          // On s'assure que la liste d'articles existe
           if (!groupCommandes[numeroClean].articles) {
             groupCommandes[numeroClean].articles = [];
           }
 
-          // On ajoute l'article s'il n'est pas déjà présent en doublon dans la même commande
           if (!groupCommandes[numeroClean].articles.some(a => String(a.ref).trim() === cleanRefKey)) {
             groupCommandes[numeroClean].articles.push({ 
               photo: photoAuto, fournisseur: fournisseurCSV, ref: cleanRefKey, codeBarre: eanCSV, quantite: qteCSV, remarqueArticle: remArtCSV 
@@ -936,7 +963,7 @@
             });
           }
         } else {
-          alert("⚠️️ Impossible de lire les colonnes. Vérifie que tu as bien copié les lignes depuis Excel.");
+          alert("⚠️ Impossible de lire les colonnes. Vérifie que tu as bien copié les lignes depuis Excel.");
         }
       });
     });
@@ -962,6 +989,7 @@
             <tr>
               <th>Date</th>
               <th>Urgent</th>
+              <th>À Contrôler</th>
               <th>N° Commande</th>
               <th>Fournisseur</th>
               <th>Code-Barre (EAN)</th>
@@ -976,10 +1004,12 @@
           const date = cmd.date || "";
           const numero = cmd.numero || "";
           const statutUrgent = cmd.urgente ? "OUI" : "NON";
+          const statutControle = cmd.controle ? "OUI" : "NON";
           cmd.articles?.forEach(art => {
             tableHTML += `<tr>
               <td>${date}</td>
               <td>${statutUrgent}</td>
+              <td>${statutControle}</td>
               <td>${numero}</td>
               <td>${art.fournisseur || ""}</td>
               <td>${art.codeBarre || ""}</td>
@@ -1009,7 +1039,7 @@
       if (list.length === 0) { alert("Rien à exporter."); return; }
       let html = `<div class="print-title">Export Reliquats</div><div class="print-subtitle">Généré le ${new Date().toLocaleString('fr-FR')}</div><div class="print-grid">`;
       list.forEach(cmd => {
-        html += `<div class="print-card"><h3>Réf: ${cmd.numero} ${cmd.urgente ? '⚠️ URGENT' : ''}</h3><div class="date">${cmd.date}</div><div class="print-photos-flex">`;
+        html += `<div class="print-card"><h3>Réf: ${cmd.numero} ${cmd.urgente ? '⚠️ URGENT' : ''} ${cmd.controle ? '🔍 À CONTRÔLER' : ''}</h3><div class="date">${cmd.date}</div><div class="print-photos-flex">`;
         cmd.articles?.forEach(art => {
           html += `<div class="print-photo-print-item">${art.photo?`<img src="${art.photo}">`:''}<div style="font-size:10px;">${art.fournisseur ? `<b>Fournisseur:</b> ${art.fournisseur}<br>` : ''}<b>Réf:</b> ${art.ref} (Qté: ${art.quantite||1})</div></div>`;
         });
