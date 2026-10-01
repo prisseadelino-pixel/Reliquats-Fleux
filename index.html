@@ -8,6 +8,12 @@
   <link rel="icon" type="image/png" href="https://i49.servimg.com/u/f49/11/31/89/70/img_2010.jpg?v=2">
   <link rel="apple-touch-icon" href="https://i49.servimg.com/u/f49/11/31/89/70/img_2010.jpg?v=2">
   <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Reliquats Fleux">
+
+  <!-- Manifeste PWA dynamique pour l'installation sur mobile -->
+  <link rel="manifest" id="my-manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Reliquats%20Fleux%22%2C%22short_name%22%3A%22Reliquats%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23090d16%22%2C%22theme_color%22%3A%22%23ff6b00%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fi49.servimg.com%2Fu%2Ff49%2F11%2F31%2F89%2F70%2Fimg_2010.jpg%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fjpeg%22%7D%5D%7D">
 
   <style>
     :root[data-theme="dark"] {
@@ -367,7 +373,7 @@
     const btnToggleTheme = document.getElementById('btnToggleTheme');
     const savedTheme = localStorage.getItem('reliquats_theme') || 'dark';
     htmlRoot.setAttribute('data-theme', savedTheme);
-    btnToggleTheme.innerHTML = savedTheme === 'dark' ? "🌙 Mode Sombre (Actif)" : "☀️ Mode Clair (Actif)";
+    btnToggleTheme.innerHTML = savedTheme === 'dark' ? "🌙 Mode Sombre (Actif)" : "☀️️ Mode Clair (Actif)";
 
     btnToggleTheme.addEventListener('click', () => {
       const currentTheme = htmlRoot.getAttribute('data-theme');
@@ -405,7 +411,6 @@
       }
     });
 
-    // Lancement instantané et écoute en arrière-plan
     btnCommencer.addEventListener('click', () => {
       homeScreen.style.display = 'none';
       appScreen.style.display = 'block';
@@ -447,7 +452,6 @@
     }
 
     function chargerDonneesEnTempsReel() {
-      // Écoute directe et légère des commandes
       db.ref('commandes').on('value', (snapshot) => {
         const data = snapshot.val();
         commandes = [];
@@ -458,7 +462,6 @@
         trierEtAfficherGalerie();
       });
 
-      // Chargement différé du catalogue photos pour ne pas bloquer l'affichage initial
       db.ref('catalogue_photos').once('value').then((snapshot) => {
         const data = snapshot.val() || {};
         Object.keys(data).forEach(cle => {
@@ -643,7 +646,7 @@
         modeEditionId = id; inputNumero.value = String(item.numero || '').trim(); articlesContainer.innerHTML = "";
         item.articles?.forEach(art => ajouterBlocArticle(art));
         btnEnregistrer.textContent = "💾 Sauvegarder les modifications"; btnAnnulerEdit.style.display = "inline-block";
-        formTitle.textContent = "✏️ Modifier le reliquat " + inputNumero.value; window.scrollTo({ top: 0, behavior: 'smooth' });
+        formTitle.textContent = "✏️️ Modifier le reliquat " + inputNumero.value; window.scrollTo({ top: 0, behavior: 'smooth' });
       });
     };
 
