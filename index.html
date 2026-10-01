@@ -373,7 +373,7 @@
     const btnToggleTheme = document.getElementById('btnToggleTheme');
     const savedTheme = localStorage.getItem('reliquats_theme') || 'dark';
     htmlRoot.setAttribute('data-theme', savedTheme);
-    btnToggleTheme.innerHTML = savedTheme === 'dark' ? "🌙 Mode Sombre (Actif)" : "☀️️ Mode Clair (Actif)";
+    btnToggleTheme.innerHTML = savedTheme === 'dark' ? "🌙 Mode Sombre (Actif)" : "☀️ Mode Clair (Actif)";
 
     btnToggleTheme.addEventListener('click', () => {
       const currentTheme = htmlRoot.getAttribute('data-theme');
@@ -646,7 +646,7 @@
         modeEditionId = id; inputNumero.value = String(item.numero || '').trim(); articlesContainer.innerHTML = "";
         item.articles?.forEach(art => ajouterBlocArticle(art));
         btnEnregistrer.textContent = "💾 Sauvegarder les modifications"; btnAnnulerEdit.style.display = "inline-block";
-        formTitle.textContent = "✏️️ Modifier le reliquat " + inputNumero.value; window.scrollTo({ top: 0, behavior: 'smooth' });
+        formTitle.textContent = "✏️ Modifier le reliquat " + inputNumero.value; window.scrollTo({ top: 0, behavior: 'smooth' });
       });
     };
 
@@ -823,7 +823,7 @@
     inputRecherche.addEventListener('input', executerRecherche);
     inputRecherche.addEventListener('keypress', (e) => { if (e.key === 'Enter') executerRecherche(); });
 
-    // --- COLLAGE EXCEL ---
+    // --- COLLAGE EXCEL (AVEC CONSERVATION DE L'URGENCE) ---
     const pasteModal = document.getElementById('pasteModal');
     const btnOpenPasteModal = document.getElementById('btnOpenPasteModal');
 
@@ -847,7 +847,14 @@
       db.ref('commandes').once('value').then(snap => {
         let existingData = snap.val() || {};
         let groupCommandes = {};
-        Object.keys(existingData).forEach(k => { if (existingData[k]?.numero) groupCommandes[String(existingData[k].numero).trim()] = existingData[k]; });
+        
+        // On récupère les commandes existantes pour préserver leur ID et leur état d'urgence (si déjà présentes)
+        Object.keys(existingData).forEach(k => { 
+          if (existingData[k]?.numero) {
+            let numKey = String(existingData[k].numero).trim();
+            groupCommandes[numKey] = existingData[k]; 
+          }
+        });
         
         let parsedCount = 0;
         let photoLinkedCount = 0;
@@ -892,9 +899,17 @@
           }
           if (photoAuto) photoLinkedCount++;
 
+          // Si la commande existe déjà, on conserve son ID et son statut urgent existant. Sinon, on l'initialise.
           if (!groupCommandes[numeroClean]) {
             groupCommandes[numeroClean] = { id: Date.now() + i, numero: numeroClean, date: dateCSV, urgente: false, articles: [] };
           }
+
+          // On s'assure que la liste d'articles existe
+          if (!groupCommandes[numeroClean].articles) {
+            groupCommandes[numeroClean].articles = [];
+          }
+
+          // On ajoute l'article s'il n'est pas déjà présent en doublon dans la même commande
           if (!groupCommandes[numeroClean].articles.some(a => String(a.ref).trim() === cleanRefKey)) {
             groupCommandes[numeroClean].articles.push({ 
               photo: photoAuto, fournisseur: fournisseurCSV, ref: cleanRefKey, codeBarre: eanCSV, quantite: qteCSV, remarqueArticle: remArtCSV 
@@ -910,14 +925,18 @@
                       `- 📦 ${keys.length} commandes\n\n` +
                       `Enregistrer ?`;
           if (confirm(msg)) {
-            let updates = {}; keys.forEach(k => updates[groupCommandes[k].id] = groupCommandes[k]);
+            let updates = {}; 
+            keys.forEach(k => {
+              let cmdObj = groupCommandes[k];
+              updates[cmdObj.id] = cmdObj;
+            });
             db.ref('commandes').update(updates).then(() => { 
               alert("✅ Import réussi !"); 
               pasteModal.style.display = 'none';
             });
           }
         } else {
-          alert("⚠️ Impossible de lire les colonnes. Vérifie que tu as bien copié les lignes depuis Excel.");
+          alert("⚠️️ Impossible de lire les colonnes. Vérifie que tu as bien copié les lignes depuis Excel.");
         }
       });
     });
