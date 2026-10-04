@@ -63,7 +63,7 @@
     .header-brand img { height: 52px !important; width: auto !important; max-width: 100%; object-fit: contain; }
     .header-controls { display: flex; flex-direction: column; align-items: flex-end; position: relative; gap: 0.3rem; flex-shrink: 0; }
     .btn-nav-home, .btn-menu-hamburger { background: var(--card-bg); border: 1px solid var(--border); color: var(--text); padding: 0.5rem 0.75rem; border-radius: 8px; cursor: pointer; font-weight: 600; }
-    .dropdown-menu { display: none; position: absolute; top: 100%; right: 0; background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); z-index: 100; min-width: 230px; margin-top: 0.4rem; }
+    .dropdown-menu { display: none; position: absolute; top: 100%; right: 0; background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); z-index: 100; min-width: 250px; margin-top: 0.4rem; }
     .dropdown-menu.show { display: block; }
     .dropdown-item { width: 100%; padding: 0.75rem 1rem; text-align: left; background: none; border: none; font-size: 0.95rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; color: var(--text); }
     .dropdown-item.danger { color: #f43f5e; }
@@ -186,7 +186,7 @@
           <button class="dropdown-item" id="btnToggleAdmin" type="button">🔒 Mode Admin : OFF</button>
           
           <div id="adminMenuOptions" style="display: none;">
-            <button class="dropdown-item" id="btnExportBackup" type="button" style="color: #0284c7;">💾 Exporter une sauvegarde</button>
+            <button class="dropdown-item" id="btnExportBackup" type="button" style="color: #0284c7;">💾 Exporter sauvegarde (.JSON)</button>
             <button class="dropdown-item" id="btnImportBackup" type="button" style="color: #8b5cf6;">📥 Restaurer une sauvegarde</button>
             <input type="file" id="fileRestoreJson" accept=".json" style="display: none;">
             <button class="dropdown-item danger" id="btnViderHistorique" type="button">🗑️ Vider l'historique</button>
@@ -244,7 +244,7 @@
             <span class="export-filter-label">📅 Filtrer par date ou sélection pour l'export :</span>
             <div class="export-actions-row">
               <input type="date" id="dateFiltreExport" class="input-date-custom">
-              <button class="btn-select-all" id="btnSelectAll" type="button">☑️ Tout cocher</button>
+              <button class="btn-select-all" id="btnSelectAll" type="button">☑️️ Tout cocher</button>
               <button class="btn-pdf" id="btnExportPDF" type="button">📄 Exporter PDF</button>
               
               <div id="adminExportOptions" style="display: none; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
@@ -656,7 +656,7 @@
         modeEditionId = id; inputNumero.value = String(item.numero || '').trim(); articlesContainer.innerHTML = "";
         item.articles?.forEach(art => ajouterBlocArticle(art));
         btnEnregistrer.textContent = "💾 Sauvegarder les modifications"; btnAnnulerEdit.style.display = "inline-block";
-        formTitle.textContent = "✏️ Modifier le reliquat " + inputNumero.value; window.scrollTo({ top: 0, behavior: 'smooth' });
+        formTitle.textContent = "✏️️ Modifier le reliquat " + inputNumero.value; window.scrollTo({ top: 0, behavior: 'smooth' });
       });
     };
 
