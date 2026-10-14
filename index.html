@@ -104,7 +104,7 @@
     
     .drag-handle { color: var(--subtext); font-size: 1.1rem; cursor: grab; padding: 0 0.1rem; font-weight: bold; }
     
-    /* Boutons textuels explicites pour Urgent et Contrôle */
+    /* Boutons textuels explicites */
     .btn-status-toggle { background: var(--card-bg); border: 1px solid var(--border); color: var(--subtext); padding: 0.3rem 0.5rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 0.25rem; white-space: nowrap; transition: all 0.1s; }
     .btn-status-toggle:active { transform: scale(0.95); }
     .btn-status-toggle.active-urgent { background: rgba(244, 63, 94, 0.25); border-color: #f43f5e; color: #f43f5e; }
@@ -684,8 +684,13 @@
         const item = commandes.find(c => c.id === id);
         if (item) {
           const newVal = !item.urgente;
-          db.ref('commandes/' + id).update({ urgente: newVal }).then(() => {
+          // Si on met en urgent, on désactive le contrôle pour éviter les conflits
+          const updates = { urgente: newVal };
+          if (newVal) updates.controle = false;
+          
+          db.ref('commandes/' + id).update(updates).then(() => {
             item.urgente = newVal;
+            if (newVal) item.controle = false;
             trierEtAfficherGalerie();
           });
         }
@@ -698,8 +703,13 @@
         const item = commandes.find(c => c.id === id);
         if (item) {
           const newVal = !item.controle;
-          db.ref('commandes/' + id).update({ controle: newVal }).then(() => {
+          // Si on met à contrôler, on désactive l'urgence
+          const updates = { controle: newVal };
+          if (newVal) updates.urgente = false;
+
+          db.ref('commandes/' + id).update(updates).then(() => {
             item.controle = newVal;
+            if (newVal) item.urgente = false;
             trierEtAfficherGalerie();
           });
         }
@@ -773,12 +783,16 @@
         const nbA = cmd.articles?.reduce((acc, a) => acc + (Number(a.quantite)||1), 0)||0;
         const displayNum = cmd.numero || 'Sans numéro';
         
+        // Gestion de l'affichage mutuel des boutons : si urgent est actif, on cache contrôle, et inversement
+        const displayUrgentBtn = cmd.controle ? 'style="display:none;"' : '';
+        const displayControleBtn = cmd.urgente ? 'style="display:none;"' : '';
+
         item.innerHTML = `
           <span class="drag-handle" title="Glisser pour réorganiser">☰</span>
-          <button type="button" class="btn-status-toggle ${cmd.urgente ? 'active-urgent' : ''}" onclick="basculerUrgence(${cmd.id}, event)" title="Basculer l'état urgent">
+          <button type="button" class="btn-status-toggle ${cmd.urgente ? 'active-urgent' : ''}" onclick="basculerUrgence(${cmd.id}, event)" title="Basculer l'état urgent" ${displayUrgentBtn}>
             🔴 Urgent
           </button>
-          <button type="button" class="btn-status-toggle ${cmd.controle ? 'active-controle' : ''}" onclick="basculerControle(${cmd.id}, event)" title="Basculer l'état à contrôler">
+          <button type="button" class="btn-status-toggle ${cmd.controle ? 'active-controle' : ''}" onclick="basculerControle(${cmd.id}, event)" title="Basculer l'état à contrôler" ${displayControleBtn}>
             🔵 Contrôler
           </button>
           <input type="checkbox" class="commande-select-checkbox" data-id="${cmd.id}" onclick="event.stopPropagation()">
