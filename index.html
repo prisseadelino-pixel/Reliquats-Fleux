@@ -208,7 +208,8 @@
           </div>
         </section>
 
-        <section class="card" id="sectionPreparation">
+        <!-- Section de préparation : masquée par défaut, visible uniquement en Mode Admin -->
+        <section class="card" id="sectionPreparation" style="display: none;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
             <h2 id="formTitle" style="font-size: 1.1rem; color:var(--primary);">Nvx reliquats</h2>
             <button type="button" id="btnNouvelleCommande" style="background:var(--primary); color:white; border:none; padding:0.4rem 0.8rem; border-radius:8px; font-weight:700; cursor:pointer; font-size:0.85rem;">➕ Nvx reliquats</button>
@@ -359,6 +360,7 @@
         btnToggleAdmin.style.color = "#16a34a";
         document.getElementById('adminMenuOptions').style.display = "block";
         document.getElementById('adminExportOptions').style.display = "inline-flex";
+        document.getElementById('sectionPreparation').style.display = "block";
         if (adminCallback) { const cb = adminCallback; adminCallback = null; cb(true); }
       } else {
         alert("❌ Code incorrect !");
@@ -404,13 +406,20 @@
     btnToggleAdmin.addEventListener('click', () => {
       dropdownMenu.classList.remove('show');
       if (!estAdmin) {
-        ouvrirModaleAdmin((succ) => { if (succ) { alert("✅ Mode Admin ON"); afficherGalerie(document.getElementById('recherche').value); } });
+        ouvrirModaleAdmin((succ) => { 
+          if (succ) { 
+            alert("✅ Mode Admin ON"); 
+            document.getElementById('sectionPreparation').style.display = "block";
+            afficherGalerie(document.getElementById('recherche').value); 
+          } 
+        });
       } else {
         estAdmin = false;
         btnToggleAdmin.innerHTML = "🔒 Mode Admin : OFF";
         btnToggleAdmin.style.color = "var(--text)";
         document.getElementById('adminMenuOptions').style.display = "none";
         document.getElementById('adminExportOptions').style.display = "none";
+        document.getElementById('sectionPreparation').style.display = "none";
         alert("🔒 Mode Admin OFF");
         afficherGalerie(document.getElementById('recherche').value);
       }
