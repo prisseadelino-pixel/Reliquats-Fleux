@@ -193,9 +193,6 @@
           <button class="dropdown-item" id="btnToggleAdmin" type="button">🔒 Mode Admin : OFF</button>
           
           <div id="adminMenuOptions" style="display: none;">
-            <button class="dropdown-item" id="btnExportBackup" type="button" style="color: #0284c7;">💾 Exporter sauvegarde (.JSON)</button>
-            <button class="dropdown-item" id="btnImportBackup" type="button" style="color: #8b5cf6;">📥 Restaurer une sauvegarde</button>
-            <input type="file" id="fileRestoreJson" accept=".json" style="display: none;">
             <button class="dropdown-item danger" id="btnViderHistorique" type="button">🗑️ Vider l'historique</button>
           </div>
         </div>
@@ -716,41 +713,6 @@
         }
       });
     };
-
-    document.getElementById('btnExportBackup').addEventListener('click', () => {
-      dropdownMenu.classList.remove('show');
-      requireAdmin(() => {
-        db.ref('/').once('value').then(snap => {
-          const blob = new Blob([JSON.stringify(snap.val() || {}, null, 2)], { type: "application/json;charset=utf-8;" });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a'); a.href = url; a.download = `backup_${new Date().toISOString().slice(0,10)}.json`; document.body.appendChild(a); a.click(); document.body.removeChild(a);
-        });
-      });
-    });
-
-    document.getElementById('btnImportBackup').addEventListener('click', () => { dropdownMenu.classList.remove('show'); requireAdmin(() => document.getElementById('fileRestoreJson').click()); });
-    
-    document.getElementById('fileRestoreJson').addEventListener('change', (e) => {
-      const file = e.target.files[0]; if (!file) return;
-      const reader = new FileReader();
-      reader.onload = (evt) => {
-        try {
-          const rawData = JSON.parse(evt.target.result);
-          const payload = (rawData.commandes || rawData.catalogue_photos) ? rawData : { commandes: rawData.commandes || {}, catalogue_photos: rawData.catalogue_photos || {} };
-          
-          let updates = {};
-          if (payload.commandes) updates['commandes'] = payload.commandes;
-          if (payload.catalogue_photos) updates['catalogue_photos'] = payload.catalogue_photos;
-
-          if (!payload.commandes && !payload.catalogue_photos) {
-            db.ref('/').set(rawData).then(() => { alert("Restauration OK !"); }).catch(err => alert(err.message));
-          } else {
-            db.ref('/').update(updates).then(() => { alert("Restauration OK !"); }).catch(err => alert(err.message));
-          }
-        } catch { alert("JSON invalide"); }
-      };
-      reader.readAsText(file);
-    });
 
     document.getElementById('btnViderHistorique').addEventListener('click', () => { dropdownMenu.classList.remove('show'); requireAdmin(() => { if (confirm("Effacer tout ?")) db.ref('commandes').remove(); }); });
 
