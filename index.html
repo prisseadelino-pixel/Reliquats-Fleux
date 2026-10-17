@@ -1062,7 +1062,7 @@
       list.forEach(cmd => {
         html += `<div class="print-card"><h3>Réf: ${cmd.numero} ${cmd.urgente ? '⚠️ URGENT' : ''} ${cmd.controle ? '🔍 À CONTRÔLER' : ''}</h3><div class="date">${cmd.date}</div><div class="print-photos-flex">`;
         cmd.articles?.forEach(art => {
-          html += `<div class="print-photo-print-item">${art.photo?`<img src="${art.photo}">`:''}<div style="font-size:10px;">${art.fournisseur ? `<b>Fournisseur:</b> ${art.fournisseur}<br>` : ''}<b>Réf:</b> ${art.ref} (Qté: ${art.quantite||1})</div></div>`;
+          html += `<div class="print-photo-print-item">${art.photo?`<img src="${art.photo}">`:''}<div style="font-size:10px;">${art.fournisseur ? `<b>Fournisseur:</b> ${art.fournisseur}<br>` : ''}<b>Réf:</b> ${art.ref}<br>${art.codeBarre ? `<b>EAN:</b> ${art.codeBarre}<br>` : ''}(Qté: ${art.quantite||1})</div></div>`;
         });
         html += `</div></div>`;
       });
