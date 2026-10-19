@@ -88,7 +88,7 @@
     .export-filter-container { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.75rem; background: var(--container-bg); padding: 0.75rem; border-radius: 10px; border: 1px solid var(--border); }
     .export-filter-label { font-size: 0.85rem; font-weight: 700; color: var(--subtext); }
     .export-actions-row { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
-    .input-date-custom { flex: 1; min-width: 130px; border: 1px solid var(--border); border-radius: 8px; padding: 0.5rem; font-size: 0.85rem; color: var(--text); background: var(--input-bg); }
+    .input-date-custom { flex: 1; min-width: 120px; border: 1px solid var(--border); border-radius: 8px; padding: 0.5rem; font-size: 0.85rem; color: var(--text); background: var(--input-bg); text-align: center; }
     button.btn-pdf { background-color: #0284c7; color: white; border: none; padding: 0.6rem 0.85rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
     button.btn-select-all { background-color: var(--secondary); color: var(--text); border: 1px solid var(--border); padding: 0.6rem 0.85rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
     button.btn-sheets { background-color: #16a34a; color: white; border: none; padding: 0.6rem 0.85rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
@@ -265,11 +265,11 @@
           </div>
 
           <div class="export-filter-container">
-            <span class="export-filter-label">📅 Filtrer par période (Du... Au...) :</span>
+            <span class="export-filter-label">📅 Filtrer par période (JJ/MM/AAAA) :</span>
             <div class="export-actions-row">
-              <input type="date" id="dateDebutFiltre" class="input-date-custom" title="Date de début">
+              <input type="text" id="dateDebutFiltre" class="input-date-custom" placeholder="JJ/MM/AAAA" autocomplete="off">
               <span style="font-size:0.8rem; color:var(--subtext);">au</span>
-              <input type="date" id="dateFinFiltre" class="input-date-custom" title="Date de fin">
+              <input type="text" id="dateFinFiltre" class="input-date-custom" placeholder="JJ/MM/AAAA" autocomplete="off">
               <button class="btn-select-all" id="btnSelectAll" type="button">☑️ Tout cocher</button>
               <button class="btn-pdf" id="btnExportPDF" type="button">📄 Exporter PDF</button>
               
@@ -627,12 +627,43 @@
 
     function convertirDateEnTimestamp(dateStr) {
       if (!dateStr) return 0;
-      if (dateStr.includes('/')) {
-        const parts = dateStr.split('/');
-        if (parts.length !== 3) return 0;
-        return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`).getTime() || 0;
+      let clean = dateStr.trim();
+      // Format JJ/MM/AAAA
+      if (clean.includes('/')) {
+        const parts = clean.split('/');
+        if (parts.length === 3) {
+          return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`).getTime() || 0;
+        }
       }
-      return new Date(dateStr).getTime() || 0;
+      // Format AAAA-MM-JJ
+      if (clean.includes('-')) {
+        const parts = clean.split('-');
+        if (parts.length === 3 && parts[0].length === 4) {
+          return new Date(clean).getTime() || 0;
+        } else if (parts.length === 3 && parts[2].length === 4) {
+          return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`).getTime() || 0;
+        }
+      }
+      return 0;
+    }
+
+    function parserDateSaisie(val) {
+      if (!val) return null;
+      let clean = val.trim();
+      // Si saisi au format JJ/MM/AAAA
+      if (clean.includes('/')) {
+        const p = clean.split('/');
+        if (p.length === 3 && p[2].length === 4) {
+          return new Date(`${p[2]}-${p[1]}-${p[0]}`).setHours(0,0,0,0);
+        }
+      }
+      // Si format standard AAAA-MM-JJ
+      let d = new Date(clean);
+      if (!isNaN(d.getTime())) {
+        d.setHours(0,0,0,0);
+        return d.getTime();
+      }
+      return null;
     }
 
     function trierEtAfficherGalerie() {
@@ -751,8 +782,9 @@
       const debutVal = dateDebutFiltre ? dateDebutFiltre.value : "";
       const finVal = dateFinFiltre ? dateFinFiltre.value : "";
       
-      const timeDebut = debutVal ? new Date(debutVal).setHours(0,0,0,0) : null;
-      const timeFin = finVal ? new Date(finVal).setHours(23,59,59,999) : null;
+      const timeDebut = parserDateSaisie(debutVal);
+      let timeFin = parserDateSaisie(finVal);
+      if (timeFin) timeFin += 86399999; // Fin de journée
 
       return commandes.filter(c => {
         if (!c) return false;
@@ -889,8 +921,8 @@
       document.getElementById('btnSelectAll').innerHTML = toutCoche ? "☑️ Tout décocher" : "☑️ Tout cocher";
     });
     
-    dateDebutFiltre.addEventListener('change', () => afficherGalerie(inputRecherche.value));
-    dateFinFiltre.addEventListener('change', () => afficherGalerie(inputRecherche.value));
+    dateDebutFiltre.addEventListener('input', () => afficherGalerie(inputRecherche.value));
+    dateFinFiltre.addEventListener('input', () => afficherGalerie(inputRecherche.value));
 
     window.ouvrirModal = function(cmd) {
       modal.style.display = "flex"; 
