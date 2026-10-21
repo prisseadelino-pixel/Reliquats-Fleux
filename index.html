@@ -222,7 +222,7 @@
       <div class="column-left">
         <section class="card" style="padding: 1rem;">
           <div class="search-box">
-            <input type="text" id="recherche" placeholder="🔍 Rechercher par numéro, fournisseur..." autocomplete="off">
+            <input type="text" id="recherche" placeholder="🔍 Rechercher (n° boutique, commande, réf...)" autocomplete="off">
             <button type="button" class="btn-search" id="btnLancerRecherche">Rechercher</button>
           </div>
         </section>
@@ -232,6 +232,11 @@
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
             <h2 id="formTitle" style="font-size: 1.1rem; color:var(--primary);">Nvx reliquats</h2>
             <button type="button" id="btnNouvelleCommande" style="background:var(--primary); color:white; border:none; padding:0.4rem 0.8rem; border-radius:8px; font-weight:700; cursor:pointer; font-size:0.85rem;">➕ Nvx reliquats</button>
+          </div>
+
+          <div class="form-group">
+            <label for="inputBoutique">N° Boutique</label>
+            <input type="text" id="inputBoutique" placeholder="Ex: 001, 002...">
           </div>
 
           <div class="form-group">
@@ -294,7 +299,7 @@
   <div id="pasteModal" class="modal" style="display: none; z-index: 3000;">
     <div style="background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; width: 90%; max-width: 600px; display: flex; flex-direction: column; gap: 1rem; margin: auto;">
       <h3 style="color: var(--primary); font-size: 1.1rem;">📋 Coller un tableau Excel</h3>
-      <p style="font-size: 0.85rem; color: var(--subtext);">Copie tes lignes Excel (Date | N° Commande | Fournisseur | EAN | Référence | Remarque | Quantité) et colle-les ci-dessous :</p>
+      <p style="font-size: 0.85rem; color: var(--subtext);">Colle directement les lignes de ton tableau Excel (les 8 colonnes seront lues automatiquement dans l'ordre de ton fichier : Date, N° Commande, Fournisseur, EAN, Réf, Désignation, Qté, Boutique) :</p>
       <textarea id="pasteTextarea" rows="8" placeholder="Colle ton tableau ici (Ctrl+V)..." style="width: 100%; font-family: monospace; font-size: 0.85rem; padding: 0.5rem;"></textarea>
       <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
         <button type="button" class="btn-secondary" id="btnCancelPaste" style="width: auto;">Annuler</button>
@@ -462,6 +467,7 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
+    const inputBoutique = document.getElementById('inputBoutique');
     const inputNumero = document.getElementById('numeroCommande');
     const btnNouvelleCommande = document.getElementById('btnNouvelleCommande');
     const articlesContainer = document.getElementById('articlesContainer');
@@ -482,6 +488,7 @@
 
     function nettoyerCommandeObjet(cmd) {
       if (!cmd) return cmd;
+      cmd.boutique = String(cmd.boutique || '').trim();
       cmd.numero = cmd.numero !== undefined && cmd.numero !== null ? String(cmd.numero).trim() : '';
       cmd.date = String(cmd.date || '').trim();
       cmd.urgente = Boolean(cmd.urgente);
@@ -627,15 +634,18 @@
 
     function convertirDateEnTimestamp(dateStr) {
       if (!dateStr) return 0;
-      let clean = dateStr.trim();
-      // Format JJ/MM/AAAA
+      let clean = String(dateStr).trim();
+      // Si format Excel sérialisé (nombre)
+      if (!isNaN(clean) && clean.length === 5) {
+        const utcDays = Math.floor(Number(clean) - 25569);
+        return utcDays * 86400 * 1000;
+      }
       if (clean.includes('/')) {
         const parts = clean.split('/');
         if (parts.length === 3) {
           return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`).getTime() || 0;
         }
       }
-      // Format AAAA-MM-JJ
       if (clean.includes('-')) {
         const parts = clean.split('-');
         if (parts.length === 3 && parts[0].length === 4) {
@@ -647,17 +657,32 @@
       return 0;
     }
 
+    function formaterDateExcel(dateVal) {
+      if (!dateVal) return new Date().toLocaleDateString('fr-FR');
+      let str = String(dateVal).trim();
+      if (!isNaN(str) && str.length === 5) {
+        const d = new Date((Number(str) - (25569)) * 86400 * 1000);
+        return d.toLocaleDateString('fr-FR');
+      }
+      if (str.includes(' 00:00:00')) {
+        str = str.split(' ')[0];
+      }
+      if (str.includes('-') && str.split('-')[0].length === 4) {
+        const p = str.split('-');
+        return `${p[2]}/${p[1]}/${p[0]}`;
+      }
+      return str;
+    }
+
     function parserDateSaisie(val) {
       if (!val) return null;
       let clean = val.trim();
-      // Si saisi au format JJ/MM/AAAA
       if (clean.includes('/')) {
         const p = clean.split('/');
         if (p.length === 3 && p[2].length === 4) {
           return new Date(`${p[2]}-${p[1]}-${p[0]}`).setHours(0,0,0,0);
         }
       }
-      // Si format standard AAAA-MM-JJ
       let d = new Date(clean);
       if (!isNaN(d.getTime())) {
         d.setHours(0,0,0,0);
@@ -692,6 +717,7 @@
 
     btnEnregistrer.addEventListener('click', () => {
       requireAdmin(() => {
+        const boutique = inputBoutique.value.trim();
         const numero = inputNumero.value.trim();
         const blocsArticles = articlesContainer.querySelectorAll('.article-block');
         if (!numero || blocsArticles.length === 0) { alert("Numéro et au moins 1 article requis."); return; }
@@ -701,6 +727,7 @@
         const existingCmd = commandes.find(c => c.id === idObjet);
         const commandeData = { 
           id: idObjet, 
+          boutique,
           numero, 
           articles: articlesList, 
           date: existingCmd?.date || new Date().toLocaleDateString('fr-FR'), 
@@ -713,7 +740,10 @@
     });
 
     function reinitialiserFormulaire() {
-      modeEditionId = null; inputNumero.value = ""; articlesContainer.innerHTML = "";
+      modeEditionId = null; 
+      inputBoutique.value = "";
+      inputNumero.value = ""; 
+      articlesContainer.innerHTML = "";
       btnEnregistrer.textContent = "Enregistrer les reliquats"; btnEnregistrer.disabled = false;
       btnAnnulerEdit.style.display = "none"; formTitle.textContent = "Nvx reliquats";
     }
@@ -725,7 +755,10 @@
       if (event) event.stopPropagation();
       requireAdmin(() => {
         const item = commandes.find(c => c.id === id); if (!item) return;
-        modeEditionId = id; inputNumero.value = String(item.numero || '').trim(); articlesContainer.innerHTML = "";
+        modeEditionId = id; 
+        inputBoutique.value = String(item.boutique || '').trim();
+        inputNumero.value = String(item.numero || '').trim(); 
+        articlesContainer.innerHTML = "";
         item.articles?.forEach(art => ajouterBlocArticle(art));
         btnEnregistrer.textContent = "💾 Sauvegarder les modifications"; btnAnnulerEdit.style.display = "inline-block";
         formTitle.textContent = "✏️ Modifier le reliquat " + inputNumero.value; window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -784,12 +817,11 @@
       
       const timeDebut = parserDateSaisie(debutVal);
       let timeFin = parserDateSaisie(finVal);
-      if (timeFin) timeFin += 86399999; // Fin de journée
+      if (timeFin) timeFin += 86399999;
 
       return commandes.filter(c => {
         if (!c) return false;
         
-        // Filtre par période
         if (timeDebut || timeFin) {
           const cTime = convertirDateEnTimestamp(c.date);
           if (cTime) {
@@ -800,16 +832,17 @@
           }
         }
 
-        // Filtre par texte (recherche)
         const fStr = String(searchFilter || '').toLowerCase();
         if (fStr) {
+          const matchBoutique = String(c.boutique || '').toLowerCase().includes(fStr);
           const matchNum = String(c.numero || '').toLowerCase().includes(fStr);
           const matchArt = c.articles?.some(a => 
             String(a.fournisseur||'').toLowerCase().includes(fStr) || 
             String(a.ref||'').toLowerCase().includes(fStr) || 
-            String(a.codeBarre||'').toLowerCase().includes(fStr)
+            String(a.codeBarre||'').toLowerCase().includes(fStr) ||
+            String(a.remarqueArticle||'').toLowerCase().includes(fStr)
           );
-          if (!matchNum && !matchArt) return false;
+          if (!matchBoutique && !matchNum && !matchArt) return false;
         }
 
         return true;
@@ -835,6 +868,7 @@
 
         const nbA = cmd.articles?.reduce((acc, a) => acc + (Number(a.quantite)||1), 0)||0;
         const displayNum = cmd.numero || 'Sans numéro';
+        const displayBoutique = cmd.boutique ? `[Boutique ${cmd.boutique}] ` : '';
         
         const displayUrgentBtn = cmd.controle ? 'style="display:none;"' : '';
         const displayControleBtn = cmd.urgente ? 'style="display:none;"' : '';
@@ -844,7 +878,7 @@
             <span class="drag-handle" title="Glisser pour réorganiser">☰</span>
             <div class="commande-main-btn" onclick='ouvrirModal(${JSON.stringify(cmd).replace(/'/g, "&#39;")})'>
               <div style="min-width: 0; flex: 1;">
-                <div class="commande-num-badge">N° ${displayNum} ${cmd.urgente ? '⚠️' : ''} ${cmd.controle ? '🔍' : ''}</div>
+                <div class="commande-num-badge">${displayBoutique}N° ${displayNum} ${cmd.urgente ? '⚠️' : ''} ${cmd.controle ? '🔍' : ''}</div>
                 <div class="commande-date-compact">${cmd.date || ''}</div>
               </div>
             </div>
@@ -926,7 +960,8 @@
 
     window.ouvrirModal = function(cmd) {
       modal.style.display = "flex"; 
-      modalTitleBadge.innerHTML = `📦 N° ${cmd.numero || ''} ${cmd.urgente ? '⚠️ (URGENT)' : ''} ${cmd.controle ? '🔍 (À CONTRÔLER)' : ''}`; 
+      const bText = cmd.boutique ? `[Boutique ${cmd.boutique}] ` : '';
+      modalTitleBadge.innerHTML = `📦 ${bText}N° ${cmd.numero || ''} ${cmd.urgente ? '⚠️ (URGENT)' : ''} ${cmd.controle ? '🔍 (À CONTRÔLER)' : ''}`; 
       modalImagesRow.innerHTML = "";
       cmd.articles?.forEach(art => {
         const box = document.createElement('div'); box.className = 'modal-photo-box';
@@ -942,7 +977,7 @@
     inputRecherche.addEventListener('input', executerRecherche);
     inputRecherche.addEventListener('keypress', (e) => { if (e.key === 'Enter') executerRecherche(); });
 
-    // --- COLLAGE EXCEL (AVEC CONSERVATION DES STATUTS URGENT & CONTRÔLE) ---
+    // --- COLLAGE EXCEL (ADAPTÉ AU FORMAT EXACT DE TON FICHIER) ---
     const pasteModal = document.getElementById('pasteModal');
     const btnOpenPasteModal = document.getElementById('btnOpenPasteModal');
 
@@ -983,16 +1018,19 @@
 
           const sep = cleanLine.includes('\t') ? '\t' : (cleanLine.includes(';') ? ';' : ',');
           let parts = cleanLine.split(sep).map(c => c.trim().replace(/^"|"$/g, ''));
-          if (parts.length < 5) return;
+          if (parts.length < 8) return;
 
-          const dateCSV = parts[0] || new Date().toLocaleDateString('fr-FR');
+          // Ordre exact de ton fichier Excel :
+          // 0: Date | 1: Réf interne | 2: Fournisseur | 3: EAN | 4: Code article | 5: Désignation | 6: Qté | 7: Boutique
+          const dateCSV = formaterDateExcel(parts[0]);
           const numeroClean = String(parts[1] || 'VRAC').replace(/^N°\s*/i, '').trim();
           const fournisseurCSV = String(parts[2] || '').trim();
           const eanCSV = String(parts[3] || '').trim();
           const refCSV = String(parts[4] || '').trim();
-          const remArtCSV = String(parts[5] || '').trim();
+          const designationCSV = String(parts[5] || '').trim();
           const qteRaw = parts[6];
           const qteCSV = !isNaN(qteRaw) && qteRaw !== '' ? Number(qteRaw) : 1;
+          const boutiqueCSV = String(parts[7] || '').trim();
 
           if (!refCSV) return;
           parsedCount++;
@@ -1018,7 +1056,9 @@
           if (photoAuto) photoLinkedCount++;
 
           if (!groupCommandes[numeroClean]) {
-            groupCommandes[numeroClean] = { id: Date.now() + i, numero: numeroClean, date: dateCSV, urgente: false, controle: false, articles: [] };
+            groupCommandes[numeroClean] = { id: Date.now() + i, boutique: boutiqueCSV, numero: numeroClean, date: dateCSV, urgente: false, controle: false, articles: [] };
+          } else if (boutiqueCSV && !groupCommandes[numeroClean].boutique) {
+            groupCommandes[numeroClean].boutique = boutiqueCSV;
           }
 
           if (!groupCommandes[numeroClean].articles) {
@@ -1027,7 +1067,7 @@
 
           if (!groupCommandes[numeroClean].articles.some(a => String(a.ref).trim() === cleanRefKey)) {
             groupCommandes[numeroClean].articles.push({ 
-              photo: photoAuto, fournisseur: fournisseurCSV, ref: cleanRefKey, codeBarre: eanCSV, quantite: qteCSV, remarqueArticle: remArtCSV 
+              photo: photoAuto, fournisseur: fournisseurCSV, ref: cleanRefKey, codeBarre: eanCSV, quantite: qteCSV, remarqueArticle: designationCSV 
             });
           }
         });
@@ -1051,7 +1091,7 @@
             });
           }
         } else {
-          alert("⚠️ Impossible de lire les colonnes. Vérifie que tu aies bien copié les lignes depuis Excel.");
+          alert("⚠️ Impossible de lire les colonnes. Vérifie que tu as bien copié l'intégralité des 8 colonnes depuis ton tableau Excel.");
         }
       });
     });
@@ -1070,34 +1110,37 @@
           <thead>
             <tr>
               <th>Date</th>
+              <th>Référence interne doc.</th>
+              <th>Fournisseur en contremarque</th>
+              <th>Code à barres ligne</th>
+              <th>Code article</th>
+              <th>Désignation</th>
+              <th>Qté restante ligne</th>
+              <th>Boutique de référence ligne doc</th>
               <th>Urgent</th>
               <th>À Contrôler</th>
-              <th>N° Commande</th>
-              <th>Fournisseur</th>
-              <th>Code-Barre (EAN)</th>
-              <th>Référence Article</th>
-              <th>Quantité</th>
-              <th>Remarque Article</th>
             </tr>
           </thead>
           <tbody>`;
 
         listeAExporter.forEach(cmd => {
           const date = cmd.date || "";
+          const boutique = cmd.boutique || "";
           const numero = cmd.numero || "";
           const statutUrgent = cmd.urgente ? "OUI" : "NON";
           const statutControle = cmd.controle ? "OUI" : "NON";
           cmd.articles?.forEach(art => {
             tableHTML += `<tr>
               <td>${date}</td>
-              <td>${statutUrgent}</td>
-              <td>${statutControle}</td>
               <td>${numero}</td>
               <td>${art.fournisseur || ""}</td>
               <td>${art.codeBarre || ""}</td>
               <td>${art.ref || ""}</td>
-              <td>${art.quantite !== undefined ? art.quantite : 1}</td>
               <td>${art.remarqueArticle || ""}</td>
+              <td>${art.quantite !== undefined ? art.quantite : 1}</td>
+              <td>${boutique}</td>
+              <td>${statutUrgent}</td>
+              <td>${statutControle}</td>
             </tr>`;
           });
         });
@@ -1121,7 +1164,8 @@
       if (list.length === 0) { alert("Rien à exporter."); return; }
       let html = `<div class="print-title">Export Reliquats</div><div class="print-subtitle">Généré le ${new Date().toLocaleString('fr-FR')}</div><div class="print-grid">`;
       list.forEach(cmd => {
-        html += `<div class="print-card"><h3>Réf: ${cmd.numero} ${cmd.urgente ? '⚠️ URGENT' : ''} ${cmd.controle ? '🔍 À CONTRÔLER' : ''}</h3><div class="date">${cmd.date}</div><div class="print-photos-flex">`;
+        const bPrint = cmd.boutique ? `[Boutique ${cmd.boutique}] ` : '';
+        html += `<div class="print-card"><h3>${bPrint}Réf: ${cmd.numero} ${cmd.urgente ? '⚠️ URGENT' : ''} ${cmd.controle ? '🔍 À CONTRÔLER' : ''}</h3><div class="date">${cmd.date}</div><div class="print-photos-flex">`;
         cmd.articles?.forEach(art => {
           html += `<div class="print-photo-print-item">${art.photo?`<img src="${art.photo}">`:''}<div style="font-size:10px;">${art.fournisseur ? `<b>Fournisseur:</b> ${art.fournisseur}<br>` : ''}<b>Réf:</b> ${art.ref}<br>${art.codeBarre ? `<b>EAN:</b> ${art.codeBarre}<br>` : ''}(Qté: ${art.quantite||1})</div></div>`;
         });
