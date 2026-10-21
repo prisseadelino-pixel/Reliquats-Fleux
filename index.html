@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="fr" data-theme="dark">
 <head>
@@ -116,7 +115,6 @@
     .commande-select-checkbox { width: 18px; height: 18px; cursor: pointer; accent-color: var(--primary); flex-shrink: 0; }
     .commande-main-btn { display: flex; align-items: center; gap: 0.75rem; flex-grow: 1; min-width: 0; cursor: pointer; }
     
-    /* Badge optimisé pour affichage fluide et lisible */
     .commande-num-badge { 
       font-weight: bold; 
       font-size: 0.95rem; 
@@ -146,7 +144,7 @@
       .commande-actions { flex-direction: column; align-items: stretch; gap: 0.3rem; }
     }
 
-    /* --- Modale optimisée (Titre épinglé en haut) --- */
+    /* --- Modale optimisée & Badge / Alerte de boutique différente --- */
     .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.85); flex-direction: column; overflow-y: auto; padding: 1rem; }
     .modal-content-container { display: flex; flex-direction: column; align-items: center; gap: 1.25rem; max-width: 95%; width: 100%; margin: auto; padding-top: 4rem; }
     
@@ -169,7 +167,28 @@
     }
 
     .modal-images-row { display: flex; gap: 1.25rem; flex-wrap: wrap; justify-content: center; max-width: 100%; width: 100%; }
-    .modal-photo-box { display: flex; flex-direction: column; align-items: center; gap: 0.4rem; background: var(--card-bg); border: 1px solid var(--border); padding: 0.85rem; border-radius: 14px; max-width: 320px; width: 100%; box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
+    
+    .modal-photo-box { 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      gap: 0.4rem; 
+      background: var(--card-bg); 
+      border: 1px solid var(--border); 
+      padding: 0.85rem; 
+      border-radius: 14px; 
+      max-width: 320px; 
+      width: 100%; 
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3); 
+      position: relative; 
+    }
+
+    /* Style d'alerte propre sur la carte article (sans filigrane sur l'image) */
+    .modal-photo-box.autre-boutique {
+      border: 2px solid #f43f5e;
+      background: rgba(244, 63, 94, 0.08);
+    }
+
     .modal-photo-box img { max-height: 42vh; border-radius: 8px; background: rgba(0,0,0,0.1); width: 100%; object-fit: contain; }
     .modal-ref-group { display: flex; flex-direction: column; align-items: center; gap: 0.3rem; width: 100%; }
     .modal-ref-badges { display: flex; gap: 0.4rem; flex-wrap: wrap; justify-content: center; }
@@ -520,6 +539,7 @@
       const boutiquesSet = new Set();
       commandes.forEach(c => {
         if (c.boutique) boutiquesSet.add(c.boutique);
+        c.articles?.forEach(a => { if (a.boutique) boutiquesSet.add(a.boutique); });
       });
       const currentSelected = selectFiltreBoutique.value;
       selectFiltreBoutique.innerHTML = `<option value="">-- Toutes les boutiques --</option>`;
@@ -582,6 +602,7 @@
       const barcodeInit = dataArticle?.codeBarre || "";
       const qteInit = dataArticle?.quantite !== undefined ? dataArticle.quantite : 1;
       const remArticleInit = dataArticle?.remarqueArticle || "";
+      const boutiqueArtInit = dataArticle?.boutique || "";
 
       bloc.innerHTML = `
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
@@ -598,7 +619,8 @@
           <button type="button" class="btn-secondary btn-galerie">📁 Galerie</button>
           <button type="button" class="btn-secondary btn-photo-directe">📸 Photo</button>
         </div>
-        <div class="form-group" style="margin-top: 0.75rem;"><label>Fournisseur</label><input type="text" class="input-fournisseur" value="${fournisseurInit}"></div>
+        <div class="form-group" style="margin-top: 0.75rem;"><label>N° Boutique spécifique article</label><input type="text" class="input-article-boutique" value="${boutiqueArtInit}" placeholder="Ex: 001, 003..."></div>
+        <div class="form-group"><label>Fournisseur</label><input type="text" class="input-fournisseur" value="${fournisseurInit}"></div>
         <div class="form-group"><label>Référence article</label><input type="text" class="input-ref" value="${refInit}"></div>
         <div class="form-group"><label>Code-barres ligne (EAN)</label><input type="text" class="input-barcode" value="${barcodeInit}"></div>
         <div class="form-group"><label>Quantité</label><input type="number" min="1" class="input-qte" value="${qteInit}"></div>
@@ -610,6 +632,7 @@
       const inputBarcode = bloc.querySelector('.input-barcode');
       const inputQte = bloc.querySelector('.input-qte');
       const inputArtRemarque = bloc.querySelector('.input-article-remarque');
+      const inputArtBoutique = bloc.querySelector('.input-article-boutique');
       const previewWrapper = bloc.querySelector('.previewWrapper');
       const photoPreview = bloc.querySelector('.photoPreview');
       const btnSupprPhoto = bloc.querySelector('.btn-suppr-photo-interne');
@@ -656,7 +679,7 @@
       bloc.querySelector('.btn-retirer-article').addEventListener('click', () => { bloc.remove(); mettreAJourIndiceArticles(); });
 
       bloc.getArticleData = () => ({
-        photo: photoData, fournisseur: inputFournisseur.value.trim(), ref: inputRef.value.trim(), codeBarre: inputBarcode.value.trim(), quantite: Number(inputQte.value) || 1, remarqueArticle: inputArtRemarque.value.trim()
+        photo: photoData, fournisseur: inputFournisseur.value.trim(), ref: inputRef.value.trim(), codeBarre: inputBarcode.value.trim(), quantite: Number(inputQte.value) || 1, remarqueArticle: inputArtRemarque.value.trim(), boutique: inputArtBoutique.value.trim()
       });
 
       articlesContainer.appendChild(bloc);
@@ -755,7 +778,6 @@
       requireAdmin(() => {
         const boutique = inputBoutique.value.trim();
         let numero = inputNumero.value.trim();
-        // S'assurer que le préfixe N° est propre si l'utilisateur ne l'a pas mis, ou le formater proprement
         const blocsArticles = articlesContainer.querySelectorAll('.article-block');
         if (!numero || blocsArticles.length === 0) { alert("Numéro et au moins 1 article requis."); return; }
         let articlesList = Array.from(blocsArticles).map(b => b.getArticleData());
@@ -860,9 +882,11 @@
       return commandes.filter(c => {
         if (!c) return false;
         
-        // 1. Filtre par le menu déroulant Boutique
-        if (boutiqueFiltreSelect && String(c.boutique || '').trim() !== boutiqueFiltreSelect) {
-          return false;
+        // 1. Filtre par le menu déroulant Boutique (Vérifie la commande ou l'un de ses articles)
+        if (boutiqueFiltreSelect) {
+          const matchCmdBoutique = String(c.boutique || '').trim() === boutiqueFiltreSelect;
+          const matchArtBoutique = c.articles?.some(a => String(a.boutique || '').trim() === boutiqueFiltreSelect);
+          if (!matchCmdBoutique && !matchArtBoutique) return false;
         }
 
         // 2. Filtre par période
@@ -885,7 +909,8 @@
             String(a.fournisseur||'').toLowerCase().includes(fStr) || 
             String(a.ref||'').toLowerCase().includes(fStr) || 
             String(a.codeBarre||'').toLowerCase().includes(fStr) ||
-            String(a.remarqueArticle||'').toLowerCase().includes(fStr)
+            String(a.remarqueArticle||'').toLowerCase().includes(fStr) ||
+            String(a.boutique||'').toLowerCase().includes(fStr)
           );
           if (!matchBoutique && !matchNum && !matchArt) return false;
         }
@@ -913,7 +938,6 @@
 
         const nbA = cmd.articles?.reduce((acc, a) => acc + (Number(a.quantite)||1), 0)||0;
         let numClean = String(cmd.numero || '').trim();
-        // Si le numéro ne commence pas par S- (ou s-), on l'ajoute proprement pour l'affichage visuel
         if (numClean && !/^s-/i.test(numClean)) {
           numClean = 'S-' + numClean;
         }
@@ -1016,12 +1040,33 @@
       if (numCleanModal && !/^s-/i.test(numCleanModal)) numCleanModal = 'S-' + numCleanModal;
       modalTitleBadge.innerHTML = `📦 ${bText}N° ${numCleanModal} ${cmd.urgente ? '⚠️ (URGENT)' : ''} ${cmd.controle ? '🔍 (À CONTRÔLER)' : ''}`; 
       modalImagesRow.innerHTML = "";
+
+      const boutiqueSelectionnee = selectFiltreBoutique.value;
+
       cmd.articles?.forEach(art => {
-        const box = document.createElement('div'); box.className = 'modal-photo-box';
-        box.innerHTML = `${art.photo ? `<img src="${art.photo}">` : ''}${art.fournisseur?`<div class="modal-fournisseur-badge">Fournisseur: ${art.fournisseur}</div>`:''}${art.ref?`<div class="modal-ref-badge">Réf: ${art.ref}</div>`:''}<div style="display:flex;gap:0.4rem;flex-wrap:wrap;justify-content:center;">${art.codeBarre?`<span class="modal-barcode-badge">EAN: ${art.codeBarre}</span>`:''}<span class="modal-qty-badge">Qte: ${art.quantite||1}</span></div>${art.remarqueArticle?`<div class="modal-article-remarque-box">💬 ${art.remarqueArticle}</div>`:''}`;
+        const artBoutique = String(art.boutique || cmd.boutique || '').trim();
+        const estAutreBoutique = boutiqueSelectionnee && artBoutique && artBoutique !== boutiqueSelectionnee;
+
+        const box = document.createElement('div'); 
+        box.className = `modal-photo-box ${estAutreBoutique ? 'autre-boutique' : ''}`;
+        
+        let artBoutiqueBadge = artBoutique ? `<div class="modal-fournisseur-badge" style="${estAutreBoutique ? 'background: #f43f5e; color: white; font-weight: bold;' : ''}">Boutique: ${artBoutique} ${estAutreBoutique ? '(Autre boutique)' : ''}</div>` : '';
+
+        box.innerHTML = `
+          ${art.photo ? `<img src="${art.photo}">` : ''}
+          ${artBoutiqueBadge}
+          ${art.fournisseur ? `<div class="modal-fournisseur-badge">Fournisseur: ${art.fournisseur}</div>` : ''}
+          ${art.ref ? `<div class="modal-ref-badge">Réf: ${art.ref}</div>` : ''}
+          <div style="display:flex;gap:0.4rem;flex-wrap:wrap;justify-content:center;">
+            ${art.codeBarre ? `<span class="modal-barcode-badge">EAN: ${art.codeBarre}</span>` : ''}
+            <span class="modal-qty-badge">Qte: ${art.quantite||1}</span>
+          </div>
+          ${art.remarqueArticle ? `<div class="modal-article-remarque-box">💬 ${art.remarqueArticle}</div>` : ''}
+        `;
         modalImagesRow.appendChild(box);
       });
     };
+
     closeModal.addEventListener('click', () => modal.style.display = "none");
     modal.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = "none"; });
 
@@ -1030,7 +1075,7 @@
     inputRecherche.addEventListener('input', executerRecherche);
     inputRecherche.addEventListener('keypress', (e) => { if (e.key === 'Enter') executerRecherche(); });
 
-    // --- COLLAGE EXCEL (ADAPTÉ AU FORMAT EXACT DE TON FICHIER) ---
+    // --- COLLAGE EXCEL ---
     const pasteModal = document.getElementById('pasteModal');
     const btnOpenPasteModal = document.getElementById('btnOpenPasteModal');
 
@@ -1116,9 +1161,10 @@
             groupCommandes[numeroClean].articles = [];
           }
 
-          if (!groupCommandes[numeroClean].articles.some(a => String(a.ref).trim() === cleanRefKey)) {
+          const existingArtIndex = groupCommandes[numeroClean].articles.findIndex(a => String(a.ref).trim() === cleanRefKey);
+          if (existingArtIndex === -1) {
             groupCommandes[numeroClean].articles.push({ 
-              photo: photoAuto, fournisseur: fournisseurCSV, ref: cleanRefKey, codeBarre: eanCSV, quantite: qteCSV, remarqueArticle: designationCSV 
+              photo: photoAuto, fournisseur: fournisseurCSV, ref: cleanRefKey, codeBarre: eanCSV, quantite: qteCSV, remarqueArticle: designationCSV, boutique: boutiqueCSV 
             });
           }
         });
@@ -1176,11 +1222,12 @@
 
         listeAExporter.forEach(cmd => {
           const date = cmd.date || "";
-          const boutique = cmd.boutique || "";
+          const boutiqueCmd = cmd.boutique || "";
           const numero = cmd.numero || "";
           const statutUrgent = cmd.urgente ? "OUI" : "NON";
           const statutControle = cmd.controle ? "OUI" : "NON";
           cmd.articles?.forEach(art => {
+            const boutiqueArt = art.boutique || boutiqueCmd;
             tableHTML += `<tr>
               <td>${date}</td>
               <td>${numero}</td>
@@ -1189,7 +1236,7 @@
               <td>${art.ref || ""}</td>
               <td>${art.remarqueArticle || ""}</td>
               <td>${art.quantite !== undefined ? art.quantite : 1}</td>
-              <td>${boutique}</td>
+              <td>${boutiqueArt}</td>
               <td>${statutUrgent}</td>
               <td>${statutControle}</td>
             </tr>`;
@@ -1237,4 +1284,3 @@
   </script>
 </body>
 </html>
-
