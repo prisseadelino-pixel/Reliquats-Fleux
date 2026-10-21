@@ -223,7 +223,7 @@
         <section class="card" style="padding: 1rem;">
           <div class="search-box" style="display: flex; flex-direction: column; gap: 0.5rem;">
             <div style="display: flex; gap: 0.5rem; width: 100%;">
-              <input type="text" id="recherche" placeholder="🔍 Rechercher (n° commande, réf...)" autocomplete="off">
+              <input type="text" id="recherche" placeholder="🔍 Rechercher (boutique, n° commande, réf...)" autocomplete="off">
               <button type="button" class="btn-search" id="btnLancerRecherche">Rechercher</button>
             </div>
             <div>
@@ -875,13 +875,7 @@
             String(a.codeBarre||'').toLowerCase().includes(fStr) ||
             String(a.remarqueArticle||'').toLowerCase().includes(fStr)
           );
-          // Si l'utilisateur tape un numéro de boutique dans la recherche, on exige que ça corresponde à la boutique OU au numéro/article
           if (!matchBoutique && !matchNum && !matchArt) return false;
-          
-          // Sécurité supplémentaire : si le filtre ressemble à un numéro de boutique (ex: "001"), on s'assure de ne garder que les boutiques correspondantes exactement ou par inclusion stricte sur le champ boutique
-          if (/^\d+$/.test(fStr) && !matchBoutique) {
-            return false;
-          }
         }
 
         return true;
