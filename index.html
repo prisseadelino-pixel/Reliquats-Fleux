@@ -635,7 +635,6 @@
     function convertirDateEnTimestamp(dateStr) {
       if (!dateStr) return 0;
       let clean = String(dateStr).trim();
-      // Si format Excel sérialisé (nombre)
       if (!isNaN(clean) && clean.length === 5) {
         const utcDays = Math.floor(Number(clean) - 25569);
         return utcDays * 86400 * 1000;
@@ -832,9 +831,14 @@
           }
         }
 
-        const fStr = String(searchFilter || '').toLowerCase();
+        const fStr = String(searchFilter || '').toLowerCase().trim();
         if (fStr) {
-          const matchBoutique = String(c.boutique || '').toLowerCase().includes(fStr);
+          const bVal = String(c.boutique || '').toLowerCase().trim();
+          // Si on tape exactement ou partiellement le numéro de boutique (ex: "001"), on filtre STRICTEMENT sur la boutique
+          if (bVal.includes(fStr)) {
+            return true;
+          }
+          // Sinon, on cherche sur le numéro de commande ou les articles
           const matchNum = String(c.numero || '').toLowerCase().includes(fStr);
           const matchArt = c.articles?.some(a => 
             String(a.fournisseur||'').toLowerCase().includes(fStr) || 
@@ -842,7 +846,7 @@
             String(a.codeBarre||'').toLowerCase().includes(fStr) ||
             String(a.remarqueArticle||'').toLowerCase().includes(fStr)
           );
-          if (!matchBoutique && !matchNum && !matchArt) return false;
+          if (!matchNum && !matchArt) return false;
         }
 
         return true;
@@ -1020,8 +1024,6 @@
           let parts = cleanLine.split(sep).map(c => c.trim().replace(/^"|"$/g, ''));
           if (parts.length < 8) return;
 
-          // Ordre exact de ton fichier Excel :
-          // 0: Date | 1: Réf interne | 2: Fournisseur | 3: EAN | 4: Code article | 5: Désignation | 6: Qté | 7: Boutique
           const dateCSV = formaterDateExcel(parts[0]);
           const numeroClean = String(parts[1] || 'VRAC').replace(/^N°\s*/i, '').trim();
           const fournisseurCSV = String(parts[2] || '').trim();
