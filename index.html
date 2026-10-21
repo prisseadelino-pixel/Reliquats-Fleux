@@ -115,14 +115,14 @@
     .commande-select-checkbox { width: 18px; height: 18px; cursor: pointer; accent-color: var(--primary); flex-shrink: 0; }
     .commande-main-btn { display: flex; align-items: center; gap: 0.75rem; flex-grow: 1; min-width: 0; cursor: pointer; }
     
-    /* Badge optimisé pour affichage mobile complet sans coupure */
+    /* Badge optimisé pour affichage fluide et lisible */
     .commande-num-badge { 
       font-weight: bold; 
       font-size: 0.95rem; 
       color: var(--primary); 
-      word-break: break-word; 
+      word-break: normal; 
       white-space: normal; 
-      line-height: 1.3; 
+      line-height: 1.35; 
     }
 
     .commande-date-compact { font-size: 0.8rem; color: var(--subtext); margin-top: 0.1rem; }
@@ -140,7 +140,7 @@
       .commande-item-compact { flex-direction: row; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; gap: 0.75rem; }
       .commande-row-top, .commande-row-bottom { display: contents; }
       .commande-main-btn { gap: 0.75rem; }
-      .commande-num-badge { font-size: 1.1rem; white-space: nowrap; word-break: normal; }
+      .commande-num-badge { font-size: 1.1rem; white-space: nowrap; }
       .btn-edit-small { font-size: 0.8rem; padding: 0.35rem 0.6rem; }
       .commande-actions { flex-direction: column; align-items: stretch; gap: 0.3rem; }
     }
@@ -753,7 +753,8 @@
     btnEnregistrer.addEventListener('click', () => {
       requireAdmin(() => {
         const boutique = inputBoutique.value.trim();
-        const numero = inputNumero.value.trim();
+        let numero = inputNumero.value.trim();
+        // S'assurer que le préfixe N° est propre si l'utilisateur ne l'a pas mis, ou le formater proprement
         const blocsArticles = articlesContainer.querySelectorAll('.article-block');
         if (!numero || blocsArticles.length === 0) { alert("Numéro et au moins 1 article requis."); return; }
         let articlesList = Array.from(blocsArticles).map(b => b.getArticleData());
@@ -910,7 +911,12 @@
         item.dataset.id = cmd.id;
 
         const nbA = cmd.articles?.reduce((acc, a) => acc + (Number(a.quantite)||1), 0)||0;
-        const displayNum = cmd.numero || 'Sans numéro';
+        let numClean = String(cmd.numero || '').trim();
+        // Si le numéro ne commence pas par S- (ou s-), on l'ajoute proprement pour l'affichage visuel
+        if (numClean && !/^s-/i.test(numClean)) {
+          numClean = 'S-' + numClean;
+        }
+        const displayNum = numClean || 'Sans numéro';
         const displayBoutique = cmd.boutique ? `[Boutique ${cmd.boutique}] ` : '';
         
         const displayUrgentBtn = cmd.controle ? 'style="display:none;"' : '';
@@ -921,7 +927,7 @@
             <span class="drag-handle" title="Glisser pour réorganiser">☰</span>
             <div class="commande-main-btn" onclick='ouvrirModal(${JSON.stringify(cmd).replace(/'/g, "&#39;")})'>
               <div style="min-width: 0; flex: 1;">
-                <div class="commande-num-badge">${displayBoutique}N° ${displayNum} ${cmd.urgente ? '⚠️' : ''} ${cmd.controle ? '🔍' : ''}</div>
+                <div class="commande-num-badge">${displayBoutique}N°&nbsp;${displayNum} ${cmd.urgente ? '⚠️' : ''} ${cmd.controle ? '🔍' : ''}</div>
                 <div class="commande-date-compact">${cmd.date || ''}</div>
               </div>
             </div>
@@ -1005,7 +1011,9 @@
     window.ouvrirModal = function(cmd) {
       modal.style.display = "flex"; 
       const bText = cmd.boutique ? `[Boutique ${cmd.boutique}] ` : '';
-      modalTitleBadge.innerHTML = `📦 ${bText}N° ${cmd.numero || ''} ${cmd.urgente ? '⚠️ (URGENT)' : ''} ${cmd.controle ? '🔍 (À CONTRÔLER)' : ''}`; 
+      let numCleanModal = String(cmd.numero || '').trim();
+      if (numCleanModal && !/^s-/i.test(numCleanModal)) numCleanModal = 'S-' + numCleanModal;
+      modalTitleBadge.innerHTML = `📦 ${bText}N° ${numCleanModal} ${cmd.urgente ? '⚠️ (URGENT)' : ''} ${cmd.controle ? '🔍 (À CONTRÔLER)' : ''}`; 
       modalImagesRow.innerHTML = "";
       cmd.articles?.forEach(art => {
         const box = document.createElement('div'); box.className = 'modal-photo-box';
@@ -1065,7 +1073,7 @@
           if (parts.length < 8) return;
 
           const dateCSV = formaterDateExcel(parts[0]);
-          const numeroClean = String(parts[1] || 'VRAC').replace(/^N°\s*/i, '').trim();
+          let numeroClean = String(parts[1] || 'VRAC').replace(/^N°\s*/i, '').trim();
           const fournisseurCSV = String(parts[2] || '').trim();
           const eanCSV = String(parts[3] || '').trim();
           const refCSV = String(parts[4] || '').trim();
@@ -1207,7 +1215,9 @@
       let html = `<div class="print-title">Export Reliquats</div><div class="print-subtitle">Généré le ${new Date().toLocaleString('fr-FR')}</div><div class="print-grid">`;
       list.forEach(cmd => {
         const bPrint = cmd.boutique ? `[Boutique ${cmd.boutique}] ` : '';
-        html += `<div class="print-card"><h3>${bPrint}Réf: ${cmd.numero} ${cmd.urgente ? '⚠️ URGENT' : ''} ${cmd.controle ? '🔍 À CONTRÔLER' : ''}</h3><div class="date">${cmd.date}</div><div class="print-photos-flex">`;
+        let numP = String(cmd.numero || '').trim();
+        if (numP && !/^s-/i.test(numP)) numP = 'S-' + numP;
+        html += `<div class="print-card"><h3>${bPrint}Réf: ${numP} ${cmd.urgente ? '⚠️ URGENT' : ''} ${cmd.controle ? '🔍 À CONTRÔLER' : ''}</h3><div class="date">${cmd.date}</div><div class="print-photos-flex">`;
         cmd.articles?.forEach(art => {
           html += `<div class="print-photo-print-item">${art.photo?`<img src="${art.photo}">`:''}<div style="font-size:10px;">${art.fournisseur ? `<b>Fournisseur:</b> ${art.fournisseur}<br>` : ''}<b>Réf:</b> ${art.ref}<br>${art.codeBarre ? `<b>EAN:</b> ${art.codeBarre}<br>` : ''}(Qté: ${art.quantite||1})</div></div>`;
         });
