@@ -144,7 +144,7 @@
       .commande-actions { flex-direction: column; align-items: stretch; gap: 0.3rem; }
     }
 
-    /* --- Modale optimisée & Badge / Alerte de boutique différente --- */
+    /* --- Modale optimisée & Alerte de boutique différente --- */
     .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.85); flex-direction: column; overflow-y: auto; padding: 1rem; }
     .modal-content-container { display: flex; flex-direction: column; align-items: center; gap: 1.25rem; max-width: 95%; width: 100%; margin: auto; padding-top: 4rem; }
     
@@ -183,7 +183,7 @@
       position: relative; 
     }
 
-    /* Style d'alerte propre sur la carte article (sans filigrane sur l'image) */
+    /* Style d'alerte claire sur la carte article */
     .modal-photo-box.autre-boutique {
       border: 2px solid #f43f5e;
       background: rgba(244, 63, 94, 0.08);
@@ -1044,7 +1044,10 @@
       const boutiqueSelectionnee = selectFiltreBoutique.value;
 
       cmd.articles?.forEach(art => {
-        const artBoutique = String(art.boutique || cmd.boutique || '').trim();
+        // On prend d'abord la boutique de l'article, sinon celle de la commande, sinon vide
+        const artBoutique = String(art.boutique || '').trim() || String(cmd.boutique || '').trim();
+        // Un article est considéré d'une autre boutique si une boutique est sélectionnée dans le filtre, 
+        // que l'article a une boutique renseignée, et qu'elle diffère de la sélection.
         const estAutreBoutique = boutiqueSelectionnee && artBoutique && artBoutique !== boutiqueSelectionnee;
 
         const box = document.createElement('div'); 
@@ -1166,6 +1169,11 @@
             groupCommandes[numeroClean].articles.push({ 
               photo: photoAuto, fournisseur: fournisseurCSV, ref: cleanRefKey, codeBarre: eanCSV, quantite: qteCSV, remarqueArticle: designationCSV, boutique: boutiqueCSV 
             });
+          } else {
+            // Mettre à jour la boutique spécifique de l'article si elle est présente dans le CSV
+            if (boutiqueCSV) {
+              groupCommandes[numeroClean].articles[existingArtIndex].boutique = boutiqueCSV;
+            }
           }
         });
 
