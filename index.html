@@ -882,7 +882,7 @@
       return commandes.filter(c => {
         if (!c) return false;
         
-        // 1. Filtre par le menu déroulant Boutique (Vérifie la commande ou l'un de ses articles)
+        // 1. Filtre par le menu déroulant Boutique
         if (boutiqueFiltreSelect) {
           const matchCmdBoutique = String(c.boutique || '').trim() === boutiqueFiltreSelect;
           const matchArtBoutique = c.articles?.some(a => String(a.boutique || '').trim() === boutiqueFiltreSelect);
@@ -900,10 +900,14 @@
           }
         }
 
-        // 3. Filtre par la barre de recherche textuelle
+        // 3. Filtre par la barre de recherche textuelle (corrigé pour supporter le préfixe S- et les numéros bruts)
         const fStr = String(searchFilter || '').toLowerCase().trim();
         if (fStr) {
-          const matchNum = String(c.numero || '').toLowerCase().includes(fStr);
+          const cleanSearchNum = fStr.replace(/^s-?/i, '');
+          const rawCmdNum = String(c.numero || '').toLowerCase().trim();
+          const cleanCmdNum = rawCmdNum.replace(/^s-?/i, '');
+
+          const matchNum = rawCmdNum.includes(fStr) || cleanCmdNum.includes(cleanSearchNum);
           const matchBoutique = String(c.boutique || '').toLowerCase().includes(fStr);
           const matchArt = c.articles?.some(a => 
             String(a.fournisseur||'').toLowerCase().includes(fStr) || 
@@ -1044,10 +1048,7 @@
       const boutiqueSelectionnee = selectFiltreBoutique.value;
 
       cmd.articles?.forEach(art => {
-        // On prend d'abord la boutique de l'article, sinon celle de la commande, sinon vide
         const artBoutique = String(art.boutique || '').trim() || String(cmd.boutique || '').trim();
-        // Un article est considéré d'une autre boutique si une boutique est sélectionnée dans le filtre, 
-        // que l'article a une boutique renseignée, et qu'elle diffère de la sélection.
         const estAutreBoutique = boutiqueSelectionnee && artBoutique && artBoutique !== boutiqueSelectionnee;
 
         const box = document.createElement('div'); 
@@ -1170,7 +1171,6 @@
               photo: photoAuto, fournisseur: fournisseurCSV, ref: cleanRefKey, codeBarre: eanCSV, quantite: qteCSV, remarqueArticle: designationCSV, boutique: boutiqueCSV 
             });
           } else {
-            // Mettre à jour la boutique spécifique de l'article si elle est présente dans le CSV
             if (boutiqueCSV) {
               groupCommandes[numeroClean].articles[existingArtIndex].boutique = boutiqueCSV;
             }
