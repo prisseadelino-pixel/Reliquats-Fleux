@@ -339,7 +339,7 @@
   <div id="pasteModal" class="modal" style="display: none; z-index: 3000;">
     <div style="background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; width: 90%; max-width: 600px; display: flex; flex-direction: column; gap: 1rem; margin: auto;">
       <h3 style="color: var(--primary); font-size: 1.1rem;">📋 Coller un tableau Excel</h3>
-      <p style="font-size: 0.85rem; color: var(--subtext);">Colle directement les lignes de ton tableau Excel (les 9 colonnes seront lues automatiquement : Date, N° Commande, Fournisseur, EAN, Réf, Désignation, Qté, Boutique, Délai ms appro) :</p>
+      <p style="font-size: 0.85rem; color: var(--subtext);">Colle directement les lignes de ton tableau Excel (les 9 colonnes seront lues : Date, N° Commande, Fournisseur, EAN, Réf, Désignation, Qté, Boutique, Délai ms appro) :</p>
       <textarea id="pasteTextarea" rows="8" placeholder="Colle ton tableau ici (Ctrl+V)..." style="width: 100%; font-family: monospace; font-size: 0.85rem; padding: 0.5rem;"></textarea>
       <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
         <button type="button" class="btn-secondary" id="btnCancelPaste" style="width: auto;">Annuler</button>
@@ -386,7 +386,10 @@
       measurementId: "G-Z8VKEX2MPV"
     };
 
-    firebase.initializeApp(firebaseConfig);
+    try {
+      firebase.initializeApp(firebaseConfig);
+    } catch(e) {}
+
     const db = firebase.database();
     const ADMIN_PASSWORD = "Fleux.reliquats!";
     let estAdmin = false;
@@ -409,10 +412,12 @@
       setTimeout(() => adminPasswordInput.focus(), 50);
     }
 
-    btnTogglePasswordView.addEventListener('click', () => {
-      adminPasswordInput.type = adminPasswordInput.type === 'password' ? 'text' : 'password';
-      btnTogglePasswordView.textContent = adminPasswordInput.type === 'password' ? '👁️' : '🙈';
-    });
+    if (btnTogglePasswordView) {
+      btnTogglePasswordView.addEventListener('click', () => {
+        adminPasswordInput.type = adminPasswordInput.type === 'password' ? 'text' : 'password';
+        btnTogglePasswordView.textContent = adminPasswordInput.type === 'password' ? '👁️' : '🙈';
+      });
+    }
 
     document.getElementById('btnCancelAdminLogin').addEventListener('click', () => {
       adminLoginModal.style.display = 'none';
@@ -447,16 +452,17 @@
     const btnToggleTheme = document.getElementById('btnToggleTheme');
     const savedTheme = localStorage.getItem('reliquats_theme') || 'dark';
     htmlRoot.setAttribute('data-theme', savedTheme);
-    btnToggleTheme.innerHTML = savedTheme === 'dark' ? "🌙 Mode Sombre (Actif)" : "☀️ Mode Clair (Actif)";
-
-    btnToggleTheme.addEventListener('click', () => {
-      const currentTheme = htmlRoot.getAttribute('data-theme');
-      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-      htmlRoot.setAttribute('data-theme', newTheme);
-      localStorage.setItem('reliquats_theme', newTheme);
-      btnToggleTheme.innerHTML = newTheme === 'dark' ? "🌙 Mode Sombre (Actif)" : "☀️ Mode Clair (Actif)";
-      document.getElementById('dropdownMenu').classList.remove('show');
-    });
+    if (btnToggleTheme) {
+      btnToggleTheme.innerHTML = savedTheme === 'dark' ? "🌙 Mode Sombre (Actif)" : "☀️ Mode Clair (Actif)";
+      btnToggleTheme.addEventListener('click', () => {
+        const currentTheme = htmlRoot.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        htmlRoot.setAttribute('data-theme', newTheme);
+        localStorage.setItem('reliquats_theme', newTheme);
+        btnToggleTheme.innerHTML = newTheme === 'dark' ? "🌙 Mode Sombre (Actif)" : "☀️ Mode Clair (Actif)";
+        document.getElementById('dropdownMenu').classList.remove('show');
+      });
+    }
 
     const homeScreen = document.getElementById('home-screen');
     const appScreen = document.getElementById('app-screen');
@@ -467,45 +473,57 @@
     const btnToggleAdmin = document.getElementById('btnToggleAdmin');
     const badgeCount = document.getElementById('badgeCount');
 
-    btnMenu.addEventListener('click', (e) => { e.stopPropagation(); dropdownMenu.classList.toggle('show'); });
-    document.addEventListener('click', () => dropdownMenu.classList.remove('show'));
+    if (btnMenu) {
+      btnMenu.addEventListener('click', (e) => { e.stopPropagation(); dropdownMenu.classList.toggle('show'); });
+    }
+    document.addEventListener('click', () => { if (dropdownMenu) dropdownMenu.classList.remove('show'); });
 
-    btnToggleAdmin.addEventListener('click', () => {
-      dropdownMenu.classList.remove('show');
-      if (!estAdmin) {
-        ouvrirModaleAdmin((succ) => { 
-          if (succ) { 
-            alert("✅ Mode Admin ON"); 
-            document.getElementById('sectionPreparation').style.display = "block";
-            afficherGalerie(document.getElementById('recherche').value); 
-          } 
-        });
-      } else {
-        estAdmin = false;
-        btnToggleAdmin.innerHTML = "🔒 Mode Admin : OFF";
-        btnToggleAdmin.style.color = "var(--text)";
-        document.getElementById('adminMenuOptions').style.display = "none";
-        document.getElementById('adminExportOptions').style.display = "none";
-        document.getElementById('sectionPreparation').style.display = "none";
-        alert("🔒 Mode Admin OFF");
-        afficherGalerie(document.getElementById('recherche').value);
-      }
-    });
+    if (btnToggleAdmin) {
+      btnToggleAdmin.addEventListener('click', () => {
+        dropdownMenu.classList.remove('show');
+        if (!estAdmin) {
+          ouvrirModaleAdmin((succ) => { 
+            if (succ) { 
+              alert("✅ Mode Admin ON"); 
+              document.getElementById('sectionPreparation').style.display = "block";
+              afficherGalerie(document.getElementById('recherche').value); 
+            } 
+          });
+        } else {
+          estAdmin = false;
+          btnToggleAdmin.innerHTML = "🔒 Mode Admin : OFF";
+          btnToggleAdmin.style.color = "var(--text)";
+          document.getElementById('adminMenuOptions').style.display = "none";
+          document.getElementById('adminExportOptions').style.display = "none";
+          document.getElementById('sectionPreparation').style.display = "none";
+          alert("🔒 Mode Admin OFF");
+          afficherGalerie(document.getElementById('recherche').value);
+        }
+      });
+    }
 
-    btnCommencer.addEventListener('click', () => {
-      homeScreen.style.display = 'none';
-      appScreen.style.display = 'block';
-      reinitialiserFormulaire();
-      chargerDonneesEnTempsReel();
-    });
+    if (btnCommencer) {
+      btnCommencer.addEventListener('click', () => {
+        try {
+          if (homeScreen) homeScreen.style.display = 'none';
+          if (appScreen) appScreen.style.display = 'block';
+          reinitialiserFormulaire();
+          chargerDonneesEnTempsReel();
+        } catch (err) {
+          alert("Erreur au lancement : " + err.message);
+        }
+      });
+    }
 
-    btnRetourAccueil.addEventListener('click', () => {
-      reinitialiserFormulaire();
-      document.getElementById('recherche').value = "";
-      appScreen.style.display = 'none';
-      homeScreen.style.display = 'flex';
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
+    if (btnRetourAccueil) {
+      btnRetourAccueil.addEventListener('click', () => {
+        reinitialiserFormulaire();
+        document.getElementById('recherche').value = "";
+        if (appScreen) appScreen.style.display = 'none';
+        if (homeScreen) homeScreen.style.display = 'flex';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
 
     const inputBoutique = document.getElementById('inputBoutique');
     const inputNumero = document.getElementById('numeroCommande');
@@ -555,28 +573,32 @@
     }
 
     function chargerDonneesEnTempsReel() {
-      db.ref('commandes').on('value', (snapshot) => {
-        const data = snapshot.val();
-        commandes = [];
-        if (data) {
-          if (Array.isArray(data)) { commandes = data.filter(Boolean).map(nettoyerCommandeObjet); }
-          else { Object.keys(data).forEach(key => { let cmd = data[key]; if (cmd) { if (!cmd.id) cmd.id = Number(key) || Date.now(); commandes.push(nettoyerCommandeObjet(cmd)); } }); }
-        }
-        mettreAJourListeBoutiques();
-        trierEtAfficherGalerie();
-      });
-
-      db.ref('catalogue_photos').once('value').then((snapshot) => {
-        const data = snapshot.val() || {};
-        Object.keys(data).forEach(cle => {
-          const item = data[cle];
-          if (item) {
-            if (item.refOriginale) catalogueArticles[item.refOriginale] = item;
-            catalogueArticles[cle] = item;
-            if (cle.startsWith("REF_")) catalogueArticles[cle.replace("REF_", "")] = item;
+      try {
+        db.ref('commandes').on('value', (snapshot) => {
+          const data = snapshot.val();
+          commandes = [];
+          if (data) {
+            if (Array.isArray(data)) { commandes = data.filter(Boolean).map(nettoyerCommandeObjet); }
+            else { Object.keys(data).forEach(key => { let cmd = data[key]; if (cmd) { if (!cmd.id) cmd.id = Number(key) || Date.now(); commandes.push(nettoyerCommandeObjet(cmd)); } }); }
           }
+          mettreAJourListeBoutiques();
+          trierEtAfficherGalerie();
         });
-      }).catch(() => {});
+
+        db.ref('catalogue_photos').once('value').then((snapshot) => {
+          const data = snapshot.val() || {};
+          Object.keys(data).forEach(cle => {
+            const item = data[cle];
+            if (item) {
+              if (item.refOriginale) catalogueArticles[item.refOriginale] = item;
+              catalogueArticles[cle] = item;
+              if (cle.startsWith("REF_")) catalogueArticles[cle.replace("REF_", "")] = item;
+            }
+          });
+        }).catch(() => {});
+      } catch(e) {
+        console.error(e);
+      }
     }
 
     function compresserImage(dataUrl, callback) {
@@ -700,7 +722,9 @@
       articlesContainer.querySelectorAll('.article-block').forEach((b, idx) => { b.querySelector('.article-index').textContent = idx + 1; });
     }
 
-    btnAjouterArticle.addEventListener('click', () => ajouterBlocArticle());
+    if (btnAjouterArticle) {
+      btnAjouterArticle.addEventListener('click', () => ajouterBlocArticle());
+    }
 
     function convertirDateEnTimestamp(dateStr) {
       if (!dateStr) return 0;
@@ -712,7 +736,15 @@
       if (clean.includes('/')) {
         const parts = clean.split('/');
         if (parts.length === 3) {
-          return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`).getTime() \vert{}\vert{} 0; } } if (clean.includes('-')) { const parts = clean.split('-'); if (parts.length === 3 && parts[0].length === 4) { return new Date(clean).getTime() \vert{}\vert{} 0; } else if (parts.length === 3 && parts[2].length === 4) { return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`).getTime() || 0;
+          return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`).getTime() || 0;
+        }
+      }
+      if (clean.includes('-')) {
+        const parts = clean.split('-');
+        if (parts.length === 3 && parts[0].length === 4) {
+          return new Date(clean).getTime() || 0;
+        } else if (parts.length === 3 && parts[2].length === 4) {
+          return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`).getTime() || 0;
         }
       }
       return 0;
@@ -730,7 +762,18 @@
       }
       if (str.includes('-') && str.split('-')[0].length === 4) {
         const p = str.split('-');
-        return `${p[2]}/${p[1]}/${p[0]}`; } return str; }  function parserDateSaisie(val) { if (!val) return null; let clean = val.trim(); if (clean.includes('/')) { const p = clean.split('/'); if (p.length === 3 && p[2].length === 4) { return new Date(`${p[2]}-${p[1]}-${p[0]}`).setHours(0,0,0,0);
+        return `${p[2]}/${p[1]}/${p[0]}`;
+      }
+      return str;
+    }
+
+    function parserDateSaisie(val) {
+      if (!val) return null;
+      let clean = val.trim();
+      if (clean.includes('/')) {
+        const p = clean.split('/');
+        if (p.length === 3 && p[2].length === 4) {
+          return new Date(`${p[2]}-${p[1]}-${p[0]}`).setHours(0,0,0,0);
         }
       }
       let d = new Date(clean);
@@ -759,47 +802,56 @@
       afficherGalerie(inputRecherche.value);
     }
 
-    btnTrierDate.addEventListener('click', () => {
-      ordreCroissant = !ordreCroissant;
-      btnTrierDate.innerHTML = ordreCroissant ? "🔄 Trier : Ancien" : "🔄 Trier : Récent";
-      trierEtAfficherGalerie();
-    });
-
-    btnEnregistrer.addEventListener('click', () => {
-      requireAdmin(() => {
-        const boutique = inputBoutique.value.trim();
-        let numero = inputNumero.value.trim();
-        const blocsArticles = articlesContainer.querySelectorAll('.article-block');
-        if (!numero || blocsArticles.length === 0) { alert("Numéro et au moins 1 article requis."); return; }
-        let articlesList = Array.from(blocsArticles).map(b => b.getArticleData());
-        btnEnregistrer.disabled = true; btnEnregistrer.textContent = "Enregistrement...";
-        const idObjet = modeEditionId !== null ? modeEditionId : Date.now();
-        const existingCmd = commandes.find(c => c.id === idObjet);
-        const commandeData = { 
-          id: idObjet, 
-          boutique,
-          numero, 
-          articles: articlesList, 
-          date: existingCmd?.date || new Date().toLocaleDateString('fr-FR'), 
-          urgente: existingCmd?.urgente || false, 
-          controle: existingCmd?.controle || false,
-          isNew: false 
-        };
-        db.ref('commandes/' + idObjet).set(commandeData).then(() => { reinitialiserFormulaire(); btnEnregistrer.disabled = false; }).catch(err => { btnEnregistrer.disabled = false; alert(err.message); });
+    if (btnTrierDate) {
+      btnTrierDate.addEventListener('click', () => {
+        ordreCroissant = !ordreCroissant;
+        btnTrierDate.innerHTML = ordreCroissant ? "🔄 Trier : Ancien" : "🔄 Trier : Récent";
+        trierEtAfficherGalerie();
       });
-    });
+    }
+
+    if (btnEnregistrer) {
+      btnEnregistrer.addEventListener('click', () => {
+        requireAdmin(() => {
+          const boutique = inputBoutique.value.trim();
+          let numero = inputNumero.value.trim();
+          const blocsArticles = articlesContainer.querySelectorAll('.article-block');
+          if (!numero || blocsArticles.length === 0) { alert("Numéro et au moins 1 article requis."); return; }
+          let articlesList = Array.from(blocsArticles).map(b => b.getArticleData());
+          btnEnregistrer.disabled = true; btnEnregistrer.textContent = "Enregistrement...";
+          const idObjet = modeEditionId !== null ? modeEditionId : Date.now();
+          const existingCmd = commandes.find(c => c.id === idObjet);
+          const commandeData = { 
+            id: idObjet, 
+            boutique,
+            numero, 
+            articles: articlesList, 
+            date: existingCmd?.date || new Date().toLocaleDateString('fr-FR'), 
+            urgente: existingCmd?.urgente || false, 
+            controle: existingCmd?.controle || false,
+            isNew: false 
+          };
+          db.ref('commandes/' + idObjet).set(commandeData).then(() => { reinitialiserFormulaire(); btnEnregistrer.disabled = false; }).catch(err => { btnEnregistrer.disabled = false; alert(err.message); });
+        });
+      });
+    }
 
     function reinitialiserFormulaire() {
       modeEditionId = null; 
-      inputBoutique.value = "";
-      inputNumero.value = ""; 
-      articlesContainer.innerHTML = "";
-      btnEnregistrer.textContent = "Enregistrer les reliquats"; btnEnregistrer.disabled = false;
-      btnAnnulerEdit.style.display = "none"; formTitle.textContent = "Nvx reliquats";
+      if (inputBoutique) inputBoutique.value = "";
+      if (inputNumero) inputNumero.value = ""; 
+      if (articlesContainer) articlesContainer.innerHTML = "";
+      if (btnEnregistrer) { btnEnregistrer.textContent = "Enregistrer les reliquats"; btnEnregistrer.disabled = false; }
+      if (btnAnnulerEdit) btnAnnulerEdit.style.display = "none"; 
+      if (formTitle) formTitle.textContent = "Nvx reliquats";
     }
 
-    btnNouvelleCommande.addEventListener('click', () => { reinitialiserFormulaire(); window.scrollTo({ top: 0, behavior: 'smooth' }); });
-    btnAnnulerEdit.addEventListener('click', reinitialiserFormulaire);
+    if (btnNouvelleCommande) {
+      btnNouvelleCommande.addEventListener('click', () => { reinitialiserFormulaire(); window.scrollTo({ top: 0, behavior: 'smooth' }); });
+    }
+    if (btnAnnulerEdit) {
+      btnAnnulerEdit.addEventListener('click', reinitialiserFormulaire);
+    }
 
     window.editerCommande = function(id, event) {
       if (event) event.stopPropagation();
@@ -859,7 +911,10 @@
       });
     };
 
-    document.getElementById('btnViderHistorique').addEventListener('click', () => { dropdownMenu.classList.remove('show'); requireAdmin(() => { if (confirm("Effacer tout ?")) db.ref('commandes').remove(); }); });
+    const btnViderHistorique = document.getElementById('btnViderHistorique');
+    if (btnViderHistorique) {
+      btnViderHistorique.addEventListener('click', () => { dropdownMenu.classList.remove('show'); requireAdmin(() => { if (confirm("Effacer tout ?")) db.ref('commandes').remove(); }); });
+    }
 
     function getFilteredCommandes(searchFilter = "") {
       const debutVal = dateDebutFiltre ? dateDebutFiltre.value : "";
@@ -873,14 +928,12 @@
       return commandes.filter(c => {
         if (!c) return false;
         
-        // 1. Filtre par le menu déroulant Boutique
         if (boutiqueFiltreSelect) {
           const matchCmdBoutique = String(c.boutique || '').trim() === boutiqueFiltreSelect;
           const matchArtBoutique = c.articles?.some(a => String(a.boutique || '').trim() === boutiqueFiltreSelect);
           if (!matchCmdBoutique && !matchArtBoutique) return false;
         }
 
-        // 2. Filtre par période
         if (timeDebut || timeFin) {
           const cTime = convertirDateEnTimestamp(c.date);
           if (cTime) {
@@ -891,7 +944,6 @@
           }
         }
 
-        // 3. Filtre par la barre de recherche textuelle
         const fStr = String(searchFilter || '').toLowerCase().trim();
         if (fStr) {
           const cleanSearchNum = fStr.replace(/^s-?/i, '');
@@ -917,10 +969,13 @@
     }
 
     function afficherGalerie(filtre = "") {
+      if (!galerieCommandes) return;
       galerieCommandes.innerHTML = "";
       const liste = getFilteredCommandes(filtre);
       
-      badgeCount.textContent = `${liste.length} cmd • ${liste.reduce((acc, c) => acc + (c.articles?.reduce((s, a) => s + (Number(a.quantite)||1), 0)||0), 0)} art`;
+      if (badgeCount) {
+        badgeCount.textContent = `${liste.length} cmd • ${liste.reduce((acc, c) => acc + (c.articles?.reduce((s, a) => s + (Number(a.quantite)||1), 0)||0), 0)} art`;
+      }
       if (liste.length === 0) { galerieCommandes.innerHTML = `<p style="text-align:center; color:var(--subtext); padding:1rem;">Aucun reliquat trouvé.</p>`; return; }
       
       liste.forEach(cmd => {
@@ -929,7 +984,17 @@
         if (cmd.urgente) cssClass = 'urgente';
         else if (cmd.controle) cssClass = 'controle';
         
-        item.className = `commande-item-compact ${cssClass}`; item.setAttribute('draggable', 'true'); item.dataset.id = cmd.id;  const nbA = cmd.articles?.reduce((acc, a) => acc + (Number(a.quantite)\vert{}\vert{}1), 0)\vert{}\vert{}0; let numClean = String(cmd.numero \vert{}\vert{} '').trim(); if (numClean && !/^s-/i.test(numClean)) { numClean = 'S-' + numClean; } const displayNum = numClean \vert{}\vert{} 'Sans numéro'; const displayBoutique = cmd.boutique ? `[Boutique ${cmd.boutique}] ` : '';
+        item.className = `commande-item-compact ${cssClass}`;
+        item.setAttribute('draggable', 'true');
+        item.dataset.id = cmd.id;
+
+        const nbA = cmd.articles?.reduce((acc, a) => acc + (Number(a.quantite)||1), 0)||0;
+        let numClean = String(cmd.numero || '').trim();
+        if (numClean && !/^s-/i.test(numClean)) {
+          numClean = 'S-' + numClean;
+        }
+        const displayNum = numClean || 'Sans numéro';
+        const displayBoutique = cmd.boutique ? `[Boutique ${cmd.boutique}] ` : '';
         
         const displayUrgentBtn = cmd.controle ? 'style="display:none;"' : '';
         const displayControleBtn = cmd.urgente ? 'style="display:none;"' : '';
@@ -977,58 +1042,77 @@
       });
     }
 
-    galerieCommandes.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      const draggingItem = document.querySelector('.dragging');
-      const siblings = [...galerieCommandes.querySelectorAll('.commande-item-compact:not(.dragging)')];
-      
-      const nextSibling = siblings.find(sibling => {
-        const box = sibling.getBoundingClientRect();
-        const offset = e.clientY - box.top - box.height / 2;
-        return offset < 0;
+    if (galerieCommandes) {
+      galerieCommandes.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        const draggingItem = document.querySelector('.dragging');
+        const siblings = [...galerieCommandes.querySelectorAll('.commande-item-compact:not(.dragging)')];
+        
+        const nextSibling = siblings.find(sibling => {
+          const box = sibling.getBoundingClientRect();
+          const offset = e.clientY - box.top - box.height / 2;
+          return offset < 0;
+        });
+
+        if (draggingItem) {
+          galerieCommandes.insertBefore(draggingItem, nextSibling);
+        }
       });
 
-      if (draggingItem) {
-        galerieCommandes.insertBefore(draggingItem, nextSibling);
-      }
-    });
+      galerieCommandes.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const currentIdsInDOM = [...galerieCommandes.querySelectorAll('.commande-item-compact')].map(el => Number(el.dataset.id));
+        
+        let reordered = [];
+        currentIdsInDOM.forEach(id => {
+          const found = commandes.find(c => c.id === id);
+          if (found) reordered.push(found);
+        });
+        commandes.forEach(c => {
+          if (!reordered.some(r => r.id === c.id)) reordered.push(c);
+        });
 
-    galerieCommandes.addEventListener('drop', (e) => {
-      e.preventDefault();
-      const currentIdsInDOM = [...galerieCommandes.querySelectorAll('.commande-item-compact')].map(el => Number(el.dataset.id));
-      
-      let reordered = [];
-      currentIdsInDOM.forEach(id => {
-        const found = commandes.find(c => c.id === id);
-        if (found) reordered.push(found);
+        commandes = reordered;
       });
-      commandes.forEach(c => {
-        if (!reordered.some(r => r.id === c.id)) reordered.push(c);
-      });
-
-      commandes = reordered;
-    });
+    }
 
     let toutCoche = false;
-    document.getElementById('btnSelectAll').addEventListener('click', () => {
-      toutCoche = !toutCoche;
-      document.querySelectorAll('.commande-select-checkbox').forEach(cb => cb.checked = toutCoche);
-      document.getElementById('btnSelectAll').innerHTML = toutCoche ? "☑️ Tout décocher" : "☑️ Tout cocher";
-    });
+    const btnSelectAll = document.getElementById('btnSelectAll');
+    if (btnSelectAll) {
+      btnSelectAll.addEventListener('click', () => {
+        toutCoche = !toutCoche;
+        document.querySelectorAll('.commande-select-checkbox').forEach(cb => cb.checked = toutCoche);
+        btnSelectAll.innerHTML = toutCoche ? "☑️ Tout décocher" : "☑️ Tout cocher";
+      });
+    }
     
-    dateDebutFiltre.addEventListener('input', () => afficherGalerie(inputRecherche.value));
-    dateFinFiltre.addEventListener('input', () => afficherGalerie(inputRecherche.value));
-    selectFiltreBoutique.addEventListener('change', () => afficherGalerie(inputRecherche.value));
+    if (dateDebutFiltre) dateDebutFiltre.addEventListener('input', () => afficherGalerie(inputRecherche.value));
+    if (dateFinFiltre) dateFinFiltre.addEventListener('input', () => afficherGalerie(inputRecherche.value));
+    if (selectFiltreBoutique) selectFiltreBoutique.addEventListener('change', () => afficherGalerie(inputRecherche.value));
 
     window.ouvrirModal = function(cmd) {
       modal.style.display = "flex"; 
-      const bText = cmd.boutique ? `[Boutique ${cmd.boutique}] ` : ''; let numCleanModal = String(cmd.numero \vert{}\vert{} '').trim(); if (numCleanModal && !/^s-/i.test(numCleanModal)) numCleanModal = 'S-' + numCleanModal; modalTitleBadge.innerHTML = `📦 ${bText}N° ${numCleanModal}${cmd.urgente ? '⚠️ (URGENT)' : ''} ${cmd.controle ? '🔍 (À CONTRÔLER)' : ''}`; modalImagesRow.innerHTML = "";  const boutiqueSelectionnee = selectFiltreBoutique.value;  cmd.articles?.forEach(art => { const artBoutique = String(art.boutique \vert{}\vert{} '').trim() \vert{}\vert{} String(cmd.boutique \vert{}\vert{} '').trim(); const estAutreBoutique = boutiqueSelectionnee && artBoutique && artBoutique !== boutiqueSelectionnee;  const box = document.createElement('div'); box.className = `modal-photo-box ${estAutreBoutique ? 'autre-boutique' : ''}`;
+      const bText = cmd.boutique ? `[Boutique ${cmd.boutique}] ` : '';
+      let numCleanModal = String(cmd.numero || '').trim();
+      if (numCleanModal && !/^s-/i.test(numCleanModal)) numCleanModal = 'S-' + numCleanModal;
+      modalTitleBadge.innerHTML = `📦 ${bText}N° ${numCleanModal} ${cmd.urgente ? '⚠️ (URGENT)' : ''} ${cmd.controle ? '🔍 (À CONTRÔLER)' : ''}`; 
+      modalImagesRow.innerHTML = "";
+
+      const boutiqueSelectionnee = selectFiltreBoutique.value;
+
+      cmd.articles?.forEach(art => {
+        const artBoutique = String(art.boutique || '').trim() || String(cmd.boutique || '').trim();
+        const estAutreBoutique = boutiqueSelectionnee && artBoutique && artBoutique !== boutiqueSelectionnee;
+
+        const box = document.createElement('div'); 
+        box.className = `modal-photo-box ${estAutreBoutique ? 'autre-boutique' : ''}`;
         
-        let artBoutiqueBadge = artBoutique ? `<div class="modal-fournisseur-badge" style="${estAutreBoutique ? 'background: #f43f5e; color: white; font-weight: bold;' : ''}">Boutique: ${artBoutique}${estAutreBoutique ? '(Autre boutique)' : ''}</div>` : '';
+        let artBoutiqueBadge = artBoutique ? `<div class="modal-fournisseur-badge" style="${estAutreBoutique ? 'background: #f43f5e; color: white; font-weight: bold;' : ''}">Boutique: ${artBoutique} ${estAutreBoutique ? '(Autre boutique)' : ''}</div>` : '';
 
         box.innerHTML = `
           ${art.photo ? `<img src="${art.photo}">` : ''}
-          ${artBoutiqueBadge}${art.fournisseur ? `<div class="modal-fournisseur-badge">Fournisseur: ${art.fournisseur}</div>` : ''}
+          ${artBoutiqueBadge}
+          ${art.fournisseur ? `<div class="modal-fournisseur-badge">Fournisseur: ${art.fournisseur}</div>` : ''}
           ${art.ref ? `<div class="modal-ref-badge">Réf: ${art.ref}</div>` : ''}
           <div style="display:flex;gap:0.4rem;flex-wrap:wrap;justify-content:center;">
             ${art.codeBarre ? `<span class="modal-barcode-badge">EAN: ${art.codeBarre}</span>` : ''}
@@ -1042,13 +1126,15 @@
       });
     };
 
-    closeModal.addEventListener('click', () => modal.style.display = "none");
-    modal.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = "none"; });
+    if (closeModal) closeModal.addEventListener('click', () => modal.style.display = "none");
+    if (modal) modal.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = "none"; });
 
     function executerRecherche() { afficherGalerie(inputRecherche.value.trim()); }
-    btnLancerRecherche.addEventListener('click', executerRecherche);
-    inputRecherche.addEventListener('input', executerRecherche);
-    inputRecherche.addEventListener('keypress', (e) => { if (e.key === 'Enter') executerRecherche(); });
+    if (btnLancerRecherche) btnLancerRecherche.addEventListener('click', executerRecherche);
+    if (inputRecherche) {
+      inputRecherche.addEventListener('input', executerRecherche);
+      inputRecherche.addEventListener('keypress', (e) => { if (e.key === 'Enter') executerRecherche(); });
+    }
 
     // --- COLLAGE EXCEL ---
     const pasteModal = document.getElementById('pasteModal');
@@ -1063,118 +1149,122 @@
       });
     }
 
-    document.getElementById('btnCancelPaste').addEventListener('click', () => { pasteModal.style.display = 'none'; });
+    const btnCancelPaste = document.getElementById('btnCancelPaste');
+    if (btnCancelPaste) btnCancelPaste.addEventListener('click', () => { pasteModal.style.display = 'none'; });
 
-    document.getElementById('btnProcessPaste').addEventListener('click', () => {
-      const rawText = document.getElementById('pasteTextarea').value.trim();
-      if (!rawText) { alert("Zone vide !"); return; }
-      const lines = rawText.split(/\r\n|\n/).filter(l => l.trim() !== '');
-      if (lines.length === 0) { alert("Aucune ligne détectée."); return; }
+    const btnProcessPaste = document.getElementById('btnProcessPaste');
+    if (btnProcessPaste) {
+      btnProcessPaste.addEventListener('click', () => {
+        const rawText = document.getElementById('pasteTextarea').value.trim();
+        if (!rawText) { alert("Zone vide !"); return; }
+        const lines = rawText.split(/\r\n|\n/).filter(l => l.trim() !== '');
+        if (lines.length === 0) { alert("Aucune ligne détectée."); return; }
 
-      db.ref('commandes').once('value').then(snap => {
-        let existingData = snap.val() || {};
-        let groupCommandes = {};
-        
-        Object.keys(existingData).forEach(k => { 
-          if (existingData[k]?.numero) {
-            let numKey = String(existingData[k].numero).trim();
-            groupCommandes[numKey] = existingData[k]; 
-          }
-        });
-        
-        let parsedCount = 0;
-        let photoLinkedCount = 0;
-
-        lines.forEach((line, i) => {
-          const cleanLine = line.trim();
-          if (!cleanLine) return;
-
-          const sep = cleanLine.includes('\t') ? '\t' : (cleanLine.includes(';') ? ';' : ',');
-          let parts = cleanLine.split(sep).map(c => c.trim().replace(/^"|"$/g, ''));
-          if (parts.length < 8) return;
-
-          const dateCSV = formaterDateExcel(parts[0]);
-          let numeroClean = String(parts[1] || 'VRAC').replace(/^N°\s*/i, '').trim();
-          const fournisseurCSV = String(parts[2] || '').trim();
-          const eanCSV = String(parts[3] || '').trim();
-          const refCSV = String(parts[4] || '').trim();
-          const designationCSV = String(parts[5] || '').trim();
-          const qteRaw = parts[6];
-          const qteCSV = !isNaN(qteRaw) && qteRaw !== '' ? Number(qteRaw) : 1;
-          const boutiqueCSV = String(parts[7] || '').trim();
-          const delaiApproCSV = String(parts[8] || '').trim();
-
-          if (!refCSV) return;
-          parsedCount++;
-
-          let photoAuto = "";
-          const cleanRefKey = refCSV.trim();
-          const cleNorm = "REF_" + cleanRefKey.replace(/[.#$\/\[\]]/g, "_");
+        db.ref('commandes').once('value').then(snap => {
+          let existingData = snap.val() || {};
+          let groupCommandes = {};
           
-          if (catalogueArticles[cleanRefKey]?.photo) {
-            photoAuto = catalogueArticles[cleanRefKey].photo;
-          } else if (catalogueArticles[cleNorm]?.photo) {
-            photoAuto = catalogueArticles[cleNorm].photo;
-          } else if (eanCSV && catalogueArticles[eanCSV]?.photo) {
-            photoAuto = catalogueArticles[eanCSV].photo;
-          } else {
-            for (let c of Object.values(groupCommandes)) {
-              if (c.articles) {
-                const foundArt = c.articles.find(a => String(a.ref).trim() === cleanRefKey || (eanCSV && String(a.codeBarre).trim() === eanCSV));
-                if (foundArt && foundArt.photo) { photoAuto = foundArt.photo; break; }
+          Object.keys(existingData).forEach(k => { 
+            if (existingData[k]?.numero) {
+              let numKey = String(existingData[k].numero).trim();
+              groupCommandes[numKey] = existingData[k]; 
+            }
+          });
+          
+          let parsedCount = 0;
+          let photoLinkedCount = 0;
+
+          lines.forEach((line, i) => {
+            const cleanLine = line.trim();
+            if (!cleanLine) return;
+
+            const sep = cleanLine.includes('\t') ? '\t' : (cleanLine.includes(';') ? ';' : ',');
+            let parts = cleanLine.split(sep).map(c => c.trim().replace(/^"|"$/g, ''));
+            if (parts.length < 8) return;
+
+            const dateCSV = formaterDateExcel(parts[0]);
+            let numeroClean = String(parts[1] || 'VRAC').replace(/^N°\s*/i, '').trim();
+            const fournisseurCSV = String(parts[2] || '').trim();
+            const eanCSV = String(parts[3] || '').trim();
+            const refCSV = String(parts[4] || '').trim();
+            const designationCSV = String(parts[5] || '').trim();
+            const qteRaw = parts[6];
+            const qteCSV = !isNaN(qteRaw) && qteRaw !== '' ? Number(qteRaw) : 1;
+            const boutiqueCSV = String(parts[7] || '').trim();
+            const delaiApproCSV = String(parts[8] || '').trim();
+
+            if (!refCSV) return;
+            parsedCount++;
+
+            let photoAuto = "";
+            const cleanRefKey = refCSV.trim();
+            const cleNorm = "REF_" + cleanRefKey.replace(/[.#$\/\[\]]/g, "_");
+            
+            if (catalogueArticles[cleanRefKey]?.photo) {
+              photoAuto = catalogueArticles[cleanRefKey].photo;
+            } else if (catalogueArticles[cleNorm]?.photo) {
+              photoAuto = catalogueArticles[cleNorm].photo;
+            } else if (eanCSV && catalogueArticles[eanCSV]?.photo) {
+              photoAuto = catalogueArticles[eanCSV].photo;
+            } else {
+              for (let c of Object.values(groupCommandes)) {
+                if (c.articles) {
+                  const foundArt = c.articles.find(a => String(a.ref).trim() === cleanRefKey || (eanCSV && String(a.codeBarre).trim() === eanCSV));
+                  if (foundArt && foundArt.photo) { photoAuto = foundArt.photo; break; }
+                }
               }
             }
-          }
-          if (photoAuto) photoLinkedCount++;
+            if (photoAuto) photoLinkedCount++;
 
-          if (!groupCommandes[numeroClean]) {
-            groupCommandes[numeroClean] = { id: Date.now() + i, boutique: boutiqueCSV, numero: numeroClean, date: dateCSV, urgente: false, controle: false, articles: [] };
-          } else if (boutiqueCSV && !groupCommandes[numeroClean].boutique) {
-            groupCommandes[numeroClean].boutique = boutiqueCSV;
-          }
+            if (!groupCommandes[numeroClean]) {
+              groupCommandes[numeroClean] = { id: Date.now() + i, boutique: boutiqueCSV, numero: numeroClean, date: dateCSV, urgente: false, controle: false, articles: [] };
+            } else if (boutiqueCSV && !groupCommandes[numeroClean].boutique) {
+              groupCommandes[numeroClean].boutique = boutiqueCSV;
+            }
 
-          if (!groupCommandes[numeroClean].articles) {
-            groupCommandes[numeroClean].articles = [];
-          }
+            if (!groupCommandes[numeroClean].articles) {
+              groupCommandes[numeroClean].articles = [];
+            }
 
-          const existingArtIndex = groupCommandes[numeroClean].articles.findIndex(a => String(a.ref).trim() === cleanRefKey);
-          if (existingArtIndex === -1) {
-            groupCommandes[numeroClean].articles.push({ 
-              photo: photoAuto, fournisseur: fournisseurCSV, ref: cleanRefKey, codeBarre: eanCSV, quantite: qteCSV, dateDispo: "", delaiMsAppro: delaiApproCSV, remarqueArticle: designationCSV, boutique: boutiqueCSV 
-            });
+            const existingArtIndex = groupCommandes[numeroClean].articles.findIndex(a => String(a.ref).trim() === cleanRefKey);
+            if (existingArtIndex === -1) {
+              groupCommandes[numeroClean].articles.push({ 
+                photo: photoAuto, fournisseur: fournisseurCSV, ref: cleanRefKey, codeBarre: eanCSV, quantite: qteCSV, dateDispo: "", delaiMsAppro: delaiApproCSV, remarqueArticle: designationCSV, boutique: boutiqueCSV 
+              });
+            } else {
+              if (boutiqueCSV) {
+                groupCommandes[numeroClean].articles[existingArtIndex].boutique = boutiqueCSV;
+              }
+              if (delaiApproCSV) {
+                groupCommandes[numeroClean].articles[existingArtIndex].delaiMsAppro = delaiApproCSV;
+              }
+            }
+          });
+
+          const keys = Object.keys(groupCommandes);
+          if (keys.length > 0) {
+            const msg = `📊 RAPPORT COLLAGE EXCEL :\n` +
+                        `- ${parsedCount} lignes analysées\n` +
+                        `- 🖼️ ${photoLinkedCount} photos rattachées\n` +
+                        `- 📦 ${keys.length} commandes\n\n` +
+                        `Enregistrer ?`;
+            if (confirm(msg)) {
+              let updates = {}; 
+              keys.forEach(k => {
+                let cmdObj = groupCommandes[k];
+                updates[cmdObj.id] = cmdObj;
+              });
+              db.ref('commandes').update(updates).then(() => { 
+                alert("✅ Import réussi !"); 
+                pasteModal.style.display = 'none';
+              });
+            }
           } else {
-            if (boutiqueCSV) {
-              groupCommandes[numeroClean].articles[existingArtIndex].boutique = boutiqueCSV;
-            }
-            if (delaiApproCSV) {
-              groupCommandes[numeroClean].articles[existingArtIndex].delaiMsAppro = delaiApproCSV;
-            }
+            alert("⚠️ Impossible de lire les colonnes.");
           }
         });
-
-        const keys = Object.keys(groupCommandes);
-        if (keys.length > 0) {
-          const msg = `📊 RAPPORT COLLAGE EXCEL :\n` +
-                      `- ${parsedCount} lignes analysées\n` +
-                      `- 🖼️ ${photoLinkedCount} photos rattachées\n` +
-                      `- 📦 ${keys.length} commandes\n\n` +
-                      `Enregistrer ?`;
-          if (confirm(msg)) {
-            let updates = {}; 
-            keys.forEach(k => {
-              let cmdObj = groupCommandes[k];
-              updates[cmdObj.id] = cmdObj;
-            });
-            db.ref('commandes').update(updates).then(() => { 
-              alert("✅ Import réussi !"); 
-              pasteModal.style.display = 'none';
-            });
-          }
-        } else {
-          alert("⚠️ Impossible de lire les colonnes.");
-        }
       });
-    });
+    }
 
     // --- EXPORT EXCEL ---
     const btnExportSheets = document.getElementById('btnExportSheets');
@@ -1197,4 +1287,91 @@
               <th>Désignation</th>
               <th>Qté restante ligne</th>
               <th>Date dispo</th>
-              <th>Délai
+              <th>Délai ms appro</th>
+              <th>Boutique de référence ligne doc</th>
+              <th>Urgent</th>
+              <th>À Contrôler</th>
+            </tr>
+          </thead>
+          <tbody>`;
+
+        listeAExporter.forEach(cmd => {
+          const date = cmd.date || "";
+          const boutiqueCmd = cmd.boutique || "";
+          const numero = cmd.numero || "";
+          const statutUrgent = cmd.urgente ? "OUI" : "NON";
+          const statutControle = cmd.controle ? "OUI" : "NON";
+          cmd.articles?.forEach(art => {
+            const boutiqueArt = art.boutique || boutiqueCmd;
+            tableHTML += `<tr>
+              <td>${date}</td>
+              <td>${numero}</td>
+              <td>${art.fournisseur || ""}</td>
+              <td>${art.codeBarre || ""}</td>
+              <td>${art.ref || ""}</td>
+              <td>${art.remarqueArticle || ""}</td>
+              <td>${art.quantite !== undefined ? art.quantite : 1}</td>
+              <td>${art.dateDispo || ""}</td>
+              <td>${art.delaiMsAppro || ""}</td>
+              <td>${boutiqueArt}</td>
+              <td>${statutUrgent}</td>
+              <td>${statutControle}</td>
+            </tr>`;
+          });
+        });
+
+        tableHTML += `</tbody></table></body></html>`;
+
+        const blob = new Blob([tableHTML], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `reliquats_export.xls`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      });
+    }
+
+    const btnExportPDF = document.getElementById('btnExportPDF');
+    if (btnExportPDF) {
+      btnExportPDF.addEventListener('click', () => {
+        const checked = document.querySelectorAll('.commande-select-checkbox:checked');
+        let list = checked.length > 0 ? commandes.filter(c => Array.from(checked).map(cb => Number(cb.getAttribute('data-id'))).includes(c.id)) : getFilteredCommandes(inputRecherche.value);
+        if (list.length === 0) { alert("Rien à exporter."); return; }
+        let html = `<div class="print-title">Export Reliquats</div><div class="print-subtitle">Généré le ${new Date().toLocaleString('fr-FR')}</div><div class="print-grid">`;
+        list.forEach(cmd => {
+          const bPrint = cmd.boutique ? `[Boutique ${cmd.boutique}] ` : '';
+          let numP = String(cmd.numero || '').trim();
+          if (numP && !/^s-/i.test(numP)) numP = 'S-' + numP;
+          html += `<div class="print-card"><h3>${bPrint}Réf: ${numP} ${cmd.urgente ? '⚠️ URGENT' : ''} ${cmd.controle ? '🔍 À CONTRÔLER' : ''}</h3><div class="date">${cmd.date}</div><div class="print-photos-flex">`;
+          cmd.articles?.forEach(art => {
+            html += `<div class="print-photo-print-item">
+              ${art.photo ? `<img src="${art.photo}">` : ''}
+              <div style="font-size:10px;">
+                ${art.fournisseur ? `<b>Fournisseur:</b> ${art.fournisseur}<br>` : ''}
+                <b>Réf:</b> ${art.ref}<br>
+                ${art.codeBarre ? `<b>EAN:</b> ${art.codeBarre}<br>` : ''}
+                ${art.dateDispo ? `<b>Dispo:</b> ${art.dateDispo}<br>` : ''}
+                ${art.delaiMsAppro ? `<b>Délai appro:</b> ${art.delaiMsAppro}<br>` : ''}
+                <b>Qté:</b> ${art.quantite || 1}
+                ${art.remarqueArticle ? `<br><b>Désignation:</b> ${art.remarqueArticle}` : ''}
+              </div>
+            </div>`;
+          });
+          html += `</div></div>`;
+        });
+        html += `</div>`;
+        const printArea = document.getElementById('print-area');
+        printArea.innerHTML = html;
+        setTimeout(() => {
+          window.print();
+          printArea.innerHTML = "";
+        }, 300);
+      });
+    }
+
+    reinitialiserFormulaire();
+  </script>
+</body>
+</html>
