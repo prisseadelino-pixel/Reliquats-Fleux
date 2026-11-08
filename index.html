@@ -1139,7 +1139,7 @@
       });
     };
 
-    // --- BOUTON APERÇU GLOBAL ---
+    // --- BOUTON APERÇU GLOBAL CLASSÉ PAR FOURNISSEUR ---
     const btnApercuGlobal = document.getElementById('btnApercuGlobal');
     if (btnApercuGlobal) {
       btnApercuGlobal.addEventListener('click', () => {
@@ -1155,7 +1155,7 @@
             if (!articlesMap[refKey]) {
               articlesMap[refKey] = {
                 ref: art.ref || 'Sans réf',
-                fournisseur: art.fournisseur || '',
+                fournisseur: art.fournisseur || 'Sans fournisseur',
                 codeBarre: art.codeBarre || '',
                 remarqueArticle: art.remarqueArticle || '',
                 photo: art.photo || '',
@@ -1167,15 +1167,25 @@
             if (art.boutique) articlesMap[refKey].boutiques.add(art.boutique);
             else if (cmd.boutique) articlesMap[refKey].boutiques.add(cmd.boutique);
             if (!articlesMap[refKey].photo && art.photo) articlesMap[refKey].photo = art.photo;
+            if (art.fournisseur && articlesMap[refKey].fournisseur === 'Sans fournisseur') {
+              articlesMap[refKey].fournisseur = art.fournisseur;
+            }
           });
         });
 
-        const consolidatedList = Object.values(articlesMap);
+        let consolidatedList = Object.values(articlesMap);
+
+        // 🔤 Tri principal par ordre alphabétique du fournisseur
+        consolidatedList.sort((a, b) => {
+          const fA = String(a.fournisseur || '').trim().toLowerCase();
+          const fB = String(b.fournisseur || '').trim().toLowerCase();
+          return fA.localeCompare(fB);
+        });
 
         // Affichage dans la modale
         modal.style.display = "flex";
         const boutiqueActive = selectFiltreBoutique.value ? ` [Boutique ${selectFiltreBoutique.value}]` : '';
-        modalTitleBadge.innerHTML = `🔍 Aperçu global par article${boutiqueActive} (${consolidatedList.length} articles uniques)`;
+        modalTitleBadge.innerHTML = `🔍 Aperçu global par Fournisseur${boutiqueActive} (${consolidatedList.length} articles)`;
         modalImagesRow.innerHTML = "";
 
         consolidatedList.forEach(art => {
@@ -1188,11 +1198,11 @@
           box.innerHTML = `
             ${art.photo ? `<img src="${art.photo}">` : ''}
             ${boutiqueBadge}
-            ${art.fournisseur ? `<div class="modal-fournisseur-badge">Fournisseur: ${art.fournisseur}</div>` : ''}
+            ${art.fournisseur ? `<div class="modal-fournisseur-badge" style="background: var(--primary); color: white;">🏭 Fournisseur: ${art.fournisseur}</div>` : ''}
             ${art.ref ? `<div class="modal-ref-badge">Réf: ${art.ref}</div>` : ''}
             <div style="display:flex;gap:0.5rem;flex-wrap:wrap;justify-content:center;">
               ${art.codeBarre ? `<span class="modal-barcode-badge">EAN: ${art.codeBarre}</span>` : ''}
-              <span class="modal-qty-badge" style="background-color: #ff6b00; font-size: 1rem;">Total Qté: ${art.quantiteTotale}</span>
+              <span class="modal-qty-badge" style="background-color: #16a34a; font-size: 1rem;">Total Qté: ${art.quantiteTotale}</span>
             </div>
             ${art.remarqueArticle ? `<div class="modal-article-remarque-box">💬 ${art.remarqueArticle}</div>` : ''}
           `;
@@ -1431,7 +1441,7 @@
         });
         html += `</div>`;
         const printArea = document.getElementById('print-area');
-        printArea.html = html;
+        printArea.innerHTML = html;
         setTimeout(() => {
           window.print();
           printArea.innerHTML = "";
