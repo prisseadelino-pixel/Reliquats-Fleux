@@ -15,6 +15,9 @@
   <!-- Manifeste PWA dynamique optimisé -->
   <link rel="manifest" id="my-manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Reliquats%20Fleux%22%2C%22short_name%22%3A%22Reliquats%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23030712%22%2C%22theme_color%22%3A%22%23ff6b00%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fi49.servimg.com%2Fu%2Ff49%2F11%2F31%2F89%2F70%2Fimg_2010.jpg%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fjpeg%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D">
 
+  <!-- Inclusion de jsPDF pour générer de vrais fichiers PDF propres sur mobile -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
   <style>
     :root[data-theme="dark"] {
       --primary: #ff6b00;
@@ -210,22 +213,6 @@
     
     .modal-close { position: fixed; top: 15px; right: 15px; color: white; font-size: 1.4rem; font-weight: bold; cursor: pointer; z-index: 1010; background: #111827; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); }
     .modal-close:hover { background: #f43f5e; }
-
-    #print-area { display: none; }
-
-    @media print {
-      @page { size: A4 portrait; margin: 10mm; }
-      body, html { background: white !important; color: black !important; height: auto !important; overflow: visible !important; margin: 0 !important; padding: 0 !important; }
-      body * { visibility: hidden !important; }
-      #print-area, #print-area * { visibility: visible !important; color: #000 !important; }
-      #print-area { display: block !important; position: static !important; width: 100% !important; background: white !important; }
-      .print-title { font-size: 15px; color: #ff6b00; margin-bottom: 2px; font-weight: bold; }
-      .print-subtitle { font-size: 9px; color: #475569; margin-bottom: 10px; border-bottom: 2px solid #ff6b00; padding-bottom: 2px; }
-      .print-grid { display: grid !important; grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; width: 100% !important; }
-      .print-card { border: 1px solid #cbd5e1; border-radius: 6px; padding: 8px; background: #ffffff !important; page-break-inside: avoid; break-inside: avoid; display: flex; flex-direction: column; gap: 6px; }
-      .print-photo-print-item { width: 100% !important; display: flex !important; flex-direction: column !important; gap: 4px !important; background: #f8fafc !important; padding: 6px !important; border-radius: 4px; border: 1px solid #e2e8f0; }
-      .print-photo-print-item img { width: 100% !important; height: 110px !important; object-fit: contain !important; border-radius: 4px; border: 1px solid #cbd5e1; background: #fff !important; display: block !important; }
-    }
   </style>
 </head>
 <body>
@@ -329,7 +316,7 @@
               
               <div style="display: flex; gap: 0.5rem; align-items: center; width: 100%; flex-wrap: wrap; margin-top: 0.25rem;">
                 <button class="btn-select-all" id="btnSelectAll" type="button">☑️ Tout</button>
-                <button class="btn-pdf" id="btnExportPDF" type="button">📄 PDF</button>
+                <button class="btn-pdf" id="btnExportPDF" type="button">📄 Télécharger PDF</button>
                 <button class="btn-apercu" id="btnApercuGlobal" type="button">🔍 Aperçu global</button>
                 
                 <div id="adminExportOptions" style="display: none; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
@@ -347,8 +334,6 @@
       </div>
     </div>
   </div>
-
-  <div id="print-area"></div>
 
   <!-- Modale de collage -->
   <div id="pasteModal" class="modal" style="display: none; z-index: 3000;">
@@ -368,7 +353,7 @@
     <span class="modal-close" id="closeModal">&times;</span>
     <div id="modalTitleBadge" class="modal-title-badge"></div>
     <div style="position: fixed; top: 15px; left: 20px; z-index: 1005;">
-      <button type="button" id="btnPrintModal" class="btn-pdf" style="padding: 0.5rem 1rem; font-size: 0.85rem; box-shadow: var(--shadow);">🖨️ Imprimer / PDF</button>
+      <button type="button" id="btnPrintModal" class="btn-pdf" style="padding: 0.5rem 1rem; font-size: 0.85rem; box-shadow: var(--shadow);">📥 Télécharger ce PDF</button>
     </div>
     <div class="modal-content-container">
       <div class="modal-images-row" id="modalImagesRow"></div>
@@ -1107,6 +1092,108 @@
     if (dateFinFiltre) dateFinFiltre.addEventListener('change', () => afficherGalerie(inputRecherche.value));
     if (selectFiltreBoutique) selectFiltreBoutique.addEventListener('change', () => afficherGalerie(inputRecherche.value));
 
+    // --- FONCTION DE GÉNÉRATION DE PDF DIRECT VIA JS-PDF ---
+    function genererFichierPDF(titreDoc, listeArticlesPures) {
+      if (!listeArticlesPures || listeArticlesPures.length === 0) {
+        alert("Aucun article à exporter.");
+        return;
+      }
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF('p', 'mm', 'a4');
+      
+      let y = 15;
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(14);
+      doc.setTextColor(255, 107, 0);
+      doc.text(titreDoc, 15, y);
+      
+      y += 6;
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      doc.setTextColor(100, 100, 100);
+      doc.text(`Généré le ${new Date().toLocaleString('fr-FR')} - Total articles : ${listeArticlesPures.length}`, 15, y);
+      
+      y += 10;
+      let x = 15;
+      const colWidth = 88;
+      const cardHeight = 42;
+      const marginX = 14;
+      const marginY = 8;
+
+      listeArticlesPures.forEach((art, index) => {
+        if (y + cardHeight > 280) {
+          doc.addPage();
+          y = 15;
+        }
+
+        // Cadre de l'article
+        doc.setDrawColor(200, 200, 200);
+        doc.setFillColor(248, 250, 252);
+        doc.roundedRect(x, y, colWidth, cardHeight, 3, 3, 'FD');
+
+        // Image si disponible
+        if (art.photo) {
+          try {
+            doc.addImage(art.photo, 'JPEG', x + 3, y + 3, 32, 36);
+          } catch(err) {}
+        }
+
+        // Textes descriptifs
+        doc.setFontSize(8);
+        doc.setTextColor(0, 0, 0);
+        let textX = x + 38;
+        let textY = y + 6;
+
+        if (art.titreEntete) {
+          doc.setFont("helvetica", "bold");
+          doc.setTextColor(255, 107, 0);
+          doc.text(doc.splitTextToSize(art.titreEntete, 48), textX, textY);
+          textY += 5;
+        }
+
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(0, 0, 0);
+
+        if (art.fournisseur) {
+          doc.text(doc.splitTextToSize(`Fournisseur: ${art.fournisseur}`, 48), textX, textY);
+          textY += 4;
+        }
+        if (art.ref) {
+          doc.text(doc.splitTextToSize(`Réf: ${art.ref}`, 48), textX, textY);
+          textY += 4;
+        }
+        if (art.codeBarre) {
+          doc.text(doc.splitTextToSize(`EAN: ${art.codeBarre}`, 48), textX, textY);
+          textY += 4;
+        }
+        if (art.dateDispo) {
+          doc.text(doc.splitTextToSize(`Dispo: ${art.dateDispo}`, 48), textX, textY);
+          textY += 4;
+        }
+        doc.setFont("helvetica", "bold");
+        doc.text(`Qté: ${art.quantite || 1}`, textX, textY);
+        textY += 4;
+
+        if (art.remarqueArticle) {
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(7);
+          doc.setTextColor(80, 80, 80);
+          doc.text(doc.splitTextToSize(`Désig: ${art.remarqueArticle}`, 48), textX, textY);
+        }
+
+        // Alternance colonne gauche / colonne droite
+        if (x === 15) {
+          x = 15 + colWidth + marginX;
+        } else {
+          x = 15;
+          y += cardHeight + marginY;
+        }
+      });
+
+      doc.save(`reliquats_${Date.now()}.pdf`);
+    }
+
     window.ouvrirModal = function(cmd) {
       modal.style.display = "flex"; 
       btnPrintModal.style.display = "inline-block"; 
@@ -1142,33 +1229,22 @@
         modalImagesRow.appendChild(box);
       });
 
-      // Impression d'une commande spécifique (chaque article devient une carte distincte dans la grille)
+      // Télécharger le PDF de cette commande spécifique
       btnPrintModal.onclick = () => {
-        let html = `<div class="print-title">${bText}Reliquat N° ${numCleanModal}</div><div class="print-subtitle">Date : ${cmd.date || ''} - Généré le ${new Date().toLocaleString('fr-FR')}</div><div class="print-grid">`;
-        
+        let listePures = [];
         cmd.articles?.forEach(art => {
-          html += `<div class="print-card">
-            <div class="print-photo-print-item">
-              ${art.photo ? `<img src="${art.photo}">` : ''}
-              <div style="font-size: 10px; color: #000 !important; line-height: 1.3;">
-                ${art.fournisseur ? `<b>Fournisseur:</b> ${art.fournisseur}<br>` : ''}
-                <b>Réf:</b> ${art.ref}<br>
-                ${art.codeBarre ? `<b>EAN:</b> ${art.codeBarre}<br>` : ''}
-                ${art.dateDispo ? `<b>Dispo:</b> ${art.dateDispo}<br>` : ''}
-                <b>Qté:</b> ${art.quantite || 1}
-                ${art.remarqueArticle ? `<br><b>Désignation:</b> ${art.remarqueArticle}` : ''}
-              </div>
-            </div>
-          </div>`;
+          listePures.push({
+            titreEntete: `${bText}N° ${numCleanModal}`,
+            photo: art.photo || '',
+            fournisseur: art.fournisseur || '',
+            ref: art.ref || '',
+            codeBarre: art.codeBarre || '',
+            dateDispo: art.dateDispo || '',
+            quantite: art.quantite || 1,
+            remarqueArticle: art.remarqueArticle || ''
+          });
         });
-        html += `</div>`;
-
-        const printArea = document.getElementById('print-area');
-        printArea.innerHTML = html;
-        setTimeout(() => {
-          window.print();
-          printArea.innerHTML = "";
-        }, 300);
+        genererFichierPDF(`Reliquat N° ${numCleanModal}`, listePures);
       };
     };
 
@@ -1240,34 +1316,23 @@
           modalImagesRow.appendChild(box);
         });
 
-        // Impression globale (chaque article consolidé forme une carte distincte dans la grille)
+        // Télécharger le PDF de l'aperçu global
         btnPrintModal.onclick = () => {
-          let html = `<div class="print-title">Aperçu Global par Fournisseur${boutiqueActive}</div><div class="print-subtitle">Généré le ${new Date().toLocaleString('fr-FR')} - Total articles uniques : ${consolidatedList.length}</div><div class="print-grid">`;
-          
+          let listePures = [];
           consolidatedList.forEach(art => {
             const boutiquesStr = art.boutiques.size > 0 ? Array.from(art.boutiques).join(', ') : '';
-            html += `<div class="print-card">
-              <div class="print-photo-print-item">
-                ${art.photo ? `<img src="${art.photo}">` : ''}
-                <div style="font-size: 10px; color: #000 !important; line-height: 1.3;">
-                  ${art.fournisseur ? `<b>🏭 Fournisseur:</b> ${art.fournisseur}<br>` : ''}
-                  ${boutiquesStr ? `<b>Boutique(s):</b> ${boutiquesStr}<br>` : ''}
-                  <b>Réf:</b> ${art.ref}<br>
-                  ${art.codeBarre ? `<b>EAN:</b> ${art.codeBarre}<br>` : ''}
-                  <b>Total Qté:</b> ${art.quantiteTotale}
-                  ${art.remarqueArticle ? `<br><b>Désignation:</b> ${art.remarqueArticle}` : ''}
-                </div>
-              </div>
-            </div>`;
+            listePures.push({
+              titreEntete: art.fournisseur ? `Fournisseur: ${art.fournisseur}` : 'Article',
+              photo: art.photo || '',
+              fournisseur: boutiquesStr ? `Boutique(s): ${boutiquesStr}` : '',
+              ref: art.ref || '',
+              codeBarre: art.codeBarre || '',
+              dateDispo: '',
+              quantite: art.quantiteTotale,
+              remarqueArticle: art.remarqueArticle || ''
+            });
           });
-          html += `</div>`;
-
-          const printArea = document.getElementById('print-area');
-          printArea.innerHTML = html;
-          setTimeout(() => {
-            window.print();
-            printArea.innerHTML = "";
-          }, 300);
+          genererFichierPDF(`Aperçu Global par Fournisseur${boutiqueActive}`, listePures);
         };
       });
     }
@@ -1280,6 +1345,38 @@
     if (inputRecherche) {
       inputRecherche.addEventListener('input', executerRecherche);
       inputRecherche.addEventListener('keypress', (e) => { if (e.key === 'Enter') executerRecherche(); });
+    }
+
+    // --- BOUTON PDF PRINCIPAL (DEPUIS LA LISTE) ---
+    const btnExportPDF = document.getElementById('btnExportPDF');
+    if (btnExportPDF) {
+      btnExportPDF.addEventListener('click', () => {
+        const checked = document.querySelectorAll('.commande-select-checkbox:checked');
+        let list = checked.length > 0 ? commandes.filter(c => Array.from(checked).map(cb => Number(cb.getAttribute('data-id'))).includes(c.id)) : getFilteredCommandes(inputRecherche.value);
+        if (list.length === 0) { alert("Rien à exporter."); return; }
+
+        let listePures = [];
+        list.forEach(cmd => {
+          const bPrint = cmd.boutique ? `[Boutique ${cmd.boutique}] ` : '';
+          let numP = String(cmd.numero || '').trim();
+          if (numP && !/^s-/i.test(numP)) numP = 'S-' + numP;
+
+          cmd.articles?.forEach(art => {
+            listePures.push({
+              titreEntete: `${bPrint}N° ${numP}`,
+              photo: art.photo || '',
+              fournisseur: art.fournisseur || '',
+              ref: art.ref || '',
+              codeBarre: art.codeBarre || '',
+              dateDispo: art.dateDispo || '',
+              quantite: art.quantite || 1,
+              remarqueArticle: art.remarqueArticle || ''
+            });
+          });
+        });
+
+        genererFichierPDF(`Export Reliquats`, listePures);
+      });
     }
 
     // --- COLLAGE EXCEL ---
@@ -1470,46 +1567,6 @@
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-      });
-    }
-
-    const btnExportPDF = document.getElementById('btnExportPDF');
-    if (btnExportPDF) {
-      btnExportPDF.addEventListener('click', () => {
-        const checked = document.querySelectorAll('.commande-select-checkbox:checked');
-        let list = checked.length > 0 ? commandes.filter(c => Array.from(checked).map(cb => Number(cb.getAttribute('data-id'))).includes(c.id)) : getFilteredCommandes(inputRecherche.value);
-        if (list.length === 0) { alert("Rien à exporter."); return; }
-        let html = `<div class="print-title">Export Reliquats</div><div class="print-subtitle">Généré le ${new Date().toLocaleString('fr-FR')}</div><div class="print-grid">`;
-        list.forEach(cmd => {
-          const bPrint = cmd.boutique ? `[Boutique ${cmd.boutique}] ` : '';
-          let numP = String(cmd.numero || '').trim();
-          if (numP && !/^s-/i.test(numP)) numP = 'S-' + numP;
-          
-          cmd.articles?.forEach(art => {
-            html += `<div class="print-card">
-              <div style="font-size: 11px; font-weight: bold; color: #ff6b00; margin-bottom: 2px;">${bPrint}Réf: ${numP} ${cmd.urgente ? '⚠️ URGENT' : ''} ${cmd.controle ? '🔍 À CONTRÔLER' : ''}</div>
-              <div style="font-size: 9px; color: #64748b; margin-bottom: 4px;">Date : ${cmd.date}</div>
-              <div class="print-photo-print-item">
-                ${art.photo ? `<img src="${art.photo}">` : ''}
-                <div style="font-size: 10px; color: #000 !important; line-height: 1.3;">
-                  ${art.fournisseur ? `<b>Fournisseur:</b> ${art.fournisseur}<br>` : ''}
-                  <b>Réf:</b> ${art.ref}<br>
-                  ${art.codeBarre ? `<b>EAN:</b> ${art.codeBarre}<br>` : ''}
-                  ${art.dateDispo ? `<b>Dispo:</b> ${art.dateDispo}<br>` : ''}
-                  <b>Qté:</b> ${art.quantite || 1}
-                  ${art.remarqueArticle ? `<br><b>Désignation:</b> ${art.remarqueArticle}` : ''}
-                </div>
-              </div>
-            </div>`;
-          });
-        });
-        html += `</div>`;
-        const printArea = document.getElementById('print-area');
-        printArea.innerHTML = html;
-        setTimeout(() => {
-          window.print();
-          printArea.innerHTML = "";
-        }, 300);
       });
     }
 
