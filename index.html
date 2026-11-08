@@ -72,8 +72,10 @@
       background: var(--card-bg); border: 1px solid var(--card-border); 
       border-radius: var(--radius); box-shadow: var(--shadow); gap: 1rem; position: relative; z-index: 50;
     }
-    .header-brand { display: flex; align-items: center; justify-content: center; background: white; padding: 0.4rem 0.8rem; border-radius: 12px; height: 50px; max-width: 200px; border: 1px solid var(--border); }
-    .header-brand img { height: 36px !important; width: auto !important; max-width: 100%; object-fit: contain; }
+    
+    /* Logo élargi à la taille demandée */
+    .header-brand { display: flex; align-items: center; justify-content: center; background: white; padding: 0.4rem 0.8rem; border-radius: 12px; height: 50px; width: 220px; max-width: 100%; border: 1px solid var(--border); }
+    .header-brand img { height: 42px !important; width: 100% !important; object-fit: contain; }
     
     .header-controls { display: flex; align-items: center; position: relative; gap: 0.6rem; }
     .btn-nav-home, .btn-menu-hamburger { 
