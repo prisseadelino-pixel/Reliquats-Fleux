@@ -193,7 +193,7 @@
       position: fixed; top: 15px; left: 50%; transform: translateX(-50%); 
       font-size: 0.95rem; font-weight: 800; color: var(--text); background: var(--card-bg); 
       padding: 0.6rem 1.2rem; border-radius: 40px; border: 1px solid var(--card-border); 
-      box-shadow: var(--shadow); z-index: 1005; white-space: nowrap; max-width: 90vw; overflow: hidden; text-overflow: ellipsis;
+      box-shadow: var(--shadow); z-index: 1005; white-space: nowrap; max-width: 80vw; overflow: hidden; text-overflow: ellipsis;
     }
 
     .modal-images-row { display: flex; gap: 1.25rem; flex-wrap: wrap; justify-content: center; max-width: 100%; width: 100%; }
@@ -368,6 +368,9 @@
   <div id="imageModal" class="modal">
     <span class="modal-close" id="closeModal">&times;</span>
     <div id="modalTitleBadge" class="modal-title-badge"></div>
+    <div style="position: fixed; top: 15px; left: 20px; z-index: 1005;">
+      <button type="button" id="btnPrintModal" class="btn-pdf" style="padding: 0.5rem 1rem; font-size: 0.85rem; box-shadow: var(--shadow);">🖨️ Imprimer / PDF</button>
+    </div>
     <div class="modal-content-container">
       <div class="modal-images-row" id="modalImagesRow"></div>
     </div>
@@ -560,6 +563,7 @@
     const modalTitleBadge = document.getElementById('modalTitleBadge');
     const modalImagesRow = document.getElementById('modalImagesRow');
     const closeModal = document.getElementById('closeModal');
+    const btnPrintModal = document.getElementById('btnPrintModal');
 
     function nettoyerCommandeObjet(cmd) {
       if (!cmd) return cmd;
@@ -1106,6 +1110,7 @@
 
     window.ouvrirModal = function(cmd) {
       modal.style.display = "flex"; 
+      btnPrintModal.style.display = "none"; // Masqué pour les commandes unitaires
       const bText = cmd.boutique ? `[Boutique ${cmd.boutique}] ` : '';
       let numCleanModal = String(cmd.numero || '').trim();
       if (numCleanModal && !/^s-/i.test(numCleanModal)) numCleanModal = 'S-' + numCleanModal;
@@ -1181,6 +1186,7 @@
         });
 
         modal.style.display = "flex";
+        btnPrintModal.style.display = "inline-block"; // Affiché pour l'aperçu global
         const boutiqueActive = selectFiltreBoutique.value ? ` [Boutique ${selectFiltreBoutique.value}]` : '';
         modalTitleBadge.innerHTML = `🔍 Aperçu global par Fournisseur${boutiqueActive} (${consolidatedList.length} articles)`;
         modalImagesRow.innerHTML = "";
@@ -1205,6 +1211,38 @@
           `;
           modalImagesRow.appendChild(box);
         });
+
+        // Action du bouton d'impression depuis la modale
+        btnPrintModal.onclick = () => {
+          let html = `<div class="print-title">Aperçu Global par Fournisseur${boutiqueActive}</div><div class="print-subtitle">Généré le ${new Date().toLocaleString('fr-FR')} - Total articles uniques : ${consolidatedList.length}</div><div class="print-grid">`;
+          
+          consolidatedList.forEach(art => {
+            const boutiquesStr = art.boutiques.size > 0 ? Array.from(art.boutiques).join(', ') : '';
+            html += `<div class="print-card">
+              <div class="print-photos-flex">
+                <div class="print-photo-print-item" style="width: 100%;">
+                  ${art.photo ? `<img src="${art.photo}">` : ''}
+                  <div style="font-size:11px;">
+                    ${art.fournisseur ? `<b>🏭 Fournisseur:</b> ${art.fournisseur}<br>` : ''}
+                    ${boutiquesStr ? `<b>Boutique(s):</b> ${boutiquesStr}<br>` : ''}
+                    <b>Réf:</b> ${art.ref}<br>
+                    ${art.codeBarre ? `<b>EAN:</b> ${art.codeBarre}<br>` : ''}
+                    <b>Total Qté:</b> ${art.quantiteTotale}
+                    ${art.remarqueArticle ? `<br><b>Désignation:</b> ${art.remarqueArticle}` : ''}
+                  </div>
+                </div>
+              </div>
+            </div>`;
+          });
+          html += `</div>`;
+
+          const printArea = document.getElementById('print-area');
+          printArea.innerHTML = html;
+          setTimeout(() => {
+            window.print();
+            printArea.innerHTML = "";
+          }, 300);
+        };
       });
     }
 
