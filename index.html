@@ -51,7 +51,7 @@
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-    body { background-color: var(--bg); color: var(--text); min-height: 100vh; }
+    body { background-color: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
 
     #home-screen {
       display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -64,133 +64,145 @@
     .btn-start { background: linear-gradient(135deg, var(--primary) 0%, #ff8c3b 100%); color: white; border: none; padding: 1.2rem 3rem; border-radius: 50px; font-size: 1.25rem; font-weight: 700; cursor: pointer; box-shadow: 0 10px 30px var(--primary-glow); }
     .btn-start:hover { transform: translateY(-2px); }
 
-    #app-screen { display: none; max-width: 1440px; margin: 0 auto; padding: 1.5rem; }
+    #app-screen { display: none; max-width: 1440px; margin: 0 auto; padding: 1rem; }
     
     header { 
       display: flex; align-items: center; justify-content: space-between; 
-      margin-bottom: 2rem; padding: 1rem 1.75rem; 
+      margin-bottom: 1.5rem; padding: 0.85rem 1.25rem; 
       background: var(--card-bg); border: 1px solid var(--card-border); 
       border-radius: var(--radius); box-shadow: var(--shadow); gap: 1rem; position: relative; z-index: 50;
     }
-    .header-brand { display: flex; align-items: center; justify-content: center; background: white; padding: 0.5rem 1rem; border-radius: 12px; height: 60px; max-width: 240px; border: 1px solid var(--border); }
-    .header-brand img { height: 44px !important; width: auto !important; max-width: 100%; object-fit: contain; }
+    .header-brand { display: flex; align-items: center; justify-content: center; background: white; padding: 0.4rem 0.8rem; border-radius: 12px; height: 50px; max-width: 200px; border: 1px solid var(--border); }
+    .header-brand img { height: 36px !important; width: auto !important; max-width: 100%; object-fit: contain; }
     
-    .header-controls { display: flex; align-items: center; position: relative; gap: 0.85rem; }
+    .header-controls { display: flex; align-items: center; position: relative; gap: 0.6rem; }
     .btn-nav-home, .btn-menu-hamburger { 
       background: var(--container-bg); border: 1px solid var(--border); color: var(--text); 
-      padding: 0.7rem 1.2rem; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 0.95rem;
-      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.6rem 1rem; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 0.9rem;
+      display: flex; align-items: center; gap: 0.4rem; white-space: nowrap;
     }
     .btn-nav-home:hover, .btn-menu-hamburger:hover { background: var(--secondary); border-color: var(--primary); }
-    .btn-menu-hamburger { font-size: 1.2rem; padding: 0.6rem 1rem; }
+    .btn-menu-hamburger { font-size: 1.1rem; padding: 0.5rem 0.8rem; }
 
-    .dropdown-menu { display: none; position: absolute; top: calc(100% + 12px); right: 0; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; box-shadow: var(--shadow); z-index: 9999; min-width: 270px; overflow: hidden; }
+    .dropdown-menu { display: none; position: absolute; top: calc(100% + 12px); right: 0; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; box-shadow: var(--shadow); z-index: 9999; min-width: 250px; overflow: hidden; }
     .dropdown-menu.show { display: block; }
     
-    .dropdown-item { width: 100%; padding: 1rem 1.25rem; text-align: left; background: var(--card-bg); border: none; font-size: 0.95rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.85rem; color: var(--text); }
+    .dropdown-item { width: 100%; padding: 0.9rem 1.1rem; text-align: left; background: var(--card-bg); border: none; font-size: 0.95rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.85rem; color: var(--text); }
     .dropdown-item.danger { color: #f43f5e; }
     .dropdown-item:hover { background: rgba(255, 107, 0, 0.15); }
 
-    .card { background: var(--card-bg); border-radius: var(--radius); padding: 1.75rem; box-shadow: var(--shadow); border: 1px solid var(--card-border); margin-bottom: 1.75rem; }
+    .card { background: var(--card-bg); border-radius: var(--radius); padding: 1.25rem; box-shadow: var(--shadow); border: 1px solid var(--card-border); margin-bottom: 1.25rem; }
     
-    .search-box { display: flex; gap: 0.85rem; align-items: center; }
-    .search-box input { flex: 1; background: var(--input-bg); }
-    .btn-search { background: linear-gradient(135deg, var(--primary) 0%, #ff8c3b 100%); color: white; border: none; padding: 0.9rem 1.5rem; border-radius: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; box-shadow: 0 4px 15px var(--primary-glow); }
+    .search-box { display: flex; gap: 0.75rem; align-items: center; flex-direction: column; }
+    .search-box-row { display: flex; gap: 0.6rem; width: 100%; }
+    .search-box input { flex: 1; background: var(--input-bg); min-width: 0; }
+    .btn-search { background: linear-gradient(135deg, var(--primary) 0%, #ff8c3b 100%); color: white; border: none; padding: 0.8rem 1.2rem; border-radius: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; box-shadow: 0 4px 15px var(--primary-glow); }
 
-    .form-group { margin-bottom: 1.25rem; }
-    .photo-box-container { background: var(--container-bg); padding: 1.25rem; border-radius: 16px; border: 2px dashed var(--border); margin-bottom: 1.25rem; position: relative; }
-    label { display: block; font-weight: 700; margin-bottom: 0.5rem; font-size: 0.82rem; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.8px; }
+    .form-group { margin-bottom: 1.1rem; }
+    .photo-box-container { background: var(--container-bg); padding: 1rem; border-radius: 16px; border: 2px dashed var(--border); margin-bottom: 1rem; position: relative; }
+    label { display: block; font-weight: 700; margin-bottom: 0.4rem; font-size: 0.8rem; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.8px; }
     
     input, select, textarea { 
-      width: 100%; padding: 0.9rem 1.1rem; border: 1px solid var(--border); border-radius: 12px; font-size: 1rem; 
-      background: var(--input-bg); color: var(--text); outline: none; 
+      width: 100%; padding: 0.85rem 1rem; border: 1px solid var(--border); border-radius: 12px; font-size: 1rem; 
+      background: var(--input-bg); color: var(--text); outline: none; max-width: 100%;
     }
     input:focus, select:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-glow); }
 
     .previewWrapper { position: relative; margin-bottom: 1rem; display: none; }
-    .photoPreview { max-height: 240px; border-radius: 12px; border: 1px solid var(--border); display: block; background: #000; width: 100%; object-fit: contain; }
-    .btn-suppr-photo-interne { position: absolute; top: 12px; right: 12px; background: rgba(244, 63, 94, 0.95); color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 8px; font-size: 0.78rem; font-weight: bold; cursor: pointer; }
+    .photoPreview { max-height: 220px; border-radius: 12px; border: 1px solid var(--border); display: block; background: #000; width: 100%; object-fit: contain; }
+    .btn-suppr-photo-interne { position: absolute; top: 10px; right: 10px; background: rgba(244, 63, 94, 0.95); color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 8px; font-size: 0.75rem; font-weight: bold; cursor: pointer; }
     
-    .camera-controls { display: flex; gap: 0.75rem; margin-top: 0.75rem; }
-    button.btn-main { background: linear-gradient(135deg, var(--primary) 0%, #ff8c3b 100%); color: white; border: none; padding: 1rem 1.5rem; border-radius: 12px; font-weight: 700; cursor: pointer; width: 100%; font-size: 1.05rem; box-shadow: 0 6px 20px var(--primary-glow); }
-    button.btn-secondary { background-color: var(--container-bg); color: var(--text); border: 1px solid var(--border); padding: 1rem 1.5rem; border-radius: 12px; font-weight: 600; cursor: pointer; width: 100%; }
+    .camera-controls { display: flex; gap: 0.6rem; margin-top: 0.6rem; }
+    button.btn-main { background: linear-gradient(135deg, var(--primary) 0%, #ff8c3b 100%); color: white; border: none; padding: 0.9rem 1.2rem; border-radius: 12px; font-weight: 700; cursor: pointer; width: 100%; font-size: 1rem; box-shadow: 0 6px 20px var(--primary-glow); }
+    button.btn-secondary { background-color: var(--container-bg); color: var(--text); border: 1px solid var(--border); padding: 0.9rem 1.2rem; border-radius: 12px; font-weight: 600; cursor: pointer; width: 100%; }
 
-    .export-filter-container { display: flex; flex-direction: column; gap: 0.85rem; margin-top: 1.25rem; background: var(--container-bg); padding: 1.25rem; border-radius: 16px; border: 1px solid var(--border); }
-    .export-filter-label { font-size: 0.82rem; font-weight: 800; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.8px; }
-    .export-actions-row { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
-    .input-date-custom { flex: 1; min-width: 140px; border: 1px solid var(--border); border-radius: 12px; padding: 0.75rem; font-size: 0.95rem; color: var(--text); background: var(--input-bg); text-align: center; color-scheme: dark; }
+    /* Correction conteneur de filtre pour mobile */
+    .export-filter-container { display: flex; flex-direction: column; gap: 0.75rem; margin-top: 1rem; background: var(--container-bg); padding: 1rem; border-radius: 16px; border: 1px solid var(--border); }
+    .export-filter-label { font-size: 0.8rem; font-weight: 800; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.8px; }
+    .export-actions-row { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; width: 100%; }
+    
+    .date-inputs-wrapper { display: flex; align-items: center; gap: 0.4rem; width: 100%; flex-wrap: wrap; }
+    .input-date-custom { flex: 1; min-width: 120px; border: 1px solid var(--border); border-radius: 12px; padding: 0.7rem; font-size: 0.9rem; color: var(--text); background: var(--input-bg); text-align: center; color-scheme: dark; }
     :root[data-theme="light"] .input-date-custom { color-scheme: light; }
     
-    button.btn-pdf { background-color: #0284c7; color: white; border: none; padding: 0.75rem 1.1rem; border-radius: 12px; font-size: 0.9rem; font-weight: 700; cursor: pointer; }
-    button.btn-select-all { background-color: var(--secondary); color: var(--text); border: 1px solid var(--border); padding: 0.75rem 1.1rem; border-radius: 12px; font-size: 0.9rem; font-weight: 700; cursor: pointer; }
-    button.btn-sheets { background-color: #16a34a; color: white; border: none; padding: 0.75rem 1.1rem; border-radius: 12px; font-size: 0.9rem; font-weight: 700; cursor: pointer; }
-    button.btn-paste { background-color: #d97706; color: white; border: none; padding: 0.75rem 1.1rem; border-radius: 12px; font-size: 0.9rem; font-weight: 700; cursor: pointer; }
-    button.btn-sort { background-color: #6366f1; color: white; border: none; padding: 0.75rem 1.1rem; border-radius: 12px; font-size: 0.9rem; font-weight: 700; cursor: pointer; }
+    button.btn-pdf, button.btn-select-all, button.btn-sheets, button.btn-paste, button.btn-sort { 
+      border-radius: 12px; font-size: 0.85rem; font-weight: 700; cursor: pointer; padding: 0.65rem 0.9rem; border: none;
+    }
+    button.btn-pdf { background-color: #0284c7; color: white; }
+    button.btn-select-all { background-color: var(--secondary); color: var(--text); border: 1px solid var(--border); }
+    button.btn-sheets { background-color: #16a34a; color: white; }
+    button.btn-paste { background-color: #d97706; color: white; }
+    button.btn-sort { background-color: #6366f1; color: white; }
 
-    .liste-commandes { display: flex; flex-direction: column; gap: 1rem; margin-top: 1.5rem; }
+    .liste-commandes { display: flex; flex-direction: column; gap: 0.85rem; margin-top: 1.25rem; }
+    
+    /* Correction de la carte commande sur mobile pour éviter les débordements */
     .commande-item-compact { 
       display: flex; flex-direction: column; background: var(--container-bg); 
-      border: 1px solid var(--border); border-radius: 16px; padding: 1.25rem; gap: 1rem; 
-      user-select: none; 
+      border: 1px solid var(--border); border-radius: 16px; padding: 1rem; gap: 0.85rem; 
+      user-select: none; width: 100%; overflow: hidden;
     }
     .commande-item-compact.urgente { background: rgba(244, 63, 94, 0.15); border: 1.5px solid rgba(244, 63, 94, 0.6); }
     .commande-item-compact.controle { background: rgba(2, 132, 199, 0.15); border: 1.5px solid rgba(2, 132, 199, 0.6); }
     
-    .commande-row-top { display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 1rem; }
-    .commande-row-bottom { display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 1rem; border-top: 1px solid var(--border); padding-top: 0.85rem; }
+    .commande-row-top { display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 0.5rem; }
+    .commande-row-bottom { display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 0.5rem; border-top: 1px solid var(--border); padding-top: 0.75rem; flex-wrap: wrap; }
 
-    .drag-handle { color: var(--subtext); font-size: 1.35rem; cursor: grab; padding: 0 0.3rem; font-weight: bold; }
+    .drag-handle { color: var(--subtext); font-size: 1.2rem; cursor: grab; padding: 0 0.2rem; font-weight: bold; flex-shrink: 0; }
     
     .btn-status-toggle { 
       background: var(--card-bg); border: 1px solid var(--border); color: var(--subtext); 
-      padding: 0.5rem 1rem; border-radius: 10px; font-size: 0.82rem; font-weight: 700; 
-      cursor: pointer; display: flex; align-items: center; gap: 0.5rem; white-space: nowrap; 
+      padding: 0.45rem 0.8rem; border-radius: 10px; font-size: 0.8rem; font-weight: 700; 
+      cursor: pointer; display: flex; align-items: center; gap: 0.4rem; white-space: nowrap; 
     }
     .btn-status-toggle.active-urgent { background: rgba(244, 63, 94, 0.3); border-color: #f43f5e; color: #f43f5e; }
     .btn-status-toggle.active-controle { background: rgba(2, 132, 199, 0.3); border-color: #0284c7; color: #38bdf8; }
 
-    .commande-select-checkbox { width: 22px; height: 22px; cursor: pointer; accent-color: var(--primary); border-radius: 6px; flex-shrink: 0; }
-    .commande-main-btn { display: flex; align-items: center; gap: 1rem; flex-grow: 1; min-width: 0; cursor: pointer; }
+    .commande-select-checkbox { width: 20px; height: 20px; cursor: pointer; accent-color: var(--primary); border-radius: 6px; flex-shrink: 0; }
+    .commande-main-btn { display: flex; align-items: center; gap: 0.75rem; flex-grow: 1; min-width: 0; cursor: pointer; }
     
-    .commande-num-badge { font-weight: 800; font-size: 1.15rem; color: var(--text); word-break: normal; white-space: normal; line-height: 1.4; }
-    .commande-date-compact { font-size: 0.85rem; color: var(--subtext); margin-top: 0.2rem; font-weight: 500; }
-    .commande-articles-badge { font-size: 0.85rem; background: var(--primary-glow); color: var(--primary); padding: 0.35rem 0.85rem; border-radius: 10px; white-space: nowrap; font-weight: 800; border: 1px solid rgba(255, 107, 0, 0.3); }
+    .commande-num-badge { font-weight: 800; font-size: 1.05rem; color: var(--text); word-break: break-all; line-height: 1.3; }
+    .commande-date-compact { font-size: 0.8rem; color: var(--subtext); margin-top: 0.15rem; font-weight: 500; }
     
-    .commande-actions { display: flex; align-items: center; gap: 0.6rem; flex-shrink: 0; }
-    .btn-edit-small { background: var(--card-bg); border: 1px solid var(--border); color: var(--text); padding: 0.5rem 0.85rem; border-radius: 10px; font-size: 0.85rem; font-weight: 600; cursor: pointer; text-align: center; }
-    .btn-delete-small { background: rgba(244, 63, 94, 0.15); border: 1px solid rgba(244, 63, 94, 0.3); color: #f43f5e; padding: 0.5rem 0.85rem; border-radius: 10px; font-size: 0.9rem; font-weight: bold; cursor: pointer; text-align: center; }
+    /* Correction du badge d'articles pour qu'il ne dépasse jamais */
+    .commande-articles-badge { font-size: 0.8rem; background: var(--primary-glow); color: var(--primary); padding: 0.3rem 0.6rem; border-radius: 8px; white-space: nowrap; font-weight: 800; border: 1px solid rgba(255, 107, 0, 0.3); flex-shrink: 0; }
+    
+    .commande-actions { display: flex; align-items: center; gap: 0.4rem; flex-shrink: 0; }
+    .btn-edit-small { background: var(--card-bg); border: 1px solid var(--border); color: var(--text); padding: 0.45rem 0.7rem; border-radius: 10px; font-size: 0.8rem; font-weight: 600; cursor: pointer; text-align: center; }
+    .btn-delete-small { background: rgba(244, 63, 94, 0.15); border: 1px solid rgba(244, 63, 94, 0.3); color: #f43f5e; padding: 0.45rem 0.7rem; border-radius: 10px; font-size: 0.85rem; font-weight: bold; cursor: pointer; text-align: center; }
 
-    .section-header-flex { display: flex; align-items: center; justify-content: space-between; }
-    .section-header-flex h2 { font-size: 1.35rem; font-weight: 800; }
-    .badge-count { background: var(--primary-glow); color: var(--primary); border: 1px solid rgba(255, 107, 0, 0.4); padding: 0.45rem 1rem; border-radius: 30px; font-size: 0.95rem; font-weight: 800; }
+    .section-header-flex { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+    .section-header-flex h2 { font-size: 1.2rem; font-weight: 800; }
+    .badge-count { background: var(--primary-glow); color: var(--primary); border: 1px solid rgba(255, 107, 0, 0.4); padding: 0.35rem 0.8rem; border-radius: 30px; font-size: 0.85rem; font-weight: 800; white-space: nowrap; }
 
     @media (min-width: 900px) {
+      #app-screen { padding: 1.5rem; }
+      .search-box { flex-direction: row; }
+      .date-inputs-wrapper { width: auto; flex-wrap: nowrap; }
       .main-layout-desktop { display: grid; grid-template-columns: 460px 1fr; gap: 2rem; align-items: start; }
       .commande-item-compact { flex-direction: row; align-items: center; justify-content: space-between; padding: 1.25rem 1.5rem; gap: 1.25rem; }
       .commande-row-top, .commande-row-bottom { display: contents; }
       .commande-main-btn { gap: 1.25rem; }
-      .commande-num-badge { font-size: 1.25rem; white-space: nowrap; }
+      .commande-num-badge { font-size: 1.25rem; white-space: nowrap; word-break: normal; }
       .btn-edit-small { font-size: 0.85rem; padding: 0.45rem 0.85rem; }
       .commande-actions { flex-direction: column; align-items: stretch; gap: 0.5rem; }
     }
 
-    .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(3, 7, 18, 0.92); flex-direction: column; overflow-y: auto; padding: 2rem; }
-    .modal-content-container { display: flex; flex-direction: column; align-items: center; gap: 1.75rem; max-width: 1100px; width: 100%; margin: auto; padding-top: 5rem; }
+    .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(3, 7, 18, 0.92); flex-direction: column; overflow-y: auto; padding: 1rem; }
+    .modal-content-container { display: flex; flex-direction: column; align-items: center; gap: 1.25rem; max-width: 1100px; width: 100%; margin: auto; padding-top: 4rem; }
     
     .modal-title-badge { 
-      position: fixed; top: 25px; left: 50%; transform: translateX(-50%); 
-      font-size: 1.15rem; font-weight: 800; color: var(--text); background: var(--card-bg); 
-      padding: 0.75rem 1.75rem; border-radius: 40px; border: 1px solid var(--card-border); 
-      box-shadow: var(--shadow); z-index: 1005; white-space: nowrap; 
+      position: fixed; top: 15px; left: 50%; transform: translateX(-50%); 
+      font-size: 0.95rem; font-weight: 800; color: var(--text); background: var(--card-bg); 
+      padding: 0.6rem 1.2rem; border-radius: 40px; border: 1px solid var(--card-border); 
+      box-shadow: var(--shadow); z-index: 1005; white-space: nowrap; max-width: 90vw; overflow: hidden; text-overflow: ellipsis;
     }
 
-    .modal-images-row { display: flex; gap: 1.75rem; flex-wrap: wrap; justify-content: center; max-width: 100%; width: 100%; }
-    .modal-photo-box { display: flex; flex-direction: column; align-items: center; gap: 0.75rem; background: var(--card-bg); border: 1px solid var(--card-border); padding: 1.5rem; border-radius: var(--radius); max-width: 320px; width: 100%; box-shadow: var(--shadow); position: relative; }
+    .modal-images-row { display: flex; gap: 1.25rem; flex-wrap: wrap; justify-content: center; max-width: 100%; width: 100%; }
+    .modal-photo-box { display: flex; flex-direction: column; align-items: center; gap: 0.75rem; background: var(--card-bg); border: 1px solid var(--card-border); padding: 1.25rem; border-radius: var(--radius); max-width: 320px; width: 100%; box-shadow: var(--shadow); position: relative; }
     .modal-photo-box.autre-boutique { border: 2.5px solid #f43f5e; background: rgba(244, 63, 94, 0.15); }
+    .modal-photo-box img { max-height: 240px; border-radius: 12px; background: #000; width: 100%; object-fit: contain; border: 1px solid var(--border); display: block !important; visibility: visible !important; }
     
-    .modal-photo-box img { max-height: 260px; border-radius: 12px; background: #000; width: 100%; object-fit: contain; border: 1px solid var(--border); display: block !important; visibility: visible !important; }
-    
-    .modal-ref-group { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; width: 100%; }
     .modal-ref-badge { background: var(--primary); color: white; padding: 0.35rem 0.85rem; border-radius: 10px; font-size: 0.9rem; font-weight: 800; }
     .modal-fournisseur-badge { background: var(--secondary); color: var(--text); padding: 0.35rem 0.85rem; border-radius: 10px; font-size: 0.85rem; font-weight: 700; border: 1px solid var(--border); }
     .modal-barcode-badge { background-color: #0284c7; color: #ffffff; font-weight: 800; padding: 0.35rem 0.85rem; border-radius: 10px; font-size: 0.85rem; font-family: monospace; }
@@ -199,7 +211,7 @@
     .modal-delai-badge { background-color: #6366f1; color: #ffffff; font-weight: 800; padding: 0.35rem 0.85rem; border-radius: 10px; font-size: 0.9rem; }
     .modal-article-remarque-box { background: rgba(255, 107, 0, 0.15); color: var(--text); padding: 0.6rem 0.9rem; border-radius: 10px; font-size: 0.9rem; font-weight: 700; text-align: center; border: 1px dashed var(--primary); width: 100%; word-break: break-word; }
     
-    .modal-close { position: fixed; top: 25px; right: 25px; color: white; font-size: 1.6rem; font-weight: bold; cursor: pointer; z-index: 1010; background: #111827; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); }
+    .modal-close { position: fixed; top: 15px; right: 15px; color: white; font-size: 1.4rem; font-weight: bold; cursor: pointer; z-index: 1010; background: #111827; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); }
     .modal-close:hover { background: #f43f5e; }
 
     #print-area { display: none; }
@@ -254,14 +266,14 @@
     <div class="main-layout-desktop">
       <div class="column-left">
         <section class="card">
-          <div class="search-box" style="display: flex; flex-direction: column; gap: 0.85rem;">
-            <div style="display: flex; gap: 0.6rem; width: 100%;">
+          <div class="search-box">
+            <div class="search-box-row">
               <input type="text" id="recherche" placeholder="🔍 Rechercher (boutique, n° commande, réf...)" autocomplete="off">
               <button type="button" class="btn-search" id="btnLancerRecherche">Rechercher</button>
             </div>
-            <div>
+            <div style="width: 100%;">
               <label for="selectFiltreBoutique" style="font-size: 0.78rem; margin-bottom: 0.35rem;">Filtrer par Boutique :</label>
-              <select id="selectFiltreBoutique" style="font-size: 0.95rem; padding: 0.75rem; background: var(--input-bg); color: var(--text); border: 1px solid var(--border); border-radius: 12px;">
+              <select id="selectFiltreBoutique" style="font-size: 0.95rem; padding: 0.75rem; background: var(--input-bg); color: var(--text); border: 1px solid var(--border); border-radius: 12px; width: 100%;">
                 <option value="">-- Toutes les boutiques --</option>
               </select>
             </div>
@@ -304,7 +316,7 @@
         <section class="card" style="margin-bottom: 0;">
           <div class="section-header-flex">
             <h2>Historique Reliquats</h2>
-            <div style="display: flex; gap: 0.6rem; align-items: center;">
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
               <button class="btn-sort" id="btnTrierDate" type="button" title="Inverser l'ordre de tri">🔄 Récent</button>
               <span id="badgeCount" class="badge-count">0</span>
             </div>
@@ -313,17 +325,20 @@
           <div class="export-filter-container">
             <span class="export-filter-label">📅 Filtrer par période :</span>
             <div class="export-actions-row">
-              <!-- MODIFICATION : Type date natif (calendrier) -->
-              <input type="date" id="dateDebutFiltre" class="input-date-custom">
-              <span style="font-size:0.85rem; color:var(--subtext);">au</span>
-              <input type="date" id="dateFinFiltre" class="input-date-custom">
+              <div class="date-inputs-wrapper">
+                <input type="date" id="dateDebutFiltre" class="input-date-custom">
+                <span style="font-size:0.85rem; color:var(--subtext); text-align: center;">au</span>
+                <input type="date" id="dateFinFiltre" class="input-date-custom">
+              </div>
               
-              <button class="btn-select-all" id="btnSelectAll" type="button">☑️ Tout</button>
-              <button class="btn-pdf" id="btnExportPDF" type="button">📄 PDF</button>
-              
-              <div id="adminExportOptions" style="display: none; gap: 0.6rem; align-items: center; flex-wrap: wrap;">
-                <button class="btn-sheets" id="btnExportSheets" type="button">📊 Excel</button>
-                <button class="btn-paste" id="btnOpenPasteModal" type="button">📋 Coller</button>
+              <div style="display: flex; gap: 0.5rem; align-items: center; width: 100%; flex-wrap: wrap; margin-top: 0.25rem;">
+                <button class="btn-select-all" id="btnSelectAll" type="button">☑️ Tout</button>
+                <button class="btn-pdf" id="btnExportPDF" type="button">📄 PDF</button>
+                
+                <div id="adminExportOptions" style="display: none; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                  <button class="btn-sheets" id="btnExportSheets" type="button">📊 Excel</button>
+                  <button class="btn-paste" id="btnOpenPasteModal" type="button">📋 Coller</button>
+                </div>
               </div>
             </div>
           </div>
@@ -340,7 +355,7 @@
 
   <!-- Modale de collage -->
   <div id="pasteModal" class="modal" style="display: none; z-index: 3000;">
-    <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 2rem; width: 90%; max-width: 600px; display: flex; flex-direction: column; gap: 1.25rem; margin: auto; box-shadow: var(--shadow);">
+    <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 1.5rem; width: 95%; max-width: 600px; display: flex; flex-direction: column; gap: 1.25rem; margin: auto; box-shadow: var(--shadow);">
       <h3 style="color: var(--primary); font-size: 1.25rem; font-weight: 800;">📋 Coller un tableau Excel</h3>
       <p style="font-size: 0.9rem; color: var(--subtext); line-height: 1.5;">Colle directement les lignes de ton tableau Excel (les 9 colonnes seront lues : Date, N° Commande, Fournisseur, EAN, Réf, Désignation, Qté, Boutique, Délai ms appro) :</p>
       <textarea id="pasteTextarea" rows="8" placeholder="Colle ton tableau ici (Ctrl+V)..." style="width: 100%; font-family: monospace; font-size: 0.85rem; padding: 0.85rem; border-radius: 12px;"></textarea>
@@ -361,7 +376,7 @@
   </div>
 
   <div id="adminLoginModal" class="modal" style="display: none; z-index: 2000;">
-    <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 2rem; width: 100%; max-width: 380px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 1.25rem; margin: auto;">
+    <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 1.5rem; width: 90%; max-width: 380px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 1.25rem; margin: auto;">
       <h3 style="color: var(--primary); font-size: 1.25rem; text-align: center; font-weight: 800;">🔒 Accès Administrateur</h3>
       <div style="position: relative;">
         <input type="password" id="adminPasswordInput" placeholder="Mot de passe admin" autocomplete="off" style="padding-right: 3rem; width: 100%;">
@@ -773,7 +788,6 @@
     function parserDateSaisie(val) {
       if (!val) return null;
       let clean = val.trim();
-      // Si la valeur vient du input type="date" (format AAAA-MM-JJ)
       if (/^\d{4}-\d{2}-\d{2}$/.test(clean)) {
         return new Date(clean).setHours(0,0,0,0);
       }
@@ -1021,7 +1035,7 @@
             </div>
           </div>
           <div class="commande-row-bottom">
-            <div style="display: flex; gap: 0.6rem; align-items: center;">
+            <div style="display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap;">
               <button type="button" class="btn-status-toggle ${cmd.urgente ? 'active-urgent' : ''}" onclick="basculerUrgence(${cmd.id}, event)" title="Basculer l'état urgent" ${displayUrgentBtn}>
                 🔴 Urgent
               </button>
@@ -1029,7 +1043,7 @@
                 🔵 Contrôler
               </button>
             </div>
-            <div style="display: flex; gap: 0.85rem; align-items: center;">
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
               <span class="commande-articles-badge">${nbA} art.</span>
               <input type="checkbox" class="commande-select-checkbox" data-id="${cmd.id}" onclick="event.stopPropagation()">
             </div>
@@ -1093,7 +1107,6 @@
       });
     }
     
-    // Modification : écoute des changements sur les sélecteurs de date natifs
     if (dateDebutFiltre) dateDebutFiltre.addEventListener('change', () => afficherGalerie(inputRecherche.value));
     if (dateFinFiltre) dateFinFiltre.addEventListener('change', () => afficherGalerie(inputRecherche.value));
     if (selectFiltreBoutique) selectFiltreBoutique.addEventListener('change', () => afficherGalerie(inputRecherche.value));
