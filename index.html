@@ -214,18 +214,18 @@
     #print-area { display: none; }
 
     @media print {
-      @page { size: A4 portrait; margin: 5mm; }
-      body, html { background: white !important; color: black !important; height: 100% !important; overflow: hidden !important; margin: 0 !important; padding: 0 !important; }
+      @page { size: A4 portrait; margin: 10mm; }
+      body, html { background: white !important; color: black !important; height: auto !important; overflow: visible !important; margin: 0 !important; padding: 0 !important; }
       body * { visibility: hidden !important; }
       #print-area, #print-area * { visibility: visible !important; }
-      #print-area { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; height: auto !important; padding: 0 !important; margin: 0 !important; background: white !important; color: black !important; }
+      #print-area { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; background: white !important; color: black !important; }
       .print-title { font-size: 18px; color: #ff6b00; margin-bottom: 2px; font-weight: bold; }
-      .print-subtitle { font-size: 10px; color: #64748b; margin-bottom: 8px; border-bottom: 2px solid #ff6b00; padding-bottom: 3px; }
-      .print-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; page-break-inside: avoid; }
-      .print-card { border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px; page-break-inside: avoid; break-inside: avoid; background: #ffffff; }
-      .print-photos-flex { display: flex; flex-wrap: wrap; gap: 4px; }
-      .print-photo-print-item { width: 48%; display: flex; flex-direction: column; gap: 2px; margin-bottom: 2px; background: #f8fafc; padding: 3px; border-radius: 4px; border: 1px solid #e2e8f0; page-break-inside: avoid; break-inside: avoid; }
-      .print-photos-flex img { width: 100%; height: 85px; object-fit: cover; border-radius: 4px; border: 1px solid #cbd5e1; }
+      .print-subtitle { font-size: 10px; color: #64748b; margin-bottom: 12px; border-bottom: 2px solid #ff6b00; padding-bottom: 3px; }
+      .print-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; page-break-inside: avoid; }
+      .print-card { border: 1px solid #cbd5e1; border-radius: 6px; padding: 8px; page-break-inside: avoid; break-inside: avoid; background: #ffffff !important; }
+      .print-photos-flex { display: flex; flex-wrap: wrap; gap: 6px; }
+      .print-photo-print-item { width: 48%; display: flex; flex-direction: column; gap: 3px; margin-bottom: 4px; background: #f8fafc !important; padding: 5px; border-radius: 4px; border: 1px solid #e2e8f0; page-break-inside: avoid; break-inside: avoid; }
+      .print-photos-flex img { width: 100%; height: 95px; object-fit: contain; border-radius: 4px; border: 1px solid #cbd5e1; background: #fff; }
     }
   </style>
 </head>
@@ -1147,7 +1147,6 @@
         let list = checked.length > 0 ? commandes.filter(c => Array.from(checked).map(cb => Number(cb.getAttribute('data-id'))).includes(c.id)) : getFilteredCommandes(inputRecherche.value);
         if (list.length === 0) { alert("Aucun reliquat trouvé pour cet aperçu."); return; }
 
-        // Regroupement par référence d'article
         let articlesMap = {};
         list.forEach(cmd => {
           cmd.articles?.forEach(art => {
@@ -1175,14 +1174,12 @@
 
         let consolidatedList = Object.values(articlesMap);
 
-        // 🔤 Tri principal par ordre alphabétique du fournisseur
         consolidatedList.sort((a, b) => {
           const fA = String(a.fournisseur || '').trim().toLowerCase();
           const fB = String(b.fournisseur || '').trim().toLowerCase();
           return fA.localeCompare(fB);
         });
 
-        // Affichage dans la modale
         modal.style.display = "flex";
         const boutiqueActive = selectFiltreBoutique.value ? ` [Boutique ${selectFiltreBoutique.value}]` : '';
         modalTitleBadge.innerHTML = `🔍 Aperçu global par Fournisseur${boutiqueActive} (${consolidatedList.length} articles)`;
