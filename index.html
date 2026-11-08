@@ -13,193 +13,194 @@
   <meta name="apple-mobile-web-app-title" content="Reliquats Fleux">
 
   <!-- Manifeste PWA dynamique optimisé -->
-  <link rel="manifest" id="my-manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Reliquats%20Fleux%22%2C%22short_name%22%3A%22Reliquats%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23090d16%22%2C%22theme_color%22%3A%22%23ff6b00%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fi49.servimg.com%2Fu%2Ff49%2F11%2F31%2F89%2F70%2Fimg_2010.jpg%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fjpeg%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D">
+  <link rel="manifest" id="my-manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Reliquats%20Fleux%22%2C%22short_name%22%3A%22Reliquats%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23030712%22%2C%22theme_color%22%3A%22%23ff6b00%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fi49.servimg.com%2Fu%2Ff49%2F11%2F31%2F89%2F70%2Fimg_2010.jpg%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fjpeg%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D">
 
   <style>
     :root[data-theme="dark"] {
       --primary: #ff6b00;
-      --primary-hover: #e05e00;
-      --secondary: #1e293b;
-      --bg: #090d16;
-      --card-bg: #131c2e;
-      --text: #f8fafc;
-      --border: #1e293b;
-      --input-bg: rgba(255,255,255,0.03);
-      --container-bg: rgba(255,255,255,0.02);
-      --subtext: #94a3b8;
-      --radius: 16px;
+      --primary-glow: rgba(255, 107, 0, 0.3);
+      --primary-hover: #ff852b;
+      --secondary: #1f2937;
+      --bg: #030712;
+      --card-bg: #111827;
+      --card-border: #374151;
+      --text: #f9fafb;
+      --border: #374151;
+      --input-bg: #0f172a;
+      --container-bg: #1f2937;
+      --subtext: #9ca3af;
+      --radius: 20px;
+      --shadow: 0 15px 25px -5px rgba(0, 0, 0, 0.5);
     }
 
     :root[data-theme="light"] {
-      --primary: #ff6b00;
-      --primary-hover: #e05e00;
+      --primary: #f97316;
+      --primary-glow: rgba(249, 115, 22, 0.25);
+      --primary-hover: #ea580c;
       --secondary: #e2e8f0;
-      --bg: #f8fafc;
+      --bg: #f3f4f6;
       --card-bg: #ffffff;
-      --text: #0f172a;
-      --border: #cbd5e1;
+      --card-border: #d1d5db;
+      --text: #111827;
+      --border: #d1d5db;
       --input-bg: #ffffff;
-      --container-bg: #f1f5f9;
-      --subtext: #64748b;
-      --radius: 16px;
+      --container-bg: #f9fafb;
+      --subtext: #6b7280;
+      --radius: 20px;
+      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
     body { background-color: var(--bg); color: var(--text); min-height: 100vh; }
 
     #home-screen {
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      min-height: 100vh; padding: 1rem; text-align: center;
-      background: radial-gradient(circle at 50% 20%, var(--secondary) 0%, var(--bg) 70%);
+      min-height: 100vh; padding: 2rem; text-align: center;
+      background: var(--bg);
     }
     .logo-container { width: 100%; display: flex; align-items: center; justify-content: center; margin-bottom: 2rem; }
-    .home-logo-img { width: 85vw !important; max-width: 420px !important; height: auto !important; max-height: 180px !important; object-fit: contain; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.15)); display: block; }
-    .app-subtitle { font-size: 1.1rem; color: var(--subtext); max-width: 480px; margin-bottom: 2rem; line-height: 1.4; }
-    .btn-start { background-color: var(--primary); color: white; border: none; padding: 1rem 2rem; border-radius: 30px; font-size: 1.2rem; font-weight: 700; cursor: pointer; box-shadow: 0 4px 14px rgba(255, 107, 0, 0.4); }
+    .home-logo-img { width: 85vw !important; max-width: 400px !important; height: auto !important; max-height: 170px !important; object-fit: contain; filter: drop-shadow(0 10px 25px rgba(255, 107, 0, 0.25)); border-radius: var(--radius); }
+    .app-subtitle { font-size: 1.2rem; color: var(--subtext); max-width: 480px; margin-bottom: 3rem; line-height: 1.6; font-weight: 400; }
+    .btn-start { background: linear-gradient(135deg, var(--primary) 0%, #ff8c3b 100%); color: white; border: none; padding: 1.2rem 3rem; border-radius: 50px; font-size: 1.25rem; font-weight: 700; cursor: pointer; box-shadow: 0 10px 30px var(--primary-glow); }
+    .btn-start:hover { transform: translateY(-2px); }
 
-    #app-screen { display: none; max-width: 1400px; margin: 0 auto; padding: 1rem; }
-    header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid var(--border); gap: 0.5rem; }
-    .header-brand { display: flex; align-items: center; justify-content: center; flex: 1; margin-right: 1rem; background: white; padding: 0.4rem 0.75rem; border-radius: 12px; height: 65px; max-width: 350px; border: 1px solid var(--border); }
-    .header-brand img { height: 52px !important; width: auto !important; max-width: 100%; object-fit: contain; }
-    .header-controls { display: flex; flex-direction: column; align-items: flex-end; position: relative; gap: 0.3rem; flex-shrink: 0; }
-    .btn-nav-home, .btn-menu-hamburger { background: var(--card-bg); border: 1px solid var(--border); color: var(--text); padding: 0.5rem 0.75rem; border-radius: 8px; cursor: pointer; font-weight: 600; }
-    .dropdown-menu { display: none; position: absolute; top: 100%; right: 0; background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); z-index: 100; min-width: 250px; margin-top: 0.4rem; }
-    .dropdown-menu.show { display: block; }
-    .dropdown-item { width: 100%; padding: 0.75rem 1rem; text-align: left; background: none; border: none; font-size: 0.95rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; color: var(--text); }
-    .dropdown-item.danger { color: #f43f5e; }
-    .dropdown-item:hover { background: rgba(128,128,128,0.1); }
-
-    .card { background: var(--card-bg); border-radius: var(--radius); padding: 1.25rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: 1px solid var(--border); margin-bottom: 1.5rem; }
-    .search-box { display: flex; gap: 0.5rem; align-items: center; }
-    .search-box input { flex: 1; background: var(--input-bg); }
-    .btn-search { background-color: var(--primary); color: white; border: none; padding: 0.75rem 1rem; border-radius: 8px; font-weight: 600; cursor: pointer; white-space: nowrap; }
-
-    .form-group { margin-bottom: 1rem; }
-    .photo-box-container { background: var(--container-bg); padding: 0.85rem; border-radius: 10px; border: 1px dashed var(--border); margin-bottom: 1rem; position: relative; }
-    label { display: block; font-weight: 600; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--subtext); }
-    input, select, textarea { width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; background: var(--input-bg); color: var(--text); outline: none; }
-    .previewWrapper { position: relative; margin-bottom: 0.75rem; display: none; }
-    .photoPreview { max-height: 200px; border-radius: 8px; border: 1px solid var(--border); display: block; background: rgba(0,0,0,0.1); }
-    .btn-suppr-photo-interne { position: absolute; top: 8px; right: 8px; background: rgba(244, 63, 94, 0.9); color: white; border: none; padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: bold; cursor: pointer; }
-    .camera-controls { display: flex; gap: 0.5rem; }
-    button.btn-main { background-color: var(--primary); color: white; border: none; padding: 0.75rem 1.25rem; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%; font-size: 1rem; }
-    button.btn-secondary { background-color: var(--secondary); color: var(--text); border: 1px solid var(--border); padding: 0.75rem 1.25rem; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%; }
-
-    .export-filter-container { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.75rem; background: var(--container-bg); padding: 0.75rem; border-radius: 10px; border: 1px solid var(--border); }
-    .export-filter-label { font-size: 0.85rem; font-weight: 700; color: var(--subtext); }
-    .export-actions-row { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
-    .input-date-custom { flex: 1; min-width: 120px; border: 1px solid var(--border); border-radius: 8px; padding: 0.5rem; font-size: 0.85rem; color: var(--text); background: var(--input-bg); text-align: center; }
-    button.btn-pdf { background-color: #0284c7; color: white; border: none; padding: 0.6rem 0.85rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
-    button.btn-select-all { background-color: var(--secondary); color: var(--text); border: 1px solid var(--border); padding: 0.6rem 0.85rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
-    button.btn-sheets { background-color: #16a34a; color: white; border: none; padding: 0.6rem 0.85rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
-    button.btn-paste { background-color: #d97706; color: white; border: none; padding: 0.6rem 0.85rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
-    button.btn-sort { background-color: #6366f1; color: white; border: none; padding: 0.6rem 0.85rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
-
-    /* --- Ligne de commande optimisée mobile & desktop --- */
-    .liste-commandes { display: flex; flex-direction: column; gap: 0.6rem; margin-top: 1rem; }
-    .commande-item-compact { display: flex; flex-direction: column; background: var(--container-bg); border: 1px solid var(--border); border-radius: 12px; padding: 0.75rem; gap: 0.6rem; user-select: none; }
-    .commande-item-compact.urgente { background: rgba(244, 63, 94, 0.12); border: 1px solid rgba(244, 63, 94, 0.5); }
-    .commande-item-compact.controle { background: rgba(2, 132, 199, 0.12); border: 1px solid rgba(2, 132, 199, 0.5); }
+    #app-screen { display: none; max-width: 1440px; margin: 0 auto; padding: 1.5rem; }
     
-    .commande-row-top { display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 0.5rem; }
-    .commande-row-bottom { display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 0.5rem; border-top: 1px solid var(--border); padding-top: 0.5rem; }
-
-    .drag-handle { color: var(--subtext); font-size: 1.2rem; cursor: grab; padding: 0 0.2rem; font-weight: bold; }
-    
-    /* Boutons textuels explicites */
-    .btn-status-toggle { background: var(--card-bg); border: 1px solid var(--border); color: var(--subtext); padding: 0.4rem 0.7rem; border-radius: 8px; font-size: 0.8rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 0.3rem; white-space: nowrap; transition: all 0.1s; }
-    .btn-status-toggle:active { transform: scale(0.95); }
-    .btn-status-toggle.active-urgent { background: rgba(244, 63, 94, 0.25); border-color: #f43f5e; color: #f43f5e; }
-    .btn-status-toggle.active-controle { background: rgba(2, 132, 199, 0.25); border-color: #0284c7; color: #38bdf8; }
-
-    .commande-select-checkbox { width: 18px; height: 18px; cursor: pointer; accent-color: var(--primary); flex-shrink: 0; }
-    .commande-main-btn { display: flex; align-items: center; gap: 0.75rem; flex-grow: 1; min-width: 0; cursor: pointer; }
-    
-    .commande-num-badge { 
-      font-weight: bold; 
-      font-size: 0.95rem; 
-      color: var(--primary); 
-      word-break: normal; 
-      white-space: normal; 
-      line-height: 1.35; 
+    header { 
+      display: flex; align-items: center; justify-content: space-between; 
+      margin-bottom: 2rem; padding: 1rem 1.75rem; 
+      background: var(--card-bg); border: 1px solid var(--card-border); 
+      border-radius: var(--radius); box-shadow: var(--shadow); gap: 1rem; position: relative; z-index: 50;
     }
-
-    .commande-date-compact { font-size: 0.8rem; color: var(--subtext); margin-top: 0.1rem; }
-    .commande-articles-badge { font-size: 0.8rem; background: rgba(255,107,0,0.15); color: var(--primary); padding: 0.2rem 0.5rem; border-radius: 6px; white-space: nowrap; font-weight: 700; }
+    .header-brand { display: flex; align-items: center; justify-content: center; background: white; padding: 0.5rem 1rem; border-radius: 12px; height: 60px; max-width: 240px; border: 1px solid var(--border); }
+    .header-brand img { height: 44px !important; width: auto !important; max-width: 100%; object-fit: contain; }
     
-    .commande-actions { display: flex; align-items: center; gap: 0.4rem; flex-shrink: 0; }
-    .btn-edit-small { background: var(--card-bg); border: 1px solid var(--border); color: var(--text); padding: 0.4rem 0.6rem; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; text-align: center; }
-    .btn-delete-small { background: rgba(244, 63, 94, 0.15); border: 1px solid rgba(244, 63, 94, 0.3); color: #f43f5e; padding: 0.4rem 0.6rem; border-radius: 8px; font-size: 0.85rem; font-weight: bold; cursor: pointer; text-align: center; }
+    .header-controls { display: flex; align-items: center; position: relative; gap: 0.85rem; }
+    .btn-nav-home, .btn-menu-hamburger { 
+      background: var(--container-bg); border: 1px solid var(--border); color: var(--text); 
+      padding: 0.7rem 1.2rem; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 0.95rem;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .btn-nav-home:hover, .btn-menu-hamburger:hover { background: var(--secondary); border-color: var(--primary); }
+    .btn-menu-hamburger { font-size: 1.2rem; padding: 0.6rem 1rem; }
+
+    .dropdown-menu { display: none; position: absolute; top: calc(100% + 12px); right: 0; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; box-shadow: var(--shadow); z-index: 9999; min-width: 270px; overflow: hidden; }
+    .dropdown-menu.show { display: block; }
+    
+    .dropdown-item { width: 100%; padding: 1rem 1.25rem; text-align: left; background: var(--card-bg); border: none; font-size: 0.95rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.85rem; color: var(--text); }
+    .dropdown-item.danger { color: #f43f5e; }
+    .dropdown-item:hover { background: rgba(255, 107, 0, 0.15); }
+
+    .card { background: var(--card-bg); border-radius: var(--radius); padding: 1.75rem; box-shadow: var(--shadow); border: 1px solid var(--card-border); margin-bottom: 1.75rem; }
+    
+    .search-box { display: flex; gap: 0.85rem; align-items: center; }
+    .search-box input { flex: 1; background: var(--input-bg); }
+    .btn-search { background: linear-gradient(135deg, var(--primary) 0%, #ff8c3b 100%); color: white; border: none; padding: 0.9rem 1.5rem; border-radius: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; box-shadow: 0 4px 15px var(--primary-glow); }
+
+    .form-group { margin-bottom: 1.25rem; }
+    .photo-box-container { background: var(--container-bg); padding: 1.25rem; border-radius: 16px; border: 2px dashed var(--border); margin-bottom: 1.25rem; position: relative; }
+    label { display: block; font-weight: 700; margin-bottom: 0.5rem; font-size: 0.82rem; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.8px; }
+    
+    input, select, textarea { 
+      width: 100%; padding: 0.9rem 1.1rem; border: 1px solid var(--border); border-radius: 12px; font-size: 1rem; 
+      background: var(--input-bg); color: var(--text); outline: none; 
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-glow); }
+
+    .previewWrapper { position: relative; margin-bottom: 1rem; display: none; }
+    .photoPreview { max-height: 240px; border-radius: 12px; border: 1px solid var(--border); display: block; background: #000; width: 100%; object-fit: contain; }
+    .btn-suppr-photo-interne { position: absolute; top: 12px; right: 12px; background: rgba(244, 63, 94, 0.95); color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 8px; font-size: 0.78rem; font-weight: bold; cursor: pointer; }
+    
+    .camera-controls { display: flex; gap: 0.75rem; margin-top: 0.75rem; }
+    button.btn-main { background: linear-gradient(135deg, var(--primary) 0%, #ff8c3b 100%); color: white; border: none; padding: 1rem 1.5rem; border-radius: 12px; font-weight: 700; cursor: pointer; width: 100%; font-size: 1.05rem; box-shadow: 0 6px 20px var(--primary-glow); }
+    button.btn-secondary { background-color: var(--container-bg); color: var(--text); border: 1px solid var(--border); padding: 1rem 1.5rem; border-radius: 12px; font-weight: 600; cursor: pointer; width: 100%; }
+
+    .export-filter-container { display: flex; flex-direction: column; gap: 0.85rem; margin-top: 1.25rem; background: var(--container-bg); padding: 1.25rem; border-radius: 16px; border: 1px solid var(--border); }
+    .export-filter-label { font-size: 0.82rem; font-weight: 800; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.8px; }
+    .export-actions-row { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
+    .input-date-custom { flex: 1; min-width: 140px; border: 1px solid var(--border); border-radius: 12px; padding: 0.75rem; font-size: 0.95rem; color: var(--text); background: var(--input-bg); text-align: center; color-scheme: dark; }
+    :root[data-theme="light"] .input-date-custom { color-scheme: light; }
+    
+    button.btn-pdf { background-color: #0284c7; color: white; border: none; padding: 0.75rem 1.1rem; border-radius: 12px; font-size: 0.9rem; font-weight: 700; cursor: pointer; }
+    button.btn-select-all { background-color: var(--secondary); color: var(--text); border: 1px solid var(--border); padding: 0.75rem 1.1rem; border-radius: 12px; font-size: 0.9rem; font-weight: 700; cursor: pointer; }
+    button.btn-sheets { background-color: #16a34a; color: white; border: none; padding: 0.75rem 1.1rem; border-radius: 12px; font-size: 0.9rem; font-weight: 700; cursor: pointer; }
+    button.btn-paste { background-color: #d97706; color: white; border: none; padding: 0.75rem 1.1rem; border-radius: 12px; font-size: 0.9rem; font-weight: 700; cursor: pointer; }
+    button.btn-sort { background-color: #6366f1; color: white; border: none; padding: 0.75rem 1.1rem; border-radius: 12px; font-size: 0.9rem; font-weight: 700; cursor: pointer; }
+
+    .liste-commandes { display: flex; flex-direction: column; gap: 1rem; margin-top: 1.5rem; }
+    .commande-item-compact { 
+      display: flex; flex-direction: column; background: var(--container-bg); 
+      border: 1px solid var(--border); border-radius: 16px; padding: 1.25rem; gap: 1rem; 
+      user-select: none; 
+    }
+    .commande-item-compact.urgente { background: rgba(244, 63, 94, 0.15); border: 1.5px solid rgba(244, 63, 94, 0.6); }
+    .commande-item-compact.controle { background: rgba(2, 132, 199, 0.15); border: 1.5px solid rgba(2, 132, 199, 0.6); }
+    
+    .commande-row-top { display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 1rem; }
+    .commande-row-bottom { display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 1rem; border-top: 1px solid var(--border); padding-top: 0.85rem; }
+
+    .drag-handle { color: var(--subtext); font-size: 1.35rem; cursor: grab; padding: 0 0.3rem; font-weight: bold; }
+    
+    .btn-status-toggle { 
+      background: var(--card-bg); border: 1px solid var(--border); color: var(--subtext); 
+      padding: 0.5rem 1rem; border-radius: 10px; font-size: 0.82rem; font-weight: 700; 
+      cursor: pointer; display: flex; align-items: center; gap: 0.5rem; white-space: nowrap; 
+    }
+    .btn-status-toggle.active-urgent { background: rgba(244, 63, 94, 0.3); border-color: #f43f5e; color: #f43f5e; }
+    .btn-status-toggle.active-controle { background: rgba(2, 132, 199, 0.3); border-color: #0284c7; color: #38bdf8; }
+
+    .commande-select-checkbox { width: 22px; height: 22px; cursor: pointer; accent-color: var(--primary); border-radius: 6px; flex-shrink: 0; }
+    .commande-main-btn { display: flex; align-items: center; gap: 1rem; flex-grow: 1; min-width: 0; cursor: pointer; }
+    
+    .commande-num-badge { font-weight: 800; font-size: 1.15rem; color: var(--text); word-break: normal; white-space: normal; line-height: 1.4; }
+    .commande-date-compact { font-size: 0.85rem; color: var(--subtext); margin-top: 0.2rem; font-weight: 500; }
+    .commande-articles-badge { font-size: 0.85rem; background: var(--primary-glow); color: var(--primary); padding: 0.35rem 0.85rem; border-radius: 10px; white-space: nowrap; font-weight: 800; border: 1px solid rgba(255, 107, 0, 0.3); }
+    
+    .commande-actions { display: flex; align-items: center; gap: 0.6rem; flex-shrink: 0; }
+    .btn-edit-small { background: var(--card-bg); border: 1px solid var(--border); color: var(--text); padding: 0.5rem 0.85rem; border-radius: 10px; font-size: 0.85rem; font-weight: 600; cursor: pointer; text-align: center; }
+    .btn-delete-small { background: rgba(244, 63, 94, 0.15); border: 1px solid rgba(244, 63, 94, 0.3); color: #f43f5e; padding: 0.5rem 0.85rem; border-radius: 10px; font-size: 0.9rem; font-weight: bold; cursor: pointer; text-align: center; }
 
     .section-header-flex { display: flex; align-items: center; justify-content: space-between; }
-    .badge-count { background: rgba(255, 107, 0, 0.15); color: var(--primary); border: 1px solid rgba(255, 107, 0, 0.4); padding: 0.35rem 0.75rem; border-radius: 30px; font-size: 0.95rem; font-weight: 800; }
+    .section-header-flex h2 { font-size: 1.35rem; font-weight: 800; }
+    .badge-count { background: var(--primary-glow); color: var(--primary); border: 1px solid rgba(255, 107, 0, 0.4); padding: 0.45rem 1rem; border-radius: 30px; font-size: 0.95rem; font-weight: 800; }
 
     @media (min-width: 900px) {
-      .main-layout-desktop { display: grid; grid-template-columns: 440px 1fr; gap: 1.5rem; align-items: start; }
-      .commande-item-compact { flex-direction: row; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; gap: 0.75rem; }
+      .main-layout-desktop { display: grid; grid-template-columns: 460px 1fr; gap: 2rem; align-items: start; }
+      .commande-item-compact { flex-direction: row; align-items: center; justify-content: space-between; padding: 1.25rem 1.5rem; gap: 1.25rem; }
       .commande-row-top, .commande-row-bottom { display: contents; }
-      .commande-main-btn { gap: 0.75rem; }
-      .commande-num-badge { font-size: 1.1rem; white-space: nowrap; }
-      .btn-edit-small { font-size: 0.8rem; padding: 0.35rem 0.6rem; }
-      .commande-actions { flex-direction: column; align-items: stretch; gap: 0.3rem; }
+      .commande-main-btn { gap: 1.25rem; }
+      .commande-num-badge { font-size: 1.25rem; white-space: nowrap; }
+      .btn-edit-small { font-size: 0.85rem; padding: 0.45rem 0.85rem; }
+      .commande-actions { flex-direction: column; align-items: stretch; gap: 0.5rem; }
     }
 
-    /* --- Modale optimisée & Alerte de boutique différente --- */
-    .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.85); flex-direction: column; overflow-y: auto; padding: 1rem; }
-    .modal-content-container { display: flex; flex-direction: column; align-items: center; gap: 1.25rem; max-width: 95%; width: 100%; margin: auto; padding-top: 4rem; }
+    .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(3, 7, 18, 0.92); flex-direction: column; overflow-y: auto; padding: 2rem; }
+    .modal-content-container { display: flex; flex-direction: column; align-items: center; gap: 1.75rem; max-width: 1100px; width: 100%; margin: auto; padding-top: 5rem; }
     
     .modal-title-badge { 
-      position: fixed; 
-      top: 15px; 
-      left: 50%; 
-      transform: translateX(-50%); 
-      font-size: 1.1rem; 
-      font-weight: bold; 
-      color: var(--text); 
-      background: var(--card-bg); 
-      padding: 0.5rem 1.2rem; 
-      border-radius: 20px; 
-      border: 1px solid var(--border); 
-      box-shadow: 0 4px 20px rgba(0,0,0,0.5); 
-      z-index: 1005; 
-      white-space: nowrap;
-      backdrop-filter: blur(8px);
+      position: fixed; top: 25px; left: 50%; transform: translateX(-50%); 
+      font-size: 1.15rem; font-weight: 800; color: var(--text); background: var(--card-bg); 
+      padding: 0.75rem 1.75rem; border-radius: 40px; border: 1px solid var(--card-border); 
+      box-shadow: var(--shadow); z-index: 1005; white-space: nowrap; 
     }
 
-    .modal-images-row { display: flex; gap: 1.25rem; flex-wrap: wrap; justify-content: center; max-width: 100%; width: 100%; }
+    .modal-images-row { display: flex; gap: 1.75rem; flex-wrap: wrap; justify-content: center; max-width: 100%; width: 100%; }
+    .modal-photo-box { display: flex; flex-direction: column; align-items: center; gap: 0.75rem; background: var(--card-bg); border: 1px solid var(--card-border); padding: 1.5rem; border-radius: var(--radius); max-width: 320px; width: 100%; box-shadow: var(--shadow); position: relative; }
+    .modal-photo-box.autre-boutique { border: 2.5px solid #f43f5e; background: rgba(244, 63, 94, 0.15); }
     
-    .modal-photo-box { 
-      display: flex; 
-      flex-direction: column; 
-      align-items: center; 
-      gap: 0.4rem; 
-      background: var(--card-bg); 
-      border: 1px solid var(--border); 
-      padding: 0.85rem; 
-      border-radius: 14px; 
-      max-width: 320px; 
-      width: 100%; 
-      box-shadow: 0 8px 20px rgba(0,0,0,0.3); 
-      position: relative; 
-    }
-
-    /* Style d'alerte claire sur la carte article */
-    .modal-photo-box.autre-boutique {
-      border: 2px solid #f43f5e;
-      background: rgba(244, 63, 94, 0.08);
-    }
-
-    .modal-photo-box img { max-height: 42vh; border-radius: 8px; background: rgba(0,0,0,0.1); width: 100%; object-fit: contain; }
-    .modal-ref-group { display: flex; flex-direction: column; align-items: center; gap: 0.3rem; width: 100%; }
-    .modal-ref-badges { display: flex; gap: 0.4rem; flex-wrap: wrap; justify-content: center; }
-    .modal-ref-badge { background: var(--primary); color: white; padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.8rem; font-weight: 700; }
-    .modal-fournisseur-badge { background: var(--secondary); color: var(--text); padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.8rem; font-weight: 600; border: 1px solid var(--border); }
-    .modal-barcode-badge { background-color: #0284c7; color: #ffffff; font-weight: 700; padding: 0.25rem 0.65rem; border-radius: 6px; font-size: 0.8rem; font-family: monospace; }
-    .modal-qty-badge { background-color: #16a34a; color: #ffffff; font-weight: 700; padding: 0.25rem 0.65rem; border-radius: 6px; font-size: 0.85rem; }
-    .modal-dispo-badge { background-color: #d97706; color: #ffffff; font-weight: 700; padding: 0.25rem 0.65rem; border-radius: 6px; font-size: 0.85rem; }
-    .modal-delai-badge { background-color: #6366f1; color: #ffffff; font-weight: 700; padding: 0.25rem 0.65rem; border-radius: 6px; font-size: 0.85rem; }
-    .modal-article-remarque-box { background: rgba(255, 107, 0, 0.15); color: var(--text); padding: 0.35rem 0.6rem; border-radius: 6px; font-size: 0.85rem; font-weight: 600; text-align: center; border: 1px dashed var(--primary); width: 100%; word-break: break-word; }
-    .modal-close { position: fixed; top: 15px; right: 15px; color: white; font-size: 1.8rem; font-weight: bold; cursor: pointer; z-index: 1010; background: rgba(0,0,0,0.5); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); }
+    .modal-photo-box img { max-height: 260px; border-radius: 12px; background: #000; width: 100%; object-fit: contain; border: 1px solid var(--border); display: block !important; visibility: visible !important; }
+    
+    .modal-ref-group { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; width: 100%; }
+    .modal-ref-badge { background: var(--primary); color: white; padding: 0.35rem 0.85rem; border-radius: 10px; font-size: 0.9rem; font-weight: 800; }
+    .modal-fournisseur-badge { background: var(--secondary); color: var(--text); padding: 0.35rem 0.85rem; border-radius: 10px; font-size: 0.85rem; font-weight: 700; border: 1px solid var(--border); }
+    .modal-barcode-badge { background-color: #0284c7; color: #ffffff; font-weight: 800; padding: 0.35rem 0.85rem; border-radius: 10px; font-size: 0.85rem; font-family: monospace; }
+    .modal-qty-badge { background-color: #16a34a; color: #ffffff; font-weight: 800; padding: 0.35rem 0.85rem; border-radius: 10px; font-size: 0.9rem; }
+    .modal-dispo-badge { background-color: #d97706; color: #ffffff; font-weight: 800; padding: 0.35rem 0.85rem; border-radius: 10px; font-size: 0.9rem; }
+    .modal-delai-badge { background-color: #6366f1; color: #ffffff; font-weight: 800; padding: 0.35rem 0.85rem; border-radius: 10px; font-size: 0.9rem; }
+    .modal-article-remarque-box { background: rgba(255, 107, 0, 0.15); color: var(--text); padding: 0.6rem 0.9rem; border-radius: 10px; font-size: 0.9rem; font-weight: 700; text-align: center; border: 1px dashed var(--primary); width: 100%; word-break: break-word; }
+    
+    .modal-close { position: fixed; top: 25px; right: 25px; color: white; font-size: 1.6rem; font-weight: bold; cursor: pointer; z-index: 1010; background: #111827; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); }
+    .modal-close:hover { background: #f43f5e; }
 
     #print-area { display: none; }
 
@@ -223,16 +224,16 @@
 
   <div id="home-screen">
     <div class="logo-container">
-      <img class="home-logo-img" src="https://i49.servimg.com/u/f49/11/31/89/70/img_2010.jpg" style="border:0;" alt="Reliquats Fleux Logo" />
+      <img class="home-logo-img" src="https://i49.servimg.com/u/f49/11/31/89/70/img_2010.jpg" alt="Reliquats Fleux Logo" />
     </div>
-    <p class="app-subtitle">Prenez en photo vos articles manquants et suivez vos numéros de commande.</p>
+    <p class="app-subtitle">Prenez en photo vos articles manquants et suivez vos numéros de commande en toute simplicité.</p>
     <button class="btn-start" id="btnCommencer" type="button">🚀 Lancer les reliquats</button>
   </div>
 
   <div id="app-screen">
     <header>
       <div class="header-brand">
-        <img src="https://i49.servimg.com/u/f49/11/31/89/70/img_2010.jpg" style="border:0;" alt="Reliquats Fleux Logo" />
+        <img src="https://i49.servimg.com/u/f49/11/31/89/70/img_2010.jpg" alt="Reliquats Fleux Logo" />
       </div>
       
       <div class="header-controls">
@@ -252,15 +253,15 @@
 
     <div class="main-layout-desktop">
       <div class="column-left">
-        <section class="card" style="padding: 1rem;">
-          <div class="search-box" style="display: flex; flex-direction: column; gap: 0.5rem;">
-            <div style="display: flex; gap: 0.5rem; width: 100%;">
+        <section class="card">
+          <div class="search-box" style="display: flex; flex-direction: column; gap: 0.85rem;">
+            <div style="display: flex; gap: 0.6rem; width: 100%;">
               <input type="text" id="recherche" placeholder="🔍 Rechercher (boutique, n° commande, réf...)" autocomplete="off">
               <button type="button" class="btn-search" id="btnLancerRecherche">Rechercher</button>
             </div>
             <div>
-              <label for="selectFiltreBoutique" style="font-size: 0.8rem; margin-bottom: 0.2rem;">Filtrer par Boutique :</label>
-              <select id="selectFiltreBoutique" style="font-size: 0.9rem; padding: 0.5rem; background: var(--input-bg); color: var(--text); border: 1px solid var(--border); border-radius: 8px;">
+              <label for="selectFiltreBoutique" style="font-size: 0.78rem; margin-bottom: 0.35rem;">Filtrer par Boutique :</label>
+              <select id="selectFiltreBoutique" style="font-size: 0.95rem; padding: 0.75rem; background: var(--input-bg); color: var(--text); border: 1px solid var(--border); border-radius: 12px;">
                 <option value="">-- Toutes les boutiques --</option>
               </select>
             </div>
@@ -269,9 +270,9 @@
 
         <!-- Section de préparation : masquée par défaut, visible uniquement en Mode Admin -->
         <section class="card" id="sectionPreparation" style="display: none;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-            <h2 id="formTitle" style="font-size: 1.1rem; color:var(--primary);">Nvx reliquats</h2>
-            <button type="button" id="btnNouvelleCommande" style="background:var(--primary); color:white; border:none; padding:0.4rem 0.8rem; border-radius:8px; font-weight:700; cursor:pointer; font-size:0.85rem;">➕ Nvx reliquats</button>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+            <h2 id="formTitle" style="font-size: 1.25rem; color:var(--primary); font-weight: 800;">Nvx reliquats</h2>
+            <button type="button" id="btnNouvelleCommande" style="background:var(--primary); color:white; border:none; padding:0.6rem 1rem; border-radius:10px; font-weight:700; cursor:pointer; font-size:0.85rem; box-shadow: 0 4px 12px var(--primary-glow);">➕ Nvx reliquats</button>
           </div>
 
           <div class="form-group">
@@ -286,13 +287,13 @@
 
           <div id="articlesContainer"></div>
 
-          <div style="margin-bottom: 1rem; text-align: center;">
-            <button type="button" id="btnAjouterArticle" style="background: transparent; border: 2px dashed var(--border); color: var(--primary); padding: 0.75rem; border-radius: 10px; font-weight: 700; width: 100%; cursor: pointer;">
+          <div style="margin-bottom: 1.5rem; text-align: center;">
+            <button type="button" id="btnAjouterArticle" style="background: transparent; border: 2px dashed var(--border); color: var(--primary); padding: 1rem; border-radius: 14px; font-weight: 700; width: 100%; cursor: pointer;">
               ➕ Ajouter un article pour cette commande
             </button>
           </div>
 
-          <div style="display:flex; gap:0.5rem; margin-top: 1rem;">
+          <div style="display:flex; gap:0.85rem; margin-top: 1.5rem;">
             <button class="btn-main" id="btnEnregistrer" type="button">Enregistrer les reliquats</button>
             <button class="btn-secondary" id="btnAnnulerEdit" type="button" style="display:none; width:auto;">Annuler</button>
           </div>
@@ -303,30 +304,32 @@
         <section class="card" style="margin-bottom: 0;">
           <div class="section-header-flex">
             <h2>Historique Reliquats</h2>
-            <div style="display: flex; gap: 0.5rem; align-items: center;">
-              <button class="btn-sort" id="btnTrierDate" type="button" title="Inverser l'ordre de tri">🔄 Trier : Récent</button>
+            <div style="display: flex; gap: 0.6rem; align-items: center;">
+              <button class="btn-sort" id="btnTrierDate" type="button" title="Inverser l'ordre de tri">🔄 Récent</button>
               <span id="badgeCount" class="badge-count">0</span>
             </div>
           </div>
 
           <div class="export-filter-container">
-            <span class="export-filter-label">📅 Filtrer par période (JJ/MM/AAAA) :</span>
+            <span class="export-filter-label">📅 Filtrer par période :</span>
             <div class="export-actions-row">
-              <input type="text" id="dateDebutFiltre" class="input-date-custom" placeholder="JJ/MM/AAAA" autocomplete="off">
-              <span style="font-size:0.8rem; color:var(--subtext);">au</span>
-              <input type="text" id="dateFinFiltre" class="input-date-custom" placeholder="JJ/MM/AAAA" autocomplete="off">
-              <button class="btn-select-all" id="btnSelectAll" type="button">☑️ Tout cocher</button>
-              <button class="btn-pdf" id="btnExportPDF" type="button">📄 Exporter PDF</button>
+              <!-- MODIFICATION : Type date natif (calendrier) -->
+              <input type="date" id="dateDebutFiltre" class="input-date-custom">
+              <span style="font-size:0.85rem; color:var(--subtext);">au</span>
+              <input type="date" id="dateFinFiltre" class="input-date-custom">
               
-              <div id="adminExportOptions" style="display: none; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
-                <button class="btn-sheets" id="btnExportSheets" type="button">📊 Exporter Excel</button>
-                <button class="btn-paste" id="btnOpenPasteModal" type="button">📋 Coller tableau</button>
+              <button class="btn-select-all" id="btnSelectAll" type="button">☑️ Tout</button>
+              <button class="btn-pdf" id="btnExportPDF" type="button">📄 PDF</button>
+              
+              <div id="adminExportOptions" style="display: none; gap: 0.6rem; align-items: center; flex-wrap: wrap;">
+                <button class="btn-sheets" id="btnExportSheets" type="button">📊 Excel</button>
+                <button class="btn-paste" id="btnOpenPasteModal" type="button">📋 Coller</button>
               </div>
             </div>
           </div>
 
           <div class="liste-commandes" id="galerieCommandes">
-            <p style="text-align:center; color:var(--subtext); padding:1rem;">Chargement en cours...</p>
+            <p style="text-align:center; color:var(--subtext); padding:2rem;">Chargement en cours...</p>
           </div>
         </section>
       </div>
@@ -337,11 +340,11 @@
 
   <!-- Modale de collage -->
   <div id="pasteModal" class="modal" style="display: none; z-index: 3000;">
-    <div style="background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; width: 90%; max-width: 600px; display: flex; flex-direction: column; gap: 1rem; margin: auto;">
-      <h3 style="color: var(--primary); font-size: 1.1rem;">📋 Coller un tableau Excel</h3>
-      <p style="font-size: 0.85rem; color: var(--subtext);">Colle directement les lignes de ton tableau Excel (les 9 colonnes seront lues : Date, N° Commande, Fournisseur, EAN, Réf, Désignation, Qté, Boutique, Délai ms appro) :</p>
-      <textarea id="pasteTextarea" rows="8" placeholder="Colle ton tableau ici (Ctrl+V)..." style="width: 100%; font-family: monospace; font-size: 0.85rem; padding: 0.5rem;"></textarea>
-      <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+    <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 2rem; width: 90%; max-width: 600px; display: flex; flex-direction: column; gap: 1.25rem; margin: auto; box-shadow: var(--shadow);">
+      <h3 style="color: var(--primary); font-size: 1.25rem; font-weight: 800;">📋 Coller un tableau Excel</h3>
+      <p style="font-size: 0.9rem; color: var(--subtext); line-height: 1.5;">Colle directement les lignes de ton tableau Excel (les 9 colonnes seront lues : Date, N° Commande, Fournisseur, EAN, Réf, Désignation, Qté, Boutique, Délai ms appro) :</p>
+      <textarea id="pasteTextarea" rows="8" placeholder="Colle ton tableau ici (Ctrl+V)..." style="width: 100%; font-family: monospace; font-size: 0.85rem; padding: 0.85rem; border-radius: 12px;"></textarea>
+      <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
         <button type="button" class="btn-secondary" id="btnCancelPaste" style="width: auto;">Annuler</button>
         <button type="button" class="btn-main" id="btnProcessPaste" style="width: auto;">Analyser et Importer</button>
       </div>
@@ -358,13 +361,13 @@
   </div>
 
   <div id="adminLoginModal" class="modal" style="display: none; z-index: 2000;">
-    <div style="background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; width: 100%; max-width: 340px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: flex; flex-direction: column; gap: 1rem; margin: auto;">
-      <h3 style="color: var(--primary); font-size: 1.1rem; text-align: center;">🔒 Accès Administrateur</h3>
+    <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 2rem; width: 100%; max-width: 380px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 1.25rem; margin: auto;">
+      <h3 style="color: var(--primary); font-size: 1.25rem; text-align: center; font-weight: 800;">🔒 Accès Administrateur</h3>
       <div style="position: relative;">
-        <input type="password" id="adminPasswordInput" placeholder="Mot de passe admin" autocomplete="off" style="padding-right: 2.8rem; width: 100%;">
-        <button type="button" id="btnTogglePasswordView" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 1.1rem; color: var(--subtext); padding: 4px;">👁️</button>
+        <input type="password" id="adminPasswordInput" placeholder="Mot de passe admin" autocomplete="off" style="padding-right: 3rem; width: 100%;">
+        <button type="button" id="btnTogglePasswordView" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 1.2rem; color: var(--subtext); padding: 4px;">👁️</button>
       </div>
-      <div style="display: flex; gap: 0.5rem;">
+      <div style="display: flex; gap: 0.75rem;">
         <button type="button" class="btn-main" id="btnSubmitAdminLogin" style="flex: 1;">Valider</button>
         <button type="button" class="btn-secondary" id="btnCancelAdminLogin" style="flex: 1;">Annuler</button>
       </div>
@@ -631,9 +634,9 @@
       const boutiqueArtInit = dataArticle?.boutique || "";
 
       bloc.innerHTML = `
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem;">
           <label style="margin-bottom: 0;">📸 Article n°<span class="article-index">${index}</span></label>
-          <button type="button" class="btn-retirer-article" style="background: rgba(244, 63, 94, 0.2); border: none; color: #f43f5e; padding: 0.2rem 0.5rem; border-radius: 6px; font-size: 0.75rem; font-weight: bold; cursor: pointer;">🗑️ Retirer</button>
+          <button type="button" class="btn-retirer-article" style="background: rgba(244, 63, 94, 0.2); border: none; color: #f43f5e; padding: 0.35rem 0.75rem; border-radius: 8px; font-size: 0.8rem; font-weight: bold; cursor: pointer;">🗑️ Retirer</button>
         </div>
         <div class="previewWrapper" style="display: ${photoInit ? 'block' : 'none'};">
           <img class="photoPreview" src="${photoInit}" alt="Aperçu Photo">
@@ -645,7 +648,7 @@
           <button type="button" class="btn-secondary btn-galerie">📁 Galerie</button>
           <button type="button" class="btn-secondary btn-photo-directe">📸 Photo</button>
         </div>
-        <div class="form-group" style="margin-top: 0.75rem;"><label>N° Boutique spécifique article</label><input type="text" class="input-article-boutique" value="${boutiqueArtInit}" placeholder="Ex: 001, 003..."></div>
+        <div class="form-group" style="margin-top: 1rem;"><label>N° Boutique spécifique article</label><input type="text" class="input-article-boutique" value="${boutiqueArtInit}" placeholder="Ex: 001, 003..."></div>
         <div class="form-group"><label>Fournisseur</label><input type="text" class="input-fournisseur" value="${fournisseurInit}"></div>
         <div class="form-group"><label>Référence article</label><input type="text" class="input-ref" value="${refInit}"></div>
         <div class="form-group"><label>Code-barres ligne (EAN)</label><input type="text" class="input-barcode" value="${barcodeInit}"></div>
@@ -770,6 +773,10 @@
     function parserDateSaisie(val) {
       if (!val) return null;
       let clean = val.trim();
+      // Si la valeur vient du input type="date" (format AAAA-MM-JJ)
+      if (/^\d{4}-\d{2}-\d{2}$/.test(clean)) {
+        return new Date(clean).setHours(0,0,0,0);
+      }
       if (clean.includes('/')) {
         const p = clean.split('/');
         if (p.length === 3 && p[2].length === 4) {
@@ -805,7 +812,7 @@
     if (btnTrierDate) {
       btnTrierDate.addEventListener('click', () => {
         ordreCroissant = !ordreCroissant;
-        btnTrierDate.innerHTML = ordreCroissant ? "🔄 Trier : Ancien" : "🔄 Trier : Récent";
+        btnTrierDate.innerHTML = ordreCroissant ? "🔄 Ancien" : "🔄 Récent";
         trierEtAfficherGalerie();
       });
     }
@@ -976,7 +983,7 @@
       if (badgeCount) {
         badgeCount.textContent = `${liste.length} cmd • ${liste.reduce((acc, c) => acc + (c.articles?.reduce((s, a) => s + (Number(a.quantite)||1), 0)||0), 0)} art`;
       }
-      if (liste.length === 0) { galerieCommandes.innerHTML = `<p style="text-align:center; color:var(--subtext); padding:1rem;">Aucun reliquat trouvé.</p>`; return; }
+      if (liste.length === 0) { galerieCommandes.innerHTML = `<p style="text-align:center; color:var(--subtext); padding:2rem;">Aucun reliquat trouvé.</p>`; return; }
       
       liste.forEach(cmd => {
         const item = document.createElement('div');
@@ -1014,7 +1021,7 @@
             </div>
           </div>
           <div class="commande-row-bottom">
-            <div style="display: flex; gap: 0.4rem; align-items: center;">
+            <div style="display: flex; gap: 0.6rem; align-items: center;">
               <button type="button" class="btn-status-toggle ${cmd.urgente ? 'active-urgent' : ''}" onclick="basculerUrgence(${cmd.id}, event)" title="Basculer l'état urgent" ${displayUrgentBtn}>
                 🔴 Urgent
               </button>
@@ -1022,7 +1029,7 @@
                 🔵 Contrôler
               </button>
             </div>
-            <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <div style="display: flex; gap: 0.85rem; align-items: center;">
               <span class="commande-articles-badge">${nbA} art.</span>
               <input type="checkbox" class="commande-select-checkbox" data-id="${cmd.id}" onclick="event.stopPropagation()">
             </div>
@@ -1082,12 +1089,13 @@
       btnSelectAll.addEventListener('click', () => {
         toutCoche = !toutCoche;
         document.querySelectorAll('.commande-select-checkbox').forEach(cb => cb.checked = toutCoche);
-        btnSelectAll.innerHTML = toutCoche ? "☑️ Tout décocher" : "☑️ Tout cocher";
+        btnSelectAll.innerHTML = toutCoche ? "☑️ Aucun" : "☑️ Tout";
       });
     }
     
-    if (dateDebutFiltre) dateDebutFiltre.addEventListener('input', () => afficherGalerie(inputRecherche.value));
-    if (dateFinFiltre) dateFinFiltre.addEventListener('input', () => afficherGalerie(inputRecherche.value));
+    // Modification : écoute des changements sur les sélecteurs de date natifs
+    if (dateDebutFiltre) dateDebutFiltre.addEventListener('change', () => afficherGalerie(inputRecherche.value));
+    if (dateFinFiltre) dateFinFiltre.addEventListener('change', () => afficherGalerie(inputRecherche.value));
     if (selectFiltreBoutique) selectFiltreBoutique.addEventListener('change', () => afficherGalerie(inputRecherche.value));
 
     window.ouvrirModal = function(cmd) {
@@ -1107,14 +1115,14 @@
         const box = document.createElement('div'); 
         box.className = `modal-photo-box ${estAutreBoutique ? 'autre-boutique' : ''}`;
         
-        let artBoutiqueBadge = artBoutique ? `<div class="modal-fournisseur-badge" style="${estAutreBoutique ? 'background: #f43f5e; color: white; font-weight: bold;' : ''}">Boutique: ${artBoutique} ${estAutreBoutique ? '(Autre boutique)' : ''}</div>` : '';
+        let artBoutiqueBadge = artBoutique ? `<div class="modal-fournisseur-badge" style="${estAutreBoutique ? 'background: #f43f5e; color: white; font-weight: bold;' : ''}">Boutique: ${artBoutique} ${estAutreBoutique ? '(Autre)' : ''}</div>` : '';
 
         box.innerHTML = `
           ${art.photo ? `<img src="${art.photo}">` : ''}
           ${artBoutiqueBadge}
           ${art.fournisseur ? `<div class="modal-fournisseur-badge">Fournisseur: ${art.fournisseur}</div>` : ''}
           ${art.ref ? `<div class="modal-ref-badge">Réf: ${art.ref}</div>` : ''}
-          <div style="display:flex;gap:0.4rem;flex-wrap:wrap;justify-content:center;">
+          <div style="display:flex;gap:0.5rem;flex-wrap:wrap;justify-content:center;">
             ${art.codeBarre ? `<span class="modal-barcode-badge">EAN: ${art.codeBarre}</span>` : ''}
             <span class="modal-qty-badge">Qte: ${art.quantite||1}</span>
           </div>
