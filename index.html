@@ -116,7 +116,6 @@
     button.btn-main { background: linear-gradient(135deg, var(--primary) 0%, #ff8c3b 100%); color: white; border: none; padding: 0.9rem 1.2rem; border-radius: 12px; font-weight: 700; cursor: pointer; width: 100%; font-size: 1rem; box-shadow: 0 6px 20px var(--primary-glow); }
     button.btn-secondary { background-color: var(--container-bg); color: var(--text); border: 1px solid var(--border); padding: 0.9rem 1.2rem; border-radius: 12px; font-weight: 600; cursor: pointer; width: 100%; }
 
-    /* Correction conteneur de filtre pour mobile */
     .export-filter-container { display: flex; flex-direction: column; gap: 0.75rem; margin-top: 1rem; background: var(--container-bg); padding: 1rem; border-radius: 16px; border: 1px solid var(--border); }
     .export-filter-label { font-size: 0.8rem; font-weight: 800; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.8px; }
     .export-actions-row { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; width: 100%; }
@@ -136,7 +135,6 @@
 
     .liste-commandes { display: flex; flex-direction: column; gap: 0.85rem; margin-top: 1.25rem; }
     
-    /* Correction de la carte commande sur mobile pour éviter les débordements */
     .commande-item-compact { 
       display: flex; flex-direction: column; background: var(--container-bg); 
       border: 1px solid var(--border); border-radius: 16px; padding: 1rem; gap: 0.85rem; 
@@ -163,8 +161,6 @@
     
     .commande-num-badge { font-weight: 800; font-size: 1.05rem; color: var(--text); word-break: break-all; line-height: 1.3; }
     .commande-date-compact { font-size: 0.8rem; color: var(--subtext); margin-top: 0.15rem; font-weight: 500; }
-    
-    /* Correction du badge d'articles pour qu'il ne dépasse jamais */
     .commande-articles-badge { font-size: 0.8rem; background: var(--primary-glow); color: var(--primary); padding: 0.3rem 0.6rem; border-radius: 8px; white-space: nowrap; font-weight: 800; border: 1px solid rgba(255, 107, 0, 0.3); flex-shrink: 0; }
     
     .commande-actions { display: flex; align-items: center; gap: 0.4rem; flex-shrink: 0; }
@@ -208,7 +204,6 @@
     .modal-barcode-badge { background-color: #0284c7; color: #ffffff; font-weight: 800; padding: 0.35rem 0.85rem; border-radius: 10px; font-size: 0.85rem; font-family: monospace; }
     .modal-qty-badge { background-color: #16a34a; color: #ffffff; font-weight: 800; padding: 0.35rem 0.85rem; border-radius: 10px; font-size: 0.9rem; }
     .modal-dispo-badge { background-color: #d97706; color: #ffffff; font-weight: 800; padding: 0.35rem 0.85rem; border-radius: 10px; font-size: 0.9rem; }
-    .modal-delai-badge { background-color: #6366f1; color: #ffffff; font-weight: 800; padding: 0.35rem 0.85rem; border-radius: 10px; font-size: 0.9rem; }
     .modal-article-remarque-box { background: rgba(255, 107, 0, 0.15); color: var(--text); padding: 0.6rem 0.9rem; border-radius: 10px; font-size: 0.9rem; font-weight: 700; text-align: center; border: 1px dashed var(--primary); width: 100%; word-break: break-word; }
     
     .modal-close { position: fixed; top: 15px; right: 15px; color: white; font-size: 1.4rem; font-weight: bold; cursor: pointer; z-index: 1010; background: #111827; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); }
@@ -357,7 +352,7 @@
   <div id="pasteModal" class="modal" style="display: none; z-index: 3000;">
     <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 1.5rem; width: 95%; max-width: 600px; display: flex; flex-direction: column; gap: 1.25rem; margin: auto; box-shadow: var(--shadow);">
       <h3 style="color: var(--primary); font-size: 1.25rem; font-weight: 800;">📋 Coller un tableau Excel</h3>
-      <p style="font-size: 0.9rem; color: var(--subtext); line-height: 1.5;">Colle directement les lignes de ton tableau Excel (les 9 colonnes seront lues : Date, N° Commande, Fournisseur, EAN, Réf, Désignation, Qté, Boutique, Délai ms appro) :</p>
+      <p style="font-size: 0.9rem; color: var(--subtext); line-height: 1.5;">Colle directement les lignes de ton tableau Excel (les colonnes lues : Date, N° Commande, Fournisseur, EAN, Réf, Désignation, Qté, Boutique) :</p>
       <textarea id="pasteTextarea" rows="8" placeholder="Colle ton tableau ici (Ctrl+V)..." style="width: 100%; font-family: monospace; font-size: 0.85rem; padding: 0.85rem; border-radius: 12px;"></textarea>
       <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
         <button type="button" class="btn-secondary" id="btnCancelPaste" style="width: auto;">Annuler</button>
@@ -644,7 +639,6 @@
       const barcodeInit = dataArticle?.codeBarre || "";
       const qteInit = dataArticle?.quantite !== undefined ? dataArticle.quantite : 1;
       const dateDispoInit = dataArticle?.dateDispo || "";
-      const delaiMsApproInit = dataArticle?.delaiMsAppro || "";
       const remArticleInit = dataArticle?.remarqueArticle || "";
       const boutiqueArtInit = dataArticle?.boutique || "";
 
@@ -669,7 +663,6 @@
         <div class="form-group"><label>Code-barres ligne (EAN)</label><input type="text" class="input-barcode" value="${barcodeInit}"></div>
         <div class="form-group"><label>Quantité</label><input type="number" min="1" class="input-qte" value="${qteInit}"></div>
         <div class="form-group"><label>📅 Date prévue de disponibilité</label><input type="text" class="input-date-dispo" value="${dateDispoInit}" placeholder="Ex: Semaine 45 ou 15/11/2026"></div>
-        <div class="form-group"><label>⏱️ Délai ms appro</label><input type="text" class="input-delai-appro" value="${delaiMsApproInit}" placeholder="Ex: 2 semaines, 10 jours..."></div>
         <div class="form-group" style="margin-bottom: 0;"><label>💬 Remarque / Désignation spécifique article</label><input type="text" class="input-article-remarque" value="${remArticleInit}"></div>
       `;
 
@@ -678,7 +671,6 @@
       const inputBarcode = bloc.querySelector('.input-barcode');
       const inputQte = bloc.querySelector('.input-qte');
       const inputDateDispo = bloc.querySelector('.input-date-dispo');
-      const inputDelaiAppro = bloc.querySelector('.input-delai-appro');
       const inputArtRemarque = bloc.querySelector('.input-article-remarque');
       const inputArtBoutique = bloc.querySelector('.input-article-boutique');
       const previewWrapper = bloc.querySelector('.previewWrapper');
@@ -696,7 +688,6 @@
         if (item && item.codeBarre && !inputBarcode.value.trim()) inputBarcode.value = item.codeBarre;
         if (item && item.quantite !== undefined && inputQte.value == "1") inputQte.value = item.quantite;
         if (item && item.dateDispo && !inputDateDispo.value.trim()) inputDateDispo.value = item.dateDispo;
-        if (item && item.delaiMsAppro && !inputDelaiAppro.value.trim()) inputDelaiAppro.value = item.delaiMsAppro;
         if (item && item.remarqueArticle && !inputArtRemarque.value.trim()) inputArtRemarque.value = item.remarqueArticle;
       }
       inputRef.addEventListener('input', verifierAutocompletion);
@@ -715,7 +706,7 @@
               const ref = inputRef.value.trim();
               if (ref) {
                 db.ref('catalogue_photos/REF_' + ref.replace(/[.#$\/\[\]]/g, "_")).update({
-                  refOriginale: ref, photo: photoData, fournisseur: inputFournisseur.value.trim(), codeBarre: inputBarcode.value.trim(), quantite: Number(inputQte.value) || 1, dateDispo: inputDateDispo.value.trim(), delaiMsAppro: inputDelaiAppro.value.trim(), remarqueArticle: inputArtRemarque.value.trim()
+                  refOriginale: ref, photo: photoData, fournisseur: inputFournisseur.value.trim(), codeBarre: inputBarcode.value.trim(), quantite: Number(inputQte.value) || 1, dateDispo: inputDateDispo.value.trim(), remarqueArticle: inputArtRemarque.value.trim()
                 }).catch(() => {});
               }
             });
@@ -729,7 +720,7 @@
       bloc.querySelector('.btn-retirer-article').addEventListener('click', () => { bloc.remove(); mettreAJourIndiceArticles(); });
 
       bloc.getArticleData = () => ({
-        photo: photoData, fournisseur: inputFournisseur.value.trim(), ref: inputRef.value.trim(), codeBarre: inputBarcode.value.trim(), quantite: Number(inputQte.value) || 1, dateDispo: inputDateDispo.value.trim(), delaiMsAppro: inputDelaiAppro.value.trim(), remarqueArticle: inputArtRemarque.value.trim(), boutique: inputArtBoutique.value.trim()
+        photo: photoData, fournisseur: inputFournisseur.value.trim(), ref: inputRef.value.trim(), codeBarre: inputBarcode.value.trim(), quantite: Number(inputQte.value) || 1, dateDispo: inputDateDispo.value.trim(), remarqueArticle: inputArtRemarque.value.trim(), boutique: inputArtBoutique.value.trim()
       });
 
       articlesContainer.appendChild(bloc);
@@ -979,8 +970,7 @@
             String(a.codeBarre||'').toLowerCase().includes(fStr) ||
             String(a.remarqueArticle||'').toLowerCase().includes(fStr) ||
             String(a.boutique||'').toLowerCase().includes(fStr) ||
-            String(a.dateDispo||'').toLowerCase().includes(fStr) ||
-            String(a.delaiMsAppro||'').toLowerCase().includes(fStr)
+            String(a.dateDispo||'').toLowerCase().includes(fStr)
           );
           if (!matchBoutique && !matchNum && !matchArt) return false;
         }
@@ -1140,7 +1130,6 @@
             <span class="modal-qty-badge">Qte: ${art.quantite||1}</span>
           </div>
           ${art.dateDispo ? `<div class="modal-dispo-badge">📅 Dispo: ${art.dateDispo}</div>` : ''}
-          ${art.delaiMsAppro ? `<div class="modal-delai-badge">⏱️ Délai appro: ${art.delaiMsAppro}</div>` : ''}
           ${art.remarqueArticle ? `<div class="modal-article-remarque-box">💬 ${art.remarqueArticle}</div>` : ''}
         `;
         modalImagesRow.appendChild(box);
@@ -1212,7 +1201,6 @@
             const qteRaw = parts[6];
             const qteCSV = !isNaN(qteRaw) && qteRaw !== '' ? Number(qteRaw) : 1;
             const boutiqueCSV = String(parts[7] || '').trim();
-            const delaiApproCSV = String(parts[8] || '').trim();
 
             if (!refCSV) return;
             parsedCount++;
@@ -1250,14 +1238,11 @@
             const existingArtIndex = groupCommandes[numeroClean].articles.findIndex(a => String(a.ref).trim() === cleanRefKey);
             if (existingArtIndex === -1) {
               groupCommandes[numeroClean].articles.push({ 
-                photo: photoAuto, fournisseur: fournisseurCSV, ref: cleanRefKey, codeBarre: eanCSV, quantite: qteCSV, dateDispo: "", delaiMsAppro: delaiApproCSV, remarqueArticle: designationCSV, boutique: boutiqueCSV 
+                photo: photoAuto, fournisseur: fournisseurCSV, ref: cleanRefKey, codeBarre: eanCSV, quantite: qteCSV, dateDispo: "", remarqueArticle: designationCSV, boutique: boutiqueCSV 
               });
             } else {
               if (boutiqueCSV) {
                 groupCommandes[numeroClean].articles[existingArtIndex].boutique = boutiqueCSV;
-              }
-              if (delaiApproCSV) {
-                groupCommandes[numeroClean].articles[existingArtIndex].delaiMsAppro = delaiApproCSV;
               }
             }
           });
@@ -1308,7 +1293,6 @@
               <th>Désignation</th>
               <th>Qté restante ligne</th>
               <th>Date dispo</th>
-              <th>Délai ms appro</th>
               <th>Boutique de référence ligne doc</th>
               <th>Urgent</th>
               <th>À Contrôler</th>
@@ -1333,7 +1317,6 @@
               <td>${art.remarqueArticle || ""}</td>
               <td>${art.quantite !== undefined ? art.quantite : 1}</td>
               <td>${art.dateDispo || ""}</td>
-              <td>${art.delaiMsAppro || ""}</td>
               <td>${boutiqueArt}</td>
               <td>${statutUrgent}</td>
               <td>${statutControle}</td>
@@ -1374,7 +1357,6 @@
                 <b>Réf:</b> ${art.ref}<br>
                 ${art.codeBarre ? `<b>EAN:</b> ${art.codeBarre}<br>` : ''}
                 ${art.dateDispo ? `<b>Dispo:</b> ${art.dateDispo}<br>` : ''}
-                ${art.delaiMsAppro ? `<b>Délai appro:</b> ${art.delaiMsAppro}<br>` : ''}
                 <b>Qté:</b> ${art.quantite || 1}
                 ${art.remarqueArticle ? `<br><b>Désignation:</b> ${art.remarqueArticle}` : ''}
               </div>
