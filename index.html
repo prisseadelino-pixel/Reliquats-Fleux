@@ -1110,7 +1110,7 @@
 
     window.ouvrirModal = function(cmd) {
       modal.style.display = "flex"; 
-      btnPrintModal.style.display = "none"; 
+      btnPrintModal.style.display = "inline-block"; 
       const bText = cmd.boutique ? `[Boutique ${cmd.boutique}] ` : '';
       let numCleanModal = String(cmd.numero || '').trim();
       if (numCleanModal && !/^s-/i.test(numCleanModal)) numCleanModal = 'S-' + numCleanModal;
@@ -1142,6 +1142,37 @@
         `;
         modalImagesRow.appendChild(box);
       });
+
+      // Action d'impression pour une commande spécifique depuis la modale
+      btnPrintModal.onclick = () => {
+        let html = `<div class="print-title">${bText}Reliquat N° ${numCleanModal}</div><div class="print-subtitle">Date : ${cmd.date || ''} - Généré le ${new Date().toLocaleString('fr-FR')}</div><div class="print-grid">`;
+        
+        cmd.articles?.forEach(art => {
+          html += `<div class="print-card">
+            <div class="print-photos-flex">
+              <div class="print-photo-print-item">
+                ${art.photo ? `<img src="${art.photo}">` : ''}
+                <div style="font-size: 10px; color: #000 !important; line-height: 1.3;">
+                  ${art.fournisseur ? `<b>Fournisseur:</b> ${art.fournisseur}<br>` : ''}
+                  <b>Réf:</b> ${art.ref}<br>
+                  ${art.codeBarre ? `<b>EAN:</b> ${art.codeBarre}<br>` : ''}
+                  ${art.dateDispo ? `<b>Dispo:</b> ${art.dateDispo}<br>` : ''}
+                  <b>Qté:</b> ${art.quantite || 1}
+                  ${art.remarqueArticle ? `<br><b>Désignation:</b> ${art.remarqueArticle}` : ''}
+                </div>
+              </div>
+            </div>
+          </div>`;
+        });
+        html += `</div>`;
+
+        const printArea = document.getElementById('print-area');
+        printArea.innerHTML = html;
+        setTimeout(() => {
+          window.print();
+          printArea.innerHTML = "";
+        }, 300);
+      };
     };
 
     // --- BOUTON APERÇU GLOBAL CLASSÉ PAR FOURNISSEUR ---
