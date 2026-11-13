@@ -13,222 +13,228 @@
   <meta name="apple-mobile-web-app-title" content="Reliquats Fleux">
 
   <!-- Manifeste PWA dynamique optimisé -->
-  <link rel="manifest" id="my-manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Reliquats%20Fleux%22%2C%22short_name%22%3A%22Reliquats%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23030712%22%2C%22theme_color%22%3A%22%23ff6b00%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fi49.servimg.com%2Fu%2Ff49%2F11%2F31%2F89%2F70%2Fimg_2010.jpg%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fjpeg%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D">
-
-  <!-- Inclusion de jsPDF pour générer de vrais fichiers PDF propres sur mobile -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <link rel="manifest" id="my-manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Reliquats%20Fleux%22%2C%22short_name%22%3A%22Reliquats%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23090d16%22%2C%22theme_color%22%3A%22%23ff6b00%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fi49.servimg.com%2Fu%2Ff49%2F11%2F31%2F89%2F70%2Fimg_2010.jpg%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fjpeg%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D">
 
   <style>
     :root[data-theme="dark"] {
       --primary: #ff6b00;
-      --primary-glow: rgba(255, 107, 0, 0.3);
-      --primary-hover: #ff852b;
-      --secondary: #1f2937;
-      --bg: #030712;
-      --card-bg: #111827;
-      --card-border: #374151;
-      --text: #f9fafb;
-      --border: #374151;
-      --input-bg: #0f172a;
-      --container-bg: #1f2937;
-      --subtext: #9ca3af;
-      --radius: 20px;
-      --shadow: 0 15px 25px -5px rgba(0, 0, 0, 0.5);
+      --primary-hover: #e05e00;
+      --secondary: #1e293b;
+      --bg: #090d16;
+      --card-bg: #131c2e;
+      --text: #f8fafc;
+      --border: #1e293b;
+      --input-bg: rgba(255,255,255,0.03);
+      --container-bg: rgba(255,255,255,0.02);
+      --subtext: #94a3b8;
+      --radius: 16px;
     }
 
     :root[data-theme="light"] {
-      --primary: #f97316;
-      --primary-glow: rgba(249, 115, 22, 0.25);
-      --primary-hover: #ea580c;
+      --primary: #ff6b00;
+      --primary-hover: #e05e00;
       --secondary: #e2e8f0;
-      --bg: #f3f4f6;
+      --bg: #f8fafc;
       --card-bg: #ffffff;
-      --card-border: #d1d5db;
-      --text: #111827;
-      --border: #d1d5db;
+      --text: #0f172a;
+      --border: #cbd5e1;
       --input-bg: #ffffff;
-      --container-bg: #f9fafb;
-      --subtext: #6b7280;
-      --radius: 20px;
-      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+      --container-bg: #f1f5f9;
+      --subtext: #64748b;
+      --radius: 16px;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-    body { background-color: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); min-height: 100vh; }
 
     #home-screen {
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      min-height: 100vh; padding: 2rem; text-align: center;
-      background: var(--bg);
+      min-height: 100vh; padding: 1rem; text-align: center;
+      background: radial-gradient(circle at 50% 20%, var(--secondary) 0%, var(--bg) 70%);
     }
     .logo-container { width: 100%; display: flex; align-items: center; justify-content: center; margin-bottom: 2rem; }
-    .home-logo-img { width: 85vw !important; max-width: 400px !important; height: auto !important; max-height: 170px !important; object-fit: contain; filter: drop-shadow(0 10px 25px rgba(255, 107, 0, 0.25)); border-radius: var(--radius); }
-    .app-subtitle { font-size: 1.2rem; color: var(--subtext); max-width: 480px; margin-bottom: 3rem; line-height: 1.6; font-weight: 400; }
-    .btn-start { background: linear-gradient(135deg, var(--primary) 0%, #ff8c3b 100%); color: white; border: none; padding: 1.2rem 3rem; border-radius: 50px; font-size: 1.25rem; font-weight: 700; cursor: pointer; box-shadow: 0 10px 30px var(--primary-glow); }
-    .btn-start:hover { transform: translateY(-2px); }
+    .home-logo-img { width: 85vw !important; max-width: 420px !important; height: auto !important; max-height: 180px !important; object-fit: contain; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.15)); display: block; }
+    .app-subtitle { font-size: 1.1rem; color: var(--subtext); max-width: 480px; margin-bottom: 2rem; line-height: 1.4; }
+    .btn-start { background-color: var(--primary); color: white; border: none; padding: 1rem 2rem; border-radius: 30px; font-size: 1.2rem; font-weight: 700; cursor: pointer; box-shadow: 0 4px 14px rgba(255, 107, 0, 0.4); }
 
-    #app-screen { display: none; max-width: 1440px; margin: 0 auto; padding: 1rem; }
-    
-    header { 
-      display: flex; align-items: center; justify-content: space-between; 
-      margin-bottom: 1.5rem; padding: 0.85rem 1.25rem; 
-      background: var(--card-bg); border: 1px solid var(--card-border); 
-      border-radius: var(--radius); box-shadow: var(--shadow); gap: 1rem; position: relative; z-index: 50;
-    }
-    
-    .header-brand { display: flex; align-items: center; justify-content: center; background: white; padding: 0.4rem 0.8rem; border-radius: 12px; height: 50px; width: 220px; max-width: 100%; border: 1px solid var(--border); }
-    .header-brand img { height: 42px !important; width: 100% !important; object-fit: contain; }
-    
-    .header-controls { display: flex; align-items: center; position: relative; gap: 0.6rem; }
-    .btn-nav-home, .btn-menu-hamburger { 
-      background: var(--container-bg); border: 1px solid var(--border); color: var(--text); 
-      padding: 0.6rem 1rem; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 0.9rem;
-      display: flex; align-items: center; gap: 0.4rem; white-space: nowrap;
-    }
-    .btn-nav-home:hover, .btn-menu-hamburger:hover { background: var(--secondary); border-color: var(--primary); }
-    .btn-menu-hamburger { font-size: 1.1rem; padding: 0.5rem 0.8rem; }
-
-    .dropdown-menu { display: none; position: absolute; top: calc(100% + 12px); right: 0; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; box-shadow: var(--shadow); z-index: 9999; min-width: 250px; overflow: hidden; }
+    #app-screen { display: none; max-width: 1400px; margin: 0 auto; padding: 1rem; }
+    header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid var(--border); gap: 0.5rem; }
+    .header-brand { display: flex; align-items: center; justify-content: center; flex: 1; margin-right: 1rem; background: white; padding: 0.4rem 0.75rem; border-radius: 12px; height: 65px; max-width: 350px; border: 1px solid var(--border); }
+    .header-brand img { height: 52px !important; width: auto !important; max-width: 100%; object-fit: contain; }
+    .header-controls { display: flex; flex-direction: column; align-items: flex-end; position: relative; gap: 0.3rem; flex-shrink: 0; }
+    .btn-nav-home, .btn-menu-hamburger { background: var(--card-bg); border: 1px solid var(--border); color: var(--text); padding: 0.5rem 0.75rem; border-radius: 8px; cursor: pointer; font-weight: 600; }
+    .dropdown-menu { display: none; position: absolute; top: 100%; right: 0; background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); z-index: 100; min-width: 250px; margin-top: 0.4rem; }
     .dropdown-menu.show { display: block; }
-    
-    .dropdown-item { width: 100%; padding: 0.9rem 1.1rem; text-align: left; background: var(--card-bg); border: none; font-size: 0.95rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.85rem; color: var(--text); }
+    .dropdown-item { width: 100%; padding: 0.75rem 1rem; text-align: left; background: none; border: none; font-size: 0.95rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; color: var(--text); }
     .dropdown-item.danger { color: #f43f5e; }
-    .dropdown-item:hover { background: rgba(255, 107, 0, 0.15); }
+    .dropdown-item:hover { background: rgba(128,128,128,0.1); }
 
-    .card { background: var(--card-bg); border-radius: var(--radius); padding: 1.25rem; box-shadow: var(--shadow); border: 1px solid var(--card-border); margin-bottom: 1.25rem; }
-    
-    .search-box { display: flex; gap: 0.75rem; align-items: center; flex-direction: column; }
-    .search-box-row { display: flex; gap: 0.6rem; width: 100%; }
-    .search-box input { flex: 1; background: var(--input-bg); min-width: 0; }
-    .btn-search { background: linear-gradient(135deg, var(--primary) 0%, #ff8c3b 100%); color: white; border: none; padding: 0.8rem 1.2rem; border-radius: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; box-shadow: 0 4px 15px var(--primary-glow); }
+    .card { background: var(--card-bg); border-radius: var(--radius); padding: 1.25rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: 1px solid var(--border); margin-bottom: 1.5rem; }
+    .search-box { display: flex; gap: 0.5rem; align-items: center; }
+    .search-box input { flex: 1; background: var(--input-bg); }
+    .btn-search { background-color: var(--primary); color: white; border: none; padding: 0.75rem 1rem; border-radius: 8px; font-weight: 600; cursor: pointer; white-space: nowrap; }
 
-    .form-group { margin-bottom: 1.1rem; }
-    .photo-box-container { background: var(--container-bg); padding: 1rem; border-radius: 16px; border: 2px dashed var(--border); margin-bottom: 1rem; position: relative; }
-    label { display: block; font-weight: 700; margin-bottom: 0.4rem; font-size: 0.8rem; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.8px; }
-    
-    input, select, textarea { 
-      width: 100%; padding: 0.85rem 1rem; border: 1px solid var(--border); border-radius: 12px; font-size: 1rem; 
-      background: var(--input-bg); color: var(--text); outline: none; max-width: 100%;
-    }
-    input:focus, select:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-glow); }
+    .form-group { margin-bottom: 1rem; }
+    .photo-box-container { background: var(--container-bg); padding: 0.85rem; border-radius: 10px; border: 1px dashed var(--border); margin-bottom: 1rem; position: relative; }
+    label { display: block; font-weight: 600; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--subtext); }
+    input, select, textarea { width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; background: var(--input-bg); color: var(--text); outline: none; }
+    .previewWrapper { position: relative; margin-bottom: 0.75rem; display: none; }
+    .photoPreview { max-height: 200px; border-radius: 8px; border: 1px solid var(--border); display: block; background: rgba(0,0,0,0.1); }
+    .btn-suppr-photo-interne { position: absolute; top: 8px; right: 8px; background: rgba(244, 63, 94, 0.9); color: white; border: none; padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: bold; cursor: pointer; }
+    .camera-controls { display: flex; gap: 0.5rem; }
+    button.btn-main { background-color: var(--primary); color: white; border: none; padding: 0.75rem 1.25rem; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%; font-size: 1rem; }
+    button.btn-secondary { background-color: var(--secondary); color: var(--text); border: 1px solid var(--border); padding: 0.75rem 1.25rem; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%; }
 
-    .previewWrapper { position: relative; margin-bottom: 1rem; display: none; }
-    .photoPreview { max-height: 220px; border-radius: 12px; border: 1px solid var(--border); display: block; background: #000; width: 100%; object-fit: contain; }
-    .btn-suppr-photo-interne { position: absolute; top: 10px; right: 10px; background: rgba(244, 63, 94, 0.95); color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 8px; font-size: 0.75rem; font-weight: bold; cursor: pointer; }
-    
-    .camera-controls { display: flex; gap: 0.6rem; margin-top: 0.6rem; }
-    button.btn-main { background: linear-gradient(135deg, var(--primary) 0%, #ff8c3b 100%); color: white; border: none; padding: 0.9rem 1.2rem; border-radius: 12px; font-weight: 700; cursor: pointer; width: 100%; font-size: 1rem; box-shadow: 0 6px 20px var(--primary-glow); }
-    button.btn-secondary { background-color: var(--container-bg); color: var(--text); border: 1px solid var(--border); padding: 0.9rem 1.2rem; border-radius: 12px; font-weight: 600; cursor: pointer; width: 100%; }
+    .export-filter-container { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.75rem; background: var(--container-bg); padding: 0.75rem; border-radius: 10px; border: 1px solid var(--border); }
+    .export-filter-label { font-size: 0.85rem; font-weight: 700; color: var(--subtext); }
+    .export-actions-row { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+    .input-date-custom { flex: 1; min-width: 120px; border: 1px solid var(--border); border-radius: 8px; padding: 0.5rem; font-size: 0.85rem; color: var(--text); background: var(--input-bg); text-align: center; }
+    button.btn-pdf { background-color: #0284c7; color: white; border: none; padding: 0.6rem 0.85rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
+    button.btn-select-all { background-color: var(--secondary); color: var(--text); border: 1px solid var(--border); padding: 0.6rem 0.85rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
+    button.btn-sheets { background-color: #16a34a; color: white; border: none; padding: 0.6rem 0.85rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
+    button.btn-paste { background-color: #d97706; color: white; border: none; padding: 0.6rem 0.85rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
+    button.btn-sort { background-color: #6366f1; color: white; border: none; padding: 0.6rem 0.85rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
+    button.btn-vue-globale { background-color: #8b5cf6; color: white; border: none; padding: 0.6rem 0.85rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
 
-    .export-filter-container { display: flex; flex-direction: column; gap: 0.75rem; margin-top: 1rem; background: var(--container-bg); padding: 1rem; border-radius: 16px; border: 1px solid var(--border); }
-    .export-filter-label { font-size: 0.8rem; font-weight: 800; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.8px; }
-    .export-actions-row { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; width: 100%; }
-    
-    .date-inputs-wrapper { display: flex; align-items: center; gap: 0.4rem; width: 100%; flex-wrap: wrap; }
-    .input-date-custom { flex: 1; min-width: 120px; border: 1px solid var(--border); border-radius: 12px; padding: 0.7rem; font-size: 0.9rem; color: var(--text); background: var(--input-bg); text-align: center; color-scheme: dark; }
-    :root[data-theme="light"] .input-date-custom { color-scheme: light; }
-    
-    button.btn-pdf, button.btn-select-all, button.btn-sheets, button.btn-paste, button.btn-sort, button.btn-apercu { 
-      border-radius: 12px; font-size: 0.85rem; font-weight: 700; cursor: pointer; padding: 0.65rem 0.9rem; border: none;
-    }
-    button.btn-pdf { background-color: #0284c7; color: white; }
-    button.btn-apercu { background-color: #8b5cf6; color: white; }
-    button.btn-select-all { background-color: var(--secondary); color: var(--text); border: 1px solid var(--border); }
-    button.btn-sheets { background-color: #16a34a; color: white; }
-    button.btn-paste { background-color: #d97706; color: white; }
-    button.btn-sort { background-color: #6366f1; color: white; }
-
-    .liste-commandes { display: flex; flex-direction: column; gap: 0.85rem; margin-top: 1.25rem; }
-    
-    .commande-item-compact { 
-      display: flex; flex-direction: column; background: var(--container-bg); 
-      border: 1px solid var(--border); border-radius: 16px; padding: 1rem; gap: 0.85rem; 
-      user-select: none; width: 100%; overflow: hidden;
-    }
-    .commande-item-compact.urgente { background: rgba(244, 63, 94, 0.15); border: 1.5px solid rgba(244, 63, 94, 0.6); }
-    .commande-item-compact.controle { background: rgba(2, 132, 199, 0.15); border: 1.5px solid rgba(2, 132, 199, 0.6); }
+    /* --- Ligne de commande optimisée mobile & desktop --- */
+    .liste-commandes { display: flex; flex-direction: column; gap: 0.6rem; margin-top: 1rem; }
+    .commande-item-compact { display: flex; flex-direction: column; background: var(--container-bg); border: 1px solid var(--border); border-radius: 12px; padding: 0.75rem; gap: 0.6rem; user-select: none; }
+    .commande-item-compact.urgente { background: rgba(244, 63, 94, 0.12); border: 1px solid rgba(244, 63, 94, 0.5); }
+    .commande-item-compact.controle { background: rgba(2, 132, 199, 0.12); border: 1px solid rgba(2, 132, 199, 0.5); }
     
     .commande-row-top { display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 0.5rem; }
-    .commande-row-bottom { display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 0.5rem; border-top: 1px solid var(--border); padding-top: 0.75rem; flex-wrap: wrap; }
+    .commande-row-bottom { display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 0.5rem; border-top: 1px solid var(--border); padding-top: 0.5rem; }
 
-    .drag-handle { color: var(--subtext); font-size: 1.2rem; cursor: grab; padding: 0 0.2rem; font-weight: bold; flex-shrink: 0; }
+    .drag-handle { color: var(--subtext); font-size: 1.2rem; cursor: grab; padding: 0 0.2rem; font-weight: bold; }
     
-    .btn-status-toggle { 
-      background: var(--card-bg); border: 1px solid var(--border); color: var(--subtext); 
-      padding: 0.45rem 0.8rem; border-radius: 10px; font-size: 0.8rem; font-weight: 700; 
-      cursor: pointer; display: flex; align-items: center; gap: 0.4rem; white-space: nowrap; 
-    }
-    .btn-status-toggle.active-urgent { background: rgba(244, 63, 94, 0.3); border-color: #f43f5e; color: #f43f5e; }
-    .btn-status-toggle.active-controle { background: rgba(2, 132, 199, 0.3); border-color: #0284c7; color: #38bdf8; }
+    .btn-status-toggle { background: var(--card-bg); border: 1px solid var(--border); color: var(--subtext); padding: 0.4rem 0.7rem; border-radius: 8px; font-size: 0.8rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 0.3rem; white-space: nowrap; transition: all 0.1s; }
+    .btn-status-toggle:active { transform: scale(0.95); }
+    .btn-status-toggle.active-urgent { background: rgba(244, 63, 94, 0.25); border-color: #f43f5e; color: #f43f5e; }
+    .btn-status-toggle.active-controle { background: rgba(2, 132, 199, 0.25); border-color: #0284c7; color: #38bdf8; }
 
-    .commande-select-checkbox { width: 20px; height: 20px; cursor: pointer; accent-color: var(--primary); border-radius: 6px; flex-shrink: 0; }
+    .commande-select-checkbox { width: 18px; height: 18px; cursor: pointer; accent-color: var(--primary); flex-shrink: 0; }
     .commande-main-btn { display: flex; align-items: center; gap: 0.75rem; flex-grow: 1; min-width: 0; cursor: pointer; }
     
-    .commande-num-badge { font-weight: 800; font-size: 1.05rem; color: var(--text); word-break: break-all; line-height: 1.3; }
-    .commande-date-compact { font-size: 0.8rem; color: var(--subtext); margin-top: 0.15rem; font-weight: 500; }
-    .commande-articles-badge { font-size: 0.8rem; background: var(--primary-glow); color: var(--primary); padding: 0.3rem 0.6rem; border-radius: 8px; white-space: nowrap; font-weight: 800; border: 1px solid rgba(255, 107, 0, 0.3); flex-shrink: 0; }
-    
-    .commande-actions { display: flex; align-items: center; gap: 0.4rem; flex-shrink: 0; }
-    .btn-edit-small { background: var(--card-bg); border: 1px solid var(--border); color: var(--text); padding: 0.45rem 0.7rem; border-radius: 10px; font-size: 0.8rem; font-weight: 600; cursor: pointer; text-align: center; }
-    .btn-delete-small { background: rgba(244, 63, 94, 0.15); border: 1px solid rgba(244, 63, 94, 0.3); color: #f43f5e; padding: 0.45rem 0.7rem; border-radius: 10px; font-size: 0.85rem; font-weight: bold; cursor: pointer; text-align: center; }
-
-    .section-header-flex { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
-    .section-header-flex h2 { font-size: 1.2rem; font-weight: 800; }
-    .badge-count { background: var(--primary-glow); color: var(--primary); border: 1px solid rgba(255, 107, 0, 0.4); padding: 0.35rem 0.8rem; border-radius: 30px; font-size: 0.85rem; font-weight: 800; white-space: nowrap; }
-
-    @media (min-width: 900px) {
-      #app-screen { padding: 1.5rem; }
-      .search-box { flex-direction: row; }
-      .date-inputs-wrapper { width: auto; flex-wrap: nowrap; }
-      .main-layout-desktop { display: grid; grid-template-columns: 460px 1fr; gap: 2rem; align-items: start; }
-      .commande-item-compact { flex-direction: row; align-items: center; justify-content: space-between; padding: 1.25rem 1.5rem; gap: 1.25rem; }
-      .commande-row-top, .commande-row-bottom { display: contents; }
-      .commande-main-btn { gap: 1.25rem; }
-      .commande-num-badge { font-size: 1.25rem; white-space: nowrap; word-break: normal; }
-      .btn-edit-small { font-size: 0.85rem; padding: 0.45rem 0.85rem; }
-      .commande-actions { flex-direction: column; align-items: stretch; gap: 0.5rem; }
+    .commande-num-badge { 
+      font-weight: bold; 
+      font-size: 0.95rem; 
+      color: var(--primary); 
+      word-break: normal; 
+      white-space: normal; 
+      line-height: 1.35; 
     }
 
-    .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(3, 7, 18, 0.92); flex-direction: column; overflow-y: auto; padding: 1rem; }
-    .modal-content-container { display: flex; flex-direction: column; align-items: center; gap: 1.25rem; max-width: 1100px; width: 100%; margin: auto; padding-top: 4rem; }
+    .commande-date-compact { font-size: 0.8rem; color: var(--subtext); margin-top: 0.1rem; }
+    .commande-articles-badge { font-size: 0.8rem; background: rgba(255,107,0,0.15); color: var(--primary); padding: 0.2rem 0.5rem; border-radius: 6px; white-space: nowrap; font-weight: 700; }
+    
+    .commande-actions { display: flex; align-items: center; gap: 0.4rem; flex-shrink: 0; }
+    .btn-edit-small { background: var(--card-bg); border: 1px solid var(--border); color: var(--text); padding: 0.4rem 0.6rem; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; text-align: center; }
+    .btn-delete-small { background: rgba(244, 63, 94, 0.15); border: 1px solid rgba(244, 63, 94, 0.3); color: #f43f5e; padding: 0.4rem 0.6rem; border-radius: 8px; font-size: 0.85rem; font-weight: bold; cursor: pointer; text-align: center; }
+
+    .section-header-flex { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
+    .badge-count { background: rgba(255, 107, 0, 0.15); color: var(--primary); border: 1px solid rgba(255, 107, 0, 0.4); padding: 0.35rem 0.75rem; border-radius: 30px; font-size: 0.95rem; font-weight: 800; }
+
+    /* Vue Globale par Fournisseur */
+    #global-view-container { display: none; margin-top: 1rem; }
+    .global-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; margin-top: 1rem; }
+    .global-card { background: var(--container-bg); border: 1px solid var(--border); border-radius: 12px; padding: 1rem; display: flex; flex-direction: column; gap: 0.6rem; position: relative; }
+    .global-card img { width: 100%; height: 180px; object-fit: contain; border-radius: 8px; background: rgba(0,0,0,0.1); }
+    .global-card-checkbox { position: absolute; top: 12px; right: 12px; width: 22px; height: 22px; accent-color: var(--primary); cursor: pointer; z-index: 5; }
+
+    @media (min-width: 900px) {
+      .main-layout-desktop { display: grid; grid-template-columns: 440px 1fr; gap: 1.5rem; align-items: start; }
+      .commande-item-compact { flex-direction: row; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; gap: 0.75rem; }
+      .commande-row-top, .commande-row-bottom { display: contents; }
+      .commande-main-btn { gap: 0.75rem; }
+      .commande-num-badge { font-size: 1.1rem; white-space: nowrap; }
+      .btn-edit-small { font-size: 0.8rem; padding: 0.35rem 0.6rem; }
+      .commande-actions { flex-direction: column; align-items: stretch; gap: 0.3rem; }
+    }
+
+    /* --- Modale optimisée & Alerte de boutique différente --- */
+    .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.85); flex-direction: column; overflow-y: auto; padding: 1rem; }
+    .modal-content-container { display: flex; flex-direction: column; align-items: center; gap: 1.25rem; max-width: 95%; width: 100%; margin: auto; padding-top: 4rem; }
     
     .modal-title-badge { 
-      position: fixed; top: 15px; left: 50%; transform: translateX(-50%); 
-      font-size: 0.95rem; font-weight: 800; color: var(--text); background: var(--card-bg); 
-      padding: 0.6rem 1.2rem; border-radius: 40px; border: 1px solid var(--card-border); 
-      box-shadow: var(--shadow); z-index: 1005; white-space: nowrap; max-width: 80vw; overflow: hidden; text-overflow: ellipsis;
+      position: fixed; 
+      top: 15px; 
+      left: 50%; 
+      transform: translateX(-50%); 
+      font-size: 1.1rem; 
+      font-weight: bold; 
+      color: var(--text); 
+      background: var(--card-bg); 
+      padding: 0.5rem 1.2rem; 
+      border-radius: 20px; 
+      border: 1px solid var(--border); 
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5); 
+      z-index: 1005; 
+      white-space: nowrap;
+      backdrop-filter: blur(8px);
     }
 
     .modal-images-row { display: flex; gap: 1.25rem; flex-wrap: wrap; justify-content: center; max-width: 100%; width: 100%; }
-    .modal-photo-box { display: flex; flex-direction: column; align-items: center; gap: 0.75rem; background: var(--card-bg); border: 1px solid var(--card-border); padding: 1.25rem; border-radius: var(--radius); max-width: 320px; width: 100%; box-shadow: var(--shadow); position: relative; }
-    .modal-photo-box.autre-boutique { border: 2.5px solid #f43f5e; background: rgba(244, 63, 94, 0.15); }
-    .modal-photo-box img { max-height: 240px; border-radius: 12px; background: #000; width: 100%; object-fit: contain; border: 1px solid var(--border); display: block !important; visibility: visible !important; }
     
-    .modal-ref-badge { background: var(--primary); color: white; padding: 0.35rem 0.85rem; border-radius: 10px; font-size: 0.9rem; font-weight: 800; }
-    .modal-fournisseur-badge { background: var(--secondary); color: var(--text); padding: 0.35rem 0.85rem; border-radius: 10px; font-size: 0.85rem; font-weight: 700; border: 1px solid var(--border); }
-    .modal-barcode-badge { background-color: #0284c7; color: #ffffff; font-weight: 800; padding: 0.35rem 0.85rem; border-radius: 10px; font-size: 0.85rem; font-family: monospace; }
-    .modal-qty-badge { background-color: #16a34a; color: #ffffff; font-weight: 800; padding: 0.35rem 0.85rem; border-radius: 10px; font-size: 0.9rem; }
-    .modal-dispo-badge { background-color: #d97706; color: #ffffff; font-weight: 800; padding: 0.35rem 0.85rem; border-radius: 10px; font-size: 0.9rem; }
-    .modal-article-remarque-box { background: rgba(255, 107, 0, 0.15); color: var(--text); padding: 0.6rem 0.9rem; border-radius: 10px; font-size: 0.9rem; font-weight: 700; text-align: center; border: 1px dashed var(--primary); width: 100%; word-break: break-word; }
-    
-    .modal-close { position: fixed; top: 15px; right: 15px; color: white; font-size: 1.4rem; font-weight: bold; cursor: pointer; z-index: 1010; background: #111827; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); }
-    .modal-close:hover { background: #f43f5e; }
+    .modal-photo-box { 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      gap: 0.4rem; 
+      background: var(--card-bg); 
+      border: 1px solid var(--border); 
+      padding: 0.85rem; 
+      border-radius: 14px; 
+      max-width: 320px; 
+      width: 100%; 
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3); 
+      position: relative; 
+    }
+
+    .modal-photo-box.autre-boutique { border: 2px solid #f43f5e; background: rgba(244, 63, 94, 0.08); }
+    .modal-photo-box img { max-height: 42vh; border-radius: 8px; background: rgba(0,0,0,0.1); width: 100%; object-fit: contain; }
+    .modal-ref-group { display: flex; flex-direction: column; align-items: center; gap: 0.3rem; width: 100%; }
+    .modal-ref-badges { display: flex; gap: 0.4rem; flex-wrap: wrap; justify-content: center; }
+    .modal-ref-badge { background: var(--primary); color: white; padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.8rem; font-weight: 700; }
+    .modal-fournisseur-badge { background: var(--secondary); color: var(--text); padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.8rem; font-weight: 600; border: 1px solid var(--border); }
+    .modal-barcode-badge { background-color: #0284c7; color: #ffffff; font-weight: 700; padding: 0.25rem 0.65rem; border-radius: 6px; font-size: 0.8rem; font-family: monospace; }
+    .modal-qty-badge { background-color: #16a34a; color: #ffffff; font-weight: 700; padding: 0.25rem 0.65rem; border-radius: 6px; font-size: 0.85rem; }
+    .modal-dispo-badge { background-color: #d97706; color: #ffffff; font-weight: 700; padding: 0.25rem 0.65rem; border-radius: 6px; font-size: 0.85rem; }
+    .modal-delai-badge { background-color: #6366f1; color: #ffffff; font-weight: 700; padding: 0.25rem 0.65rem; border-radius: 6px; font-size: 0.85rem; }
+    .modal-article-remarque-box { background: rgba(255, 107, 0, 0.15); color: var(--text); padding: 0.35rem 0.6rem; border-radius: 6px; font-size: 0.85rem; font-weight: 600; text-align: center; border: 1px dashed var(--primary); width: 100%; word-break: break-word; }
+    .modal-close { position: fixed; top: 15px; right: 15px; color: white; font-size: 1.8rem; font-weight: bold; cursor: pointer; z-index: 1010; background: rgba(0,0,0,0.5); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); }
+
+    #print-area { display: none; }
+
+    @media print {
+      @page { size: A4 portrait; margin: 5mm; }
+      body, html { background: white !important; color: black !important; height: 100% !important; overflow: hidden !important; margin: 0 !important; padding: 0 !important; }
+      body * { visibility: hidden !important; }
+      #print-area, #print-area * { visibility: visible !important; }
+      #print-area { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; height: auto !important; padding: 0 !important; margin: 0 !important; background: white !important; color: black !important; }
+      .print-title { font-size: 18px; color: #ff6b00; margin-bottom: 2px; font-weight: bold; }
+      .print-subtitle { font-size: 10px; color: #64748b; margin-bottom: 8px; border-bottom: 2px solid #ff6b00; padding-bottom: 3px; }
+      .print-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; page-break-inside: avoid; }
+      .print-card { border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px; page-break-inside: avoid; break-inside: avoid; background: #ffffff; }
+      .print-photos-flex { display: flex; flex-wrap: wrap; gap: 4px; }
+      .print-photo-print-item { width: 48%; display: flex; flex-direction: column; gap: 2px; margin-bottom: 2px; background: #f8fafc; padding: 3px; border-radius: 4px; border: 1px solid #e2e8f0; page-break-inside: avoid; break-inside: avoid; }
+      .print-photos-flex img { width: 100%; height: 85px; object-fit: cover; border-radius: 4px; border: 1px solid #cbd5e1; }
+    }
   </style>
 </head>
 <body>
 
   <div id="home-screen">
     <div class="logo-container">
-      <img class="home-logo-img" src="https://i49.servimg.com/u/f49/11/31/89/70/img_2010.jpg" alt="Reliquats Fleux Logo" />
+      <img class="home-logo-img" src="https://i49.servimg.com/u/f49/11/31/89/70/img_2010.jpg" style="border:0;" alt="Reliquats Fleux Logo" />
     </div>
-    <p class="app-subtitle">Prenez en photo vos articles manquants et suivez vos numéros de commande en toute simplicité.</p>
+    <p class="app-subtitle">Prenez en photo vos articles manquants et suivez vos numéros de commande.</p>
     <button class="btn-start" id="btnCommencer" type="button">🚀 Lancer les reliquats</button>
   </div>
 
   <div id="app-screen">
     <header>
       <div class="header-brand">
-        <img src="https://i49.servimg.com/u/f49/11/31/89/70/img_2010.jpg" alt="Reliquats Fleux Logo" />
+        <img src="https://i49.servimg.com/u/f49/11/31/89/70/img_2010.jpg" style="border:0;" alt="Reliquats Fleux Logo" />
       </div>
       
       <div class="header-controls">
@@ -248,26 +254,26 @@
 
     <div class="main-layout-desktop">
       <div class="column-left">
-        <section class="card">
-          <div class="search-box">
-            <div class="search-box-row">
+        <section class="card" style="padding: 1rem;">
+          <div class="search-box" style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <div style="display: flex; gap: 0.5rem; width: 100%;">
               <input type="text" id="recherche" placeholder="🔍 Rechercher (boutique, n° commande, réf...)" autocomplete="off">
               <button type="button" class="btn-search" id="btnLancerRecherche">Rechercher</button>
             </div>
-            <div style="width: 100%;">
-              <label for="selectFiltreBoutique" style="font-size: 0.78rem; margin-bottom: 0.35rem;">Filtrer par Boutique :</label>
-              <select id="selectFiltreBoutique" style="font-size: 0.95rem; padding: 0.75rem; background: var(--input-bg); color: var(--text); border: 1px solid var(--border); border-radius: 12px; width: 100%;">
+            <div>
+              <label for="selectFiltreBoutique" style="font-size: 0.8rem; margin-bottom: 0.2rem;">Filtrer par Boutique :</label>
+              <select id="selectFiltreBoutique" style="font-size: 0.9rem; padding: 0.5rem; background: var(--input-bg); color: var(--text); border: 1px solid var(--border); border-radius: 8px;">
                 <option value="">-- Toutes les boutiques --</option>
               </select>
             </div>
           </div>
         </section>
 
-        <!-- Section de préparation : masquée par défaut, visible uniquement en Mode Admin -->
+        <!-- Section de préparation -->
         <section class="card" id="sectionPreparation" style="display: none;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
-            <h2 id="formTitle" style="font-size: 1.25rem; color:var(--primary); font-weight: 800;">Nvx reliquats</h2>
-            <button type="button" id="btnNouvelleCommande" style="background:var(--primary); color:white; border:none; padding:0.6rem 1rem; border-radius:10px; font-weight:700; cursor:pointer; font-size:0.85rem; box-shadow: 0 4px 12px var(--primary-glow);">➕ Nvx reliquats</button>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+            <h2 id="formTitle" style="font-size: 1.1rem; color:var(--primary);">Nvx reliquats</h2>
+            <button type="button" id="btnNouvelleCommande" style="background:var(--primary); color:white; border:none; padding:0.4rem 0.8rem; border-radius:8px; font-weight:700; cursor:pointer; font-size:0.85rem;">➕ Nvx reliquats</button>
           </div>
 
           <div class="form-group">
@@ -282,13 +288,13 @@
 
           <div id="articlesContainer"></div>
 
-          <div style="margin-bottom: 1.5rem; text-align: center;">
-            <button type="button" id="btnAjouterArticle" style="background: transparent; border: 2px dashed var(--border); color: var(--primary); padding: 1rem; border-radius: 14px; font-weight: 700; width: 100%; cursor: pointer;">
+          <div style="margin-bottom: 1rem; text-align: center;">
+            <button type="button" id="btnAjouterArticle" style="background: transparent; border: 2px dashed var(--border); color: var(--primary); padding: 0.75rem; border-radius: 10px; font-weight: 700; width: 100%; cursor: pointer;">
               ➕ Ajouter un article pour cette commande
             </button>
           </div>
 
-          <div style="display:flex; gap:0.85rem; margin-top: 1.5rem;">
+          <div style="display:flex; gap:0.5rem; margin-top: 1rem;">
             <button class="btn-main" id="btnEnregistrer" type="button">Enregistrer les reliquats</button>
             <button class="btn-secondary" id="btnAnnulerEdit" type="button" style="display:none; width:auto;">Annuler</button>
           </div>
@@ -299,49 +305,59 @@
         <section class="card" style="margin-bottom: 0;">
           <div class="section-header-flex">
             <h2>Historique Reliquats</h2>
-            <div style="display: flex; gap: 0.5rem; align-items: center;">
-              <button class="btn-sort" id="btnTrierDate" type="button" title="Inverser l'ordre de tri">🔄 Récent</button>
+            <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+              <button class="btn-vue-globale" id="btnToggleVueGlobale" type="button">📊 Vue par Fournisseur</button>
+              <button class="btn-sort" id="btnTrierDate" type="button" title="Inverser l'ordre de tri">🔄 Trier : Récent</button>
               <span id="badgeCount" class="badge-count">0</span>
             </div>
           </div>
 
           <div class="export-filter-container">
-            <span class="export-filter-label">📅 Filtrer par période :</span>
+            <span class="export-filter-label">📅 Filtrer par période (JJ/MM/AAAA) :</span>
             <div class="export-actions-row">
-              <div class="date-inputs-wrapper">
-                <input type="date" id="dateDebutFiltre" class="input-date-custom">
-                <span style="font-size:0.85rem; color:var(--subtext); text-align: center;">au</span>
-                <input type="date" id="dateFinFiltre" class="input-date-custom">
-              </div>
+              <input type="text" id="dateDebutFiltre" class="input-date-custom" placeholder="JJ/MM/AAAA" autocomplete="off">
+              <span style="font-size:0.8rem; color:var(--subtext);">au</span>
+              <input type="text" id="dateFinFiltre" class="input-date-custom" placeholder="JJ/MM/AAAA" autocomplete="off">
+              <button class="btn-select-all" id="btnSelectAll" type="button">☑️ Tout cocher</button>
+              <button class="btn-pdf" id="btnExportPDF" type="button">📄 Exporter PDF</button>
               
-              <div style="display: flex; gap: 0.5rem; align-items: center; width: 100%; flex-wrap: wrap; margin-top: 0.25rem;">
-                <button class="btn-select-all" id="btnSelectAll" type="button">☑️ Tout</button>
-                <button class="btn-pdf" id="btnExportPDF" type="button">📄 Télécharger PDF</button>
-                <button class="btn-apercu" id="btnApercuGlobal" type="button">🔍 Aperçu global</button>
-                
-                <div id="adminExportOptions" style="display: none; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
-                  <button class="btn-sheets" id="btnExportSheets" type="button">📊 Excel</button>
-                  <button class="btn-paste" id="btnOpenPasteModal" type="button">📋 Coller</button>
-                </div>
+              <div id="adminExportOptions" style="display: none; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                <button class="btn-sheets" id="btnExportSheets" type="button">📊 Exporter Excel</button>
+                <button class="btn-paste" id="btnOpenPasteModal" type="button">📋 Coller tableau</button>
               </div>
             </div>
           </div>
 
+          <!-- Liste classique -->
           <div class="liste-commandes" id="galerieCommandes">
-            <p style="text-align:center; color:var(--subtext); padding:2rem;">Chargement en cours...</p>
+            <p style="text-align:center; color:var(--subtext); padding:1rem;">Chargement en cours...</p>
+          </div>
+
+          <!-- Vue Globale par Fournisseur avec sélections d'articles -->
+          <div id="global-view-container">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; flex-wrap: wrap; gap: 0.5rem; background: var(--input-bg); padding: 0.75rem; border-radius: 10px; border: 1px solid var(--border);">
+              <span id="globalViewTitle" style="font-weight: bold; color: var(--primary);">Aperçu global par Fournisseur</span>
+              <div style="display: flex; gap: 0.5rem;">
+                <button class="btn-select-all" id="btnSelectAllGlobal" type="button">☑️ Tout cocher</button>
+                <button class="btn-pdf" id="btnExportPDFGlobal" type="button">📄 Exporter PDF (Sélection)</button>
+              </div>
+            </div>
+            <div class="global-grid" id="globalGridContainer"></div>
           </div>
         </section>
       </div>
     </div>
   </div>
 
+  <div id="print-area"></div>
+
   <!-- Modale de collage -->
   <div id="pasteModal" class="modal" style="display: none; z-index: 3000;">
-    <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 1.5rem; width: 95%; max-width: 600px; display: flex; flex-direction: column; gap: 1.25rem; margin: auto; box-shadow: var(--shadow);">
-      <h3 style="color: var(--primary); font-size: 1.25rem; font-weight: 800;">📋 Coller un tableau Excel</h3>
-      <p style="font-size: 0.9rem; color: var(--subtext); line-height: 1.5;">Colle directement les lignes de ton tableau Excel (les colonnes lues : Date, N° Commande, Fournisseur, EAN, Réf, Désignation, Qté, Boutique) :</p>
-      <textarea id="pasteTextarea" rows="8" placeholder="Colle ton tableau ici (Ctrl+V)..." style="width: 100%; font-family: monospace; font-size: 0.85rem; padding: 0.85rem; border-radius: 12px;"></textarea>
-      <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+    <div style="background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; width: 90%; max-width: 600px; display: flex; flex-direction: column; gap: 1rem; margin: auto;">
+      <h3 style="color: var(--primary); font-size: 1.1rem;">📋 Coller un tableau Excel</h3>
+      <p style="font-size: 0.85rem; color: var(--subtext);">Colle directement les lignes de ton tableau Excel (les 9 colonnes seront lues) :</p>
+      <textarea id="pasteTextarea" rows="8" placeholder="Colle ton tableau ici (Ctrl+V)..." style="width: 100%; font-family: monospace; font-size: 0.85rem; padding: 0.5rem;"></textarea>
+      <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
         <button type="button" class="btn-secondary" id="btnCancelPaste" style="width: auto;">Annuler</button>
         <button type="button" class="btn-main" id="btnProcessPaste" style="width: auto;">Analyser et Importer</button>
       </div>
@@ -352,22 +368,19 @@
   <div id="imageModal" class="modal">
     <span class="modal-close" id="closeModal">&times;</span>
     <div id="modalTitleBadge" class="modal-title-badge"></div>
-    <div style="position: fixed; top: 15px; left: 20px; z-index: 1005;">
-      <button type="button" id="btnPrintModal" class="btn-pdf" style="padding: 0.5rem 1rem; font-size: 0.85rem; box-shadow: var(--shadow);">📥 Télécharger ce PDF</button>
-    </div>
     <div class="modal-content-container">
       <div class="modal-images-row" id="modalImagesRow"></div>
     </div>
   </div>
 
   <div id="adminLoginModal" class="modal" style="display: none; z-index: 2000;">
-    <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 1.5rem; width: 90%; max-width: 380px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 1.25rem; margin: auto;">
-      <h3 style="color: var(--primary); font-size: 1.25rem; text-align: center; font-weight: 800;">🔒 Accès Administrateur</h3>
+    <div style="background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; width: 100%; max-width: 340px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: flex; flex-direction: column; gap: 1rem; margin: auto;">
+      <h3 style="color: var(--primary); font-size: 1.1rem; text-align: center;">🔒 Accès Administrateur</h3>
       <div style="position: relative;">
-        <input type="password" id="adminPasswordInput" placeholder="Mot de passe admin" autocomplete="off" style="padding-right: 3rem; width: 100%;">
-        <button type="button" id="btnTogglePasswordView" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 1.2rem; color: var(--subtext); padding: 4px;">👁️</button>
+        <input type="password" id="adminPasswordInput" placeholder="Mot de passe admin" autocomplete="off" style="padding-right: 2.8rem; width: 100%;">
+        <button type="button" id="btnTogglePasswordView" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 1.1rem; color: var(--subtext); padding: 4px;">👁️</button>
       </div>
-      <div style="display: flex; gap: 0.75rem;">
+      <div style="display: flex; gap: 0.5rem;">
         <button type="button" class="btn-main" id="btnSubmitAdminLogin" style="flex: 1;">Valider</button>
         <button type="button" class="btn-secondary" id="btnCancelAdminLogin" style="flex: 1;">Annuler</button>
       </div>
@@ -389,10 +402,7 @@
       measurementId: "G-Z8VKEX2MPV"
     };
 
-    try {
-      firebase.initializeApp(firebaseConfig);
-    } catch(e) {}
-
+    try { firebase.initializeApp(firebaseConfig); } catch(e) {}
     const db = firebase.database();
     const ADMIN_PASSWORD = "Fleux.reliquats!";
     let estAdmin = false;
@@ -400,6 +410,7 @@
     let commandes = [];
     let catalogueArticles = {};
     let modeEditionId = null;
+    let vueGlobaleActive = false;
 
     let adminCallback = null;
     const adminLoginModal = document.getElementById('adminLoginModal');
@@ -476,9 +487,7 @@
     const btnToggleAdmin = document.getElementById('btnToggleAdmin');
     const badgeCount = document.getElementById('badgeCount');
 
-    if (btnMenu) {
-      btnMenu.addEventListener('click', (e) => { e.stopPropagation(); dropdownMenu.classList.toggle('show'); });
-    }
+    if (btnMenu) btnMenu.addEventListener('click', (e) => { e.stopPropagation(); dropdownMenu.classList.toggle('show'); });
     document.addEventListener('click', () => { if (dropdownMenu) dropdownMenu.classList.remove('show'); });
 
     if (btnToggleAdmin) {
@@ -489,7 +498,7 @@
             if (succ) { 
               alert("✅ Mode Admin ON"); 
               document.getElementById('sectionPreparation').style.display = "block";
-              afficherGalerie(document.getElementById('recherche').value); 
+              rafraichirAffichageActuel(); 
             } 
           });
         } else {
@@ -500,21 +509,17 @@
           document.getElementById('adminExportOptions').style.display = "none";
           document.getElementById('sectionPreparation').style.display = "none";
           alert("🔒 Mode Admin OFF");
-          afficherGalerie(document.getElementById('recherche').value);
+          rafraichirAffichageActuel();
         }
       });
     }
 
     if (btnCommencer) {
       btnCommencer.addEventListener('click', () => {
-        try {
-          if (homeScreen) homeScreen.style.display = 'none';
-          if (appScreen) appScreen.style.display = 'block';
-          reinitialiserFormulaire();
-          chargerDonneesEnTempsReel();
-        } catch (err) {
-          alert("Erreur au lancement : " + err.message);
-        }
+        if (homeScreen) homeScreen.style.display = 'none';
+        if (appScreen) appScreen.style.display = 'block';
+        reinitialiserFormulaire();
+        chargerDonneesEnTempsReel();
       });
     }
 
@@ -537,6 +542,9 @@
     const btnAnnulerEdit = document.getElementById('btnAnnulerEdit');
     const formTitle = document.getElementById('formTitle');
     const galerieCommandes = document.getElementById('galerieCommandes');
+    const globalViewContainer = document.getElementById('global-view-container');
+    const globalGridContainer = document.getElementById('globalGridContainer');
+    const btnToggleVueGlobale = document.getElementById('btnToggleVueGlobale');
     const inputRecherche = document.getElementById('recherche');
     const btnLancerRecherche = document.getElementById('btnLancerRecherche');
     const selectFiltreBoutique = document.getElementById('selectFiltreBoutique');
@@ -547,7 +555,6 @@
     const modalTitleBadge = document.getElementById('modalTitleBadge');
     const modalImagesRow = document.getElementById('modalImagesRow');
     const closeModal = document.getElementById('closeModal');
-    const btnPrintModal = document.getElementById('btnPrintModal');
 
     function nettoyerCommandeObjet(cmd) {
       if (!cmd) return cmd;
@@ -577,32 +584,28 @@
     }
 
     function chargerDonneesEnTempsReel() {
-      try {
-        db.ref('commandes').on('value', (snapshot) => {
-          const data = snapshot.val();
-          commandes = [];
-          if (data) {
-            if (Array.isArray(data)) { commandes = data.filter(Boolean).map(nettoyerCommandeObjet); }
-            else { Object.keys(data).forEach(key => { let cmd = data[key]; if (cmd) { if (!cmd.id) cmd.id = Number(key) || Date.now(); commandes.push(nettoyerCommandeObjet(cmd)); } }); }
-          }
-          mettreAJourListeBoutiques();
-          trierEtAfficherGalerie();
-        });
+      db.ref('commandes').on('value', (snapshot) => {
+        const data = snapshot.val();
+        commandes = [];
+        if (data) {
+          if (Array.isArray(data)) { commandes = data.filter(Boolean).map(nettoyerCommandeObjet); }
+          else { Object.keys(data).forEach(key => { let cmd = data[key]; if (cmd) { if (!cmd.id) cmd.id = Number(key) || Date.now(); commandes.push(nettoyerCommandeObjet(cmd)); } }); }
+        }
+        mettreAJourListeBoutiques();
+        rafraichirAffichageActuel();
+      });
 
-        db.ref('catalogue_photos').once('value').then((snapshot) => {
-          const data = snapshot.val() || {};
-          Object.keys(data).forEach(cle => {
-            const item = data[cle];
-            if (item) {
-              if (item.refOriginale) catalogueArticles[item.refOriginale] = item;
-              catalogueArticles[cle] = item;
-              if (cle.startsWith("REF_")) catalogueArticles[cle.replace("REF_", "")] = item;
-            }
-          });
-        }).catch(() => {});
-      } catch(e) {
-        console.error(e);
-      }
+      db.ref('catalogue_photos').once('value').then((snapshot) => {
+        const data = snapshot.val() || {};
+        Object.keys(data).forEach(cle => {
+          const item = data[cle];
+          if (item) {
+            if (item.refOriginale) catalogueArticles[item.refOriginale] = item;
+            catalogueArticles[cle] = item;
+            if (cle.startsWith("REF_")) catalogueArticles[cle.replace("REF_", "")] = item;
+          }
+        });
+      }).catch(() => {});
     }
 
     function compresserImage(dataUrl, callback) {
@@ -630,13 +633,14 @@
       const barcodeInit = dataArticle?.codeBarre || "";
       const qteInit = dataArticle?.quantite !== undefined ? dataArticle.quantite : 1;
       const dateDispoInit = dataArticle?.dateDispo || "";
+      const delaiMsApproInit = dataArticle?.delaiMsAppro || "";
       const remArticleInit = dataArticle?.remarqueArticle || "";
       const boutiqueArtInit = dataArticle?.boutique || "";
 
       bloc.innerHTML = `
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
           <label style="margin-bottom: 0;">📸 Article n°<span class="article-index">${index}</span></label>
-          <button type="button" class="btn-retirer-article" style="background: rgba(244, 63, 94, 0.2); border: none; color: #f43f5e; padding: 0.35rem 0.75rem; border-radius: 8px; font-size: 0.8rem; font-weight: bold; cursor: pointer;">🗑️ Retirer</button>
+          <button type="button" class="btn-retirer-article" style="background: rgba(244, 63, 94, 0.2); border: none; color: #f43f5e; padding: 0.2rem 0.5rem; border-radius: 6px; font-size: 0.75rem; font-weight: bold; cursor: pointer;">🗑️ Retirer</button>
         </div>
         <div class="previewWrapper" style="display: ${photoInit ? 'block' : 'none'};">
           <img class="photoPreview" src="${photoInit}" alt="Aperçu Photo">
@@ -648,12 +652,13 @@
           <button type="button" class="btn-secondary btn-galerie">📁 Galerie</button>
           <button type="button" class="btn-secondary btn-photo-directe">📸 Photo</button>
         </div>
-        <div class="form-group" style="margin-top: 1rem;"><label>N° Boutique spécifique article</label><input type="text" class="input-article-boutique" value="${boutiqueArtInit}" placeholder="Ex: 001, 003..."></div>
+        <div class="form-group" style="margin-top: 0.75rem;"><label>N° Boutique spécifique article</label><input type="text" class="input-article-boutique" value="${boutiqueArtInit}" placeholder="Ex: 001, 003..."></div>
         <div class="form-group"><label>Fournisseur</label><input type="text" class="input-fournisseur" value="${fournisseurInit}"></div>
         <div class="form-group"><label>Référence article</label><input type="text" class="input-ref" value="${refInit}"></div>
         <div class="form-group"><label>Code-barres ligne (EAN)</label><input type="text" class="input-barcode" value="${barcodeInit}"></div>
         <div class="form-group"><label>Quantité</label><input type="number" min="1" class="input-qte" value="${qteInit}"></div>
         <div class="form-group"><label>📅 Date prévue de disponibilité</label><input type="text" class="input-date-dispo" value="${dateDispoInit}" placeholder="Ex: Semaine 45 ou 15/11/2026"></div>
+        <div class="form-group"><label>⏱️ Délai ms appro</label><input type="text" class="input-delai-appro" value="${delaiMsApproInit}" placeholder="Ex: 2 semaines, 10 jours..."></div>
         <div class="form-group" style="margin-bottom: 0;"><label>💬 Remarque / Désignation spécifique article</label><input type="text" class="input-article-remarque" value="${remArticleInit}"></div>
       `;
 
@@ -662,6 +667,7 @@
       const inputBarcode = bloc.querySelector('.input-barcode');
       const inputQte = bloc.querySelector('.input-qte');
       const inputDateDispo = bloc.querySelector('.input-date-dispo');
+      const inputDelaiAppro = bloc.querySelector('.input-delai-appro');
       const inputArtRemarque = bloc.querySelector('.input-article-remarque');
       const inputArtBoutique = bloc.querySelector('.input-article-boutique');
       const previewWrapper = bloc.querySelector('.previewWrapper');
@@ -679,6 +685,7 @@
         if (item && item.codeBarre && !inputBarcode.value.trim()) inputBarcode.value = item.codeBarre;
         if (item && item.quantite !== undefined && inputQte.value == "1") inputQte.value = item.quantite;
         if (item && item.dateDispo && !inputDateDispo.value.trim()) inputDateDispo.value = item.dateDispo;
+        if (item && item.delaiMsAppro && !inputDelaiAppro.value.trim()) inputDelaiAppro.value = item.delaiMsAppro;
         if (item && item.remarqueArticle && !inputArtRemarque.value.trim()) inputArtRemarque.value = item.remarqueArticle;
       }
       inputRef.addEventListener('input', verifierAutocompletion);
@@ -697,7 +704,7 @@
               const ref = inputRef.value.trim();
               if (ref) {
                 db.ref('catalogue_photos/REF_' + ref.replace(/[.#$\/\[\]]/g, "_")).update({
-                  refOriginale: ref, photo: photoData, fournisseur: inputFournisseur.value.trim(), codeBarre: inputBarcode.value.trim(), quantite: Number(inputQte.value) || 1, dateDispo: inputDateDispo.value.trim(), remarqueArticle: inputArtRemarque.value.trim()
+                  refOriginale: ref, photo: photoData, fournisseur: inputFournisseur.value.trim(), codeBarre: inputBarcode.value.trim(), quantite: Number(inputQte.value) || 1, dateDispo: inputDateDispo.value.trim(), delaiMsAppro: inputDelaiAppro.value.trim(), remarqueArticle: inputArtRemarque.value.trim()
                 }).catch(() => {});
               }
             });
@@ -711,7 +718,7 @@
       bloc.querySelector('.btn-retirer-article').addEventListener('click', () => { bloc.remove(); mettreAJourIndiceArticles(); });
 
       bloc.getArticleData = () => ({
-        photo: photoData, fournisseur: inputFournisseur.value.trim(), ref: inputRef.value.trim(), codeBarre: inputBarcode.value.trim(), quantite: Number(inputQte.value) || 1, dateDispo: inputDateDispo.value.trim(), remarqueArticle: inputArtRemarque.value.trim(), boutique: inputArtBoutique.value.trim()
+        photo: photoData, fournisseur: inputFournisseur.value.trim(), ref: inputRef.value.trim(), codeBarre: inputBarcode.value.trim(), quantite: Number(inputQte.value) || 1, dateDispo: inputDateDispo.value.trim(), delaiMsAppro: inputDelaiAppro.value.trim(), remarqueArticle: inputArtRemarque.value.trim(), boutique: inputArtBoutique.value.trim()
       });
 
       articlesContainer.appendChild(bloc);
@@ -722,9 +729,7 @@
       articlesContainer.querySelectorAll('.article-block').forEach((b, idx) => { b.querySelector('.article-index').textContent = idx + 1; });
     }
 
-    if (btnAjouterArticle) {
-      btnAjouterArticle.addEventListener('click', () => ajouterBlocArticle());
-    }
+    if (btnAjouterArticle) btnAjouterArticle.addEventListener('click', () => ajouterBlocArticle());
 
     function convertirDateEnTimestamp(dateStr) {
       if (!dateStr) return 0;
@@ -735,17 +740,12 @@
       }
       if (clean.includes('/')) {
         const parts = clean.split('/');
-        if (parts.length === 3) {
-          return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`).getTime() || 0;
-        }
+        if (parts.length === 3) return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`).getTime() || 0;
       }
       if (clean.includes('-')) {
         const parts = clean.split('-');
-        if (parts.length === 3 && parts[0].length === 4) {
-          return new Date(clean).getTime() || 0;
-        } else if (parts.length === 3 && parts[2].length === 4) {
-          return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`).getTime() || 0;
-        }
+        if (parts.length === 3 && parts[0].length === 4) return new Date(clean).getTime() || 0;
+        else if (parts.length === 3 && parts[2].length === 4) return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`).getTime() || 0;
       }
       return 0;
     }
@@ -757,9 +757,7 @@
         const d = new Date((Number(str) - (25569)) * 86400 * 1000);
         return d.toLocaleDateString('fr-FR');
       }
-      if (str.includes(' 00:00:00')) {
-        str = str.split(' ')[0];
-      }
+      if (str.includes(' 00:00:00')) str = str.split(' ')[0];
       if (str.includes('-') && str.split('-')[0].length === 4) {
         const p = str.split('-');
         return `${p[2]}/${p[1]}/${p[0]}`;
@@ -770,21 +768,18 @@
     function parserDateSaisie(val) {
       if (!val) return null;
       let clean = val.trim();
-      if (/^\d{4}-\d{2}-\d{2}$/.test(clean)) {
-        return new Date(clean).setHours(0,0,0,0);
-      }
       if (clean.includes('/')) {
         const p = clean.split('/');
-        if (p.length === 3 && p[2].length === 4) {
-          return new Date(`${p[2]}-${p[1]}-${p[0]}`).setHours(0,0,0,0);
-        }
+        if (p.length === 3 && p[2].length === 4) return new Date(`${p[2]}-${p[1]}-${p[0]}`).setHours(0,0,0,0);
       }
       let d = new Date(clean);
-      if (!isNaN(d.getTime())) {
-        d.setHours(0,0,0,0);
-        return d.getTime();
-      }
+      if (!isNaN(d.getTime())) { d.setHours(0,0,0,0); return d.getTime(); }
       return null;
+    }
+
+    function rafraichirAffichageActuel() {
+      trierEtAfficherGalerie();
+      if (vueGlobaleActive) afficherVueGlobale();
     }
 
     function trierEtAfficherGalerie() {
@@ -796,11 +791,7 @@
 
         const timeA = convertirDateEnTimestamp(a.date) || Number(a.id) || 0;
         const timeB = convertirDateEnTimestamp(b.date) || Number(b.id) || 0;
-        if (ordreCroissant) {
-          return timeA - timeB;
-        } else {
-          return timeB - timeA;
-        }
+        return ordreCroissant ? (timeA - timeB) : (timeB - timeA);
       });
       afficherGalerie(inputRecherche.value);
     }
@@ -808,53 +799,54 @@
     if (btnTrierDate) {
       btnTrierDate.addEventListener('click', () => {
         ordreCroissant = !ordreCroissant;
-        btnTrierDate.innerHTML = ordreCroissant ? "🔄 Ancien" : "🔄 Récent";
-        trierEtAfficherGalerie();
+        btnTrierDate.innerHTML = ordreCroissant ? "🔄 Trier : Ancien" : "🔄 Trier : Récent";
+        rafraichirAffichageActuel();
       });
     }
 
-    if (btnEnregistrer) {
-      btnEnregistrer.addEventListener('click', () => {
-        requireAdmin(() => {
-          const boutique = inputBoutique.value.trim();
-          let numero = inputNumero.value.trim();
-          const blocsArticles = articlesContainer.querySelectorAll('.article-block');
-          if (!numero || blocsArticles.length === 0) { alert("Numéro et au moins 1 article requis."); return; }
-          let articlesList = Array.from(blocsArticles).map(b => b.getArticleData());
-          btnEnregistrer.disabled = true; btnEnregistrer.textContent = "Enregistrement...";
-          const idObjet = modeEditionId !== null ? modeEditionId : Date.now();
-          const existingCmd = commandes.find(c => c.id === idObjet);
-          const commandeData = { 
-            id: idObjet, 
-            boutique,
-            numero, 
-            articles: articlesList, 
-            date: existingCmd?.date || new Date().toLocaleDateString('fr-FR'), 
-            urgente: existingCmd?.urgente || false, 
-            controle: existingCmd?.controle || false,
-            isNew: false 
-          };
-          db.ref('commandes/' + idObjet).set(commandeData).then(() => { reinitialiserFormulaire(); btnEnregistrer.disabled = false; }).catch(err => { btnEnregistrer.disabled = false; alert(err.message); });
-        });
+    btnToggleVueGlobale.addEventListener('click', () => {
+      vueGlobaleActive = !vueGlobaleActive;
+      if (vueGlobaleActive) {
+        btnToggleVueGlobale.innerHTML = "📋 Vue par Commandes";
+        galerieCommandes.style.display = 'none';
+        globalViewContainer.style.display = 'block';
+        afficherVueGlobale();
+      } else {
+        btnToggleVueGlobale.innerHTML = "📊 Vue par Fournisseur";
+        globalViewContainer.style.display = 'none';
+        galerieCommandes.style.display = 'flex';
+        afficherGalerie(inputRecherche.value);
+      }
+    });
+
+    btnEnregistrer.addEventListener('click', () => {
+      requireAdmin(() => {
+        const boutique = inputBoutique.value.trim();
+        let numero = inputNumero.value.trim();
+        const blocsArticles = articlesContainer.querySelectorAll('.article-block');
+        if (!numero || blocsArticles.length === 0) { alert("Numéro et au moins 1 article requis."); return; }
+        let articlesList = Array.from(blocsArticles).map(b => b.getArticleData());
+        btnEnregistrer.disabled = true; btnEnregistrer.textContent = "Enregistrement...";
+        const idObjet = modeEditionId !== null ? modeEditionId : Date.now();
+        const existingCmd = commandes.find(c => c.id === idObjet);
+        const commandeData = { 
+          id: idObjet, boutique, numero, articles: articlesList, 
+          date: existingCmd?.date || new Date().toLocaleDateString('fr-FR'), 
+          urgente: existingCmd?.urgente || false, controle: existingCmd?.controle || false, isNew: false 
+        };
+        db.ref('commandes/' + idObjet).set(commandeData).then(() => { reinitialiserFormulaire(); btnEnregistrer.disabled = false; }).catch(err => { btnEnregistrer.disabled = false; alert(err.message); });
       });
-    }
+    });
 
     function reinitialiserFormulaire() {
       modeEditionId = null; 
-      if (inputBoutique) inputBoutique.value = "";
-      if (inputNumero) inputNumero.value = ""; 
-      if (articlesContainer) articlesContainer.innerHTML = "";
-      if (btnEnregistrer) { btnEnregistrer.textContent = "Enregistrer les reliquats"; btnEnregistrer.disabled = false; }
-      if (btnAnnulerEdit) btnAnnulerEdit.style.display = "none"; 
-      if (formTitle) formTitle.textContent = "Nvx reliquats";
+      inputBoutique.value = ""; inputNumero.value = ""; articlesContainer.innerHTML = "";
+      btnEnregistrer.textContent = "Enregistrer les reliquats"; btnEnregistrer.disabled = false;
+      btnAnnulerEdit.style.display = "none"; formTitle.textContent = "Nvx reliquats";
     }
 
-    if (btnNouvelleCommande) {
-      btnNouvelleCommande.addEventListener('click', () => { reinitialiserFormulaire(); window.scrollTo({ top: 0, behavior: 'smooth' }); });
-    }
-    if (btnAnnulerEdit) {
-      btnAnnulerEdit.addEventListener('click', reinitialiserFormulaire);
-    }
+    if (btnNouvelleCommande) btnNouvelleCommande.addEventListener('click', () => { reinitialiserFormulaire(); window.scrollTo({ top: 0, behavior: 'smooth' }); });
+    if (btnAnnulerEdit) btnAnnulerEdit.addEventListener('click', reinitialiserFormulaire);
 
     window.editerCommande = function(id, event) {
       if (event) event.stopPropagation();
@@ -886,12 +878,7 @@
           const newVal = !item.urgente;
           const updates = { urgente: newVal };
           if (newVal) updates.controle = false;
-          
-          db.ref('commandes/' + id).update(updates).then(() => {
-            item.urgente = newVal;
-            if (newVal) item.controle = false;
-            trierEtAfficherGalerie();
-          });
+          db.ref('commandes/' + id).update(updates).then(() => { item.urgente = newVal; if (newVal) item.controle = false; rafraichirAfficherGalerie(); });
         }
       });
     };
@@ -904,20 +891,13 @@
           const newVal = !item.controle;
           const updates = { controle: newVal };
           if (newVal) updates.urgente = false;
-
-          db.ref('commandes/' + id).update(updates).then(() => {
-            item.controle = newVal;
-            if (newVal) item.urgente = false;
-            trierEtAfficherGalerie();
-          });
+          db.ref('commandes/' + id).update(updates).then(() => { item.controle = newVal; if (newVal) item.urgente = false; rafraichirAffichageActuel(); });
         }
       });
     };
 
     const btnViderHistorique = document.getElementById('btnViderHistorique');
-    if (btnViderHistorique) {
-      btnViderHistorique.addEventListener('click', () => { dropdownMenu.classList.remove('show'); requireAdmin(() => { if (confirm("Effacer tout ?")) db.ref('commandes').remove(); }); });
-    }
+    if (btnViderHistorique) btnViderHistorique.addEventListener('click', () => { dropdownMenu.classList.remove('show'); requireAdmin(() => { if (confirm("Effacer tout ?")) db.ref('commandes').remove(); }); });
 
     function getFilteredCommandes(searchFilter = "") {
       const debutVal = dateDebutFiltre ? dateDebutFiltre.value : "";
@@ -930,29 +910,23 @@
 
       return commandes.filter(c => {
         if (!c) return false;
-        
         if (boutiqueFiltreSelect) {
           const matchCmdBoutique = String(c.boutique || '').trim() === boutiqueFiltreSelect;
           const matchArtBoutique = c.articles?.some(a => String(a.boutique || '').trim() === boutiqueFiltreSelect);
           if (!matchCmdBoutique && !matchArtBoutique) return false;
         }
-
         if (timeDebut || timeFin) {
           const cTime = convertirDateEnTimestamp(c.date);
           if (cTime) {
             if (timeDebut && cTime < timeDebut) return false;
             if (timeFin && cTime > timeFin) return false;
-          } else {
-            return false;
-          }
+          } else return false;
         }
-
         const fStr = String(searchFilter || '').toLowerCase().trim();
         if (fStr) {
           const cleanSearchNum = fStr.replace(/^s-?/i, '');
           const rawCmdNum = String(c.numero || '').toLowerCase().trim();
           const cleanCmdNum = rawCmdNum.replace(/^s-?/i, '');
-
           const matchNum = rawCmdNum.includes(fStr) || cleanCmdNum.includes(cleanSearchNum);
           const matchBoutique = String(c.boutique || '').toLowerCase().includes(fStr);
           const matchArt = c.articles?.some(a => 
@@ -961,45 +935,33 @@
             String(a.codeBarre||'').toLowerCase().includes(fStr) ||
             String(a.remarqueArticle||'').toLowerCase().includes(fStr) ||
             String(a.boutique||'').toLowerCase().includes(fStr) ||
-            String(a.dateDispo||'').toLowerCase().includes(fStr)
+            String(a.dateDispo||'').toLowerCase().includes(fStr) ||
+            String(a.delaiMsAppro||'').toLowerCase().includes(fStr)
           );
           if (!matchBoutique && !matchNum && !matchArt) return false;
         }
-
         return true;
       });
     }
 
     function afficherGalerie(filtre = "") {
-      if (!galerieCommandes) return;
       galerieCommandes.innerHTML = "";
       const liste = getFilteredCommandes(filtre);
-      
-      if (badgeCount) {
-        badgeCount.textContent = `${liste.length} cmd • ${liste.reduce((acc, c) => acc + (c.articles?.reduce((s, a) => s + (Number(a.quantite)||1), 0)||0), 0)} art`;
-      }
-      if (liste.length === 0) { galerieCommandes.innerHTML = `<p style="text-align:center; color:var(--subtext); padding:2rem;">Aucun reliquat trouvé.</p>`; return; }
+      badgeCount.textContent = `${liste.length} cmd • ${liste.reduce((acc, c) => acc + (c.articles?.reduce((s, a) => s + (Number(a.quantite)||1), 0)||0), 0)} art`;
+      if (liste.length === 0) { galerieCommandes.innerHTML = `<p style="text-align:center; color:var(--subtext); padding:1rem;">Aucun reliquat trouvé.</p>`; return; }
       
       liste.forEach(cmd => {
         const item = document.createElement('div');
-        let cssClass = '';
-        if (cmd.urgente) cssClass = 'urgente';
-        else if (cmd.controle) cssClass = 'controle';
-        
+        let cssClass = cmd.urgente ? 'urgente' : (cmd.controle ? 'controle' : '');
         item.className = `commande-item-compact ${cssClass}`;
         item.setAttribute('draggable', 'true');
         item.dataset.id = cmd.id;
 
         const nbA = cmd.articles?.reduce((acc, a) => acc + (Number(a.quantite)||1), 0)||0;
         let numClean = String(cmd.numero || '').trim();
-        if (numClean && !/^s-/i.test(numClean)) {
-          numClean = 'S-' + numClean;
-        }
+        if (numClean && !/^s-/i.test(numClean)) numClean = 'S-' + numClean;
         const displayNum = numClean || 'Sans numéro';
         const displayBoutique = cmd.boutique ? `[Boutique ${cmd.boutique}] ` : '';
-        
-        const displayUrgentBtn = cmd.controle ? 'style="display:none;"' : '';
-        const displayControleBtn = cmd.urgente ? 'style="display:none;"' : '';
 
         item.innerHTML = `
           <div class="commande-row-top">
@@ -1016,13 +978,9 @@
             </div>
           </div>
           <div class="commande-row-bottom">
-            <div style="display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap;">
-              <button type="button" class="btn-status-toggle ${cmd.urgente ? 'active-urgent' : ''}" onclick="basculerUrgence(${cmd.id}, event)" title="Basculer l'état urgent" ${displayUrgentBtn}>
-                🔴 Urgent
-              </button>
-              <button type="button" class="btn-status-toggle ${cmd.controle ? 'active-controle' : ''}" onclick="basculerControle(${cmd.id}, event)" title="Basculer l'état à contrôler" ${displayControleBtn}>
-                🔵 Contrôler
-              </button>
+            <div style="display: flex; gap: 0.4rem; align-items: center;">
+              <button type="button" class="btn-status-toggle ${cmd.urgente ? 'active-urgent' : ''}" onclick="basculerUrgence(${cmd.id}, event)" ${cmd.controle ? 'style="display:none;"' : ''}>🔴 Urgent</button>
+              <button type="button" class="btn-status-toggle ${cmd.controle ? 'active-controle' : ''}" onclick="basculerControle(${cmd.id}, event)" ${cmd.urgente ? 'style="display:none;"' : ''}>🔵 Contrôler</button>
             </div>
             <div style="display: flex; gap: 0.5rem; align-items: center;">
               <span class="commande-articles-badge">${nbA} art.</span>
@@ -1030,53 +988,98 @@
             </div>
           </div>
         `;
-
-        item.addEventListener('dragstart', (e) => {
-          item.classList.add('dragging');
-          e.dataTransfer.setData('text/plain', cmd.id);
-        });
-
-        item.addEventListener('dragend', () => {
-          item.classList.remove('dragging');
-        });
-
         galerieCommandes.appendChild(item);
       });
     }
 
-    if (galerieCommandes) {
-      galerieCommandes.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        const draggingItem = document.querySelector('.dragging');
-        const siblings = [...galerieCommandes.querySelectorAll('.commande-item-compact:not(.dragging)')];
-        
-        const nextSibling = siblings.find(sibling => {
-          const box = sibling.getBoundingClientRect();
-          const offset = e.clientY - box.top - box.height / 2;
-          return offset < 0;
-        });
+    // Vue Globale par Fournisseur avec sélection individuelle des articles
+    function afficherVueGlobale() {
+      globalGridContainer.innerHTML = "";
+      const liste = getFilteredCommandes(inputRecherche.value);
+      let totalArticlesCount = 0;
 
-        if (draggingItem) {
-          galerieCommandes.insertBefore(draggingItem, nextSibling);
+      liste.forEach(cmd => {
+        cmd.articles?.forEach((art, artIdx) => {
+          totalArticlesCount++;
+          const card = document.createElement('div');
+          card.className = 'global-card';
+          
+          let numClean = String(cmd.numero || '').trim();
+          if (numClean && !/^s-/i.test(numClean)) numClean = 'S-' + numClean;
+          const artBoutique = art.boutique || cmd.boutique || '';
+
+          card.innerHTML = `
+            <input type="checkbox" class="global-article-checkbox" data-cmd-id="${cmd.id}" data-art-idx="${artIdx}">
+            ${art.photo ? `<img src="${art.photo}">` : ''}
+            <div style="font-size:0.85rem; font-weight:bold; color:var(--primary);">N° ${numClean}</div>
+            ${artBoutique ? `<div style="font-size:0.8rem; color:var(--subtext);">Boutique: ${artBoutique}</div>` : ''}
+            ${art.fournisseur ? `<div style="font-size:0.8rem; font-weight:600;">Fournisseur: ${art.fournisseur}</div>` : ''}
+            ${art.ref ? `<div style="font-size:0.8rem;">Réf: ${art.ref}</div>` : ''}
+            ${art.codeBarre ? `<div style="font-size:0.8rem; font-family:monospace;">EAN: ${art.codeBarre}</div>` : ''}
+            <div style="font-size:0.8rem; color:#16a34a; font-weight:bold;">Qté: ${art.quantite || 1}</div>
+            ${art.dateDispo ? `<div style="font-size:0.8rem; color:#d97706;">Dispo: ${art.dateDispo}</div>` : ''}
+            ${art.remarqueArticle ? `<div style="font-size:0.8rem; background:rgba(255,107,0,0.1); padding:0.3rem; border-radius:4px;">💬 ${art.remarqueArticle}</div>` : ''}
+          `;
+          globalGridContainer.appendChild(card);
+        });
+      });
+      document.getElementById('globalViewTitle').textContent = `Aperçu global par Fournisseur (${totalArticlesCount} articles)`;
+    }
+
+    let toutCocheGlobal = false;
+    document.getElementById('btnSelectAllGlobal').addEventListener('click', () => {
+      toutCocheGlobal = !toutCocheGlobal;
+      document.querySelectorAll('.global-article-checkbox').forEach(cb => cb.checked = toutCocheGlobal);
+      document.getElementById('btnSelectAllGlobal').innerHTML = toutCocheGlobal ? "☑️ Tout décocher" : "☑️ Tout cocher";
+    });
+
+    document.getElementById('btnExportPDFGlobal').addEventListener('click', () => {
+      const checkedBoxes = document.querySelectorAll('.global-article-checkbox:checked');
+      if (checkedBoxes.length === 0) { alert("Veuillez sélectionner au moins un article."); return; }
+
+      let selectedMap = {};
+      checkedBoxes.forEach(cb => {
+        const cmdId = Number(cb.getAttribute('data-cmd-id'));
+        const artIdx = Number(cb.getAttribute('data-art-idx'));
+        if (!selectedMap[cmdId]) selectedMap[cmdId] = [];
+        const cmd = commandes.find(c => c.id === cmdId);
+        if (cmd && cmd.articles && cmd.articles[artIdx]) {
+          selectedMap[cmdId].push(cmd.articles[artIdx]);
         }
       });
 
-      galerieCommandes.addEventListener('drop', (e) => {
-        e.preventDefault();
-        const currentIdsInDOM = [...galerieCommandes.querySelectorAll('.commande-item-compact')].map(el => Number(el.dataset.id));
-        
-        let reordered = [];
-        currentIdsInDOM.forEach(id => {
-          const found = commandes.find(c => c.id === id);
-          if (found) reordered.push(found);
-        });
-        commandes.forEach(c => {
-          if (!reordered.some(r => r.id === c.id)) reordered.push(c);
-        });
+      let html = `<div class="print-title">Export Reliquats (Sélection)</div><div class="print-subtitle">Généré le ${new Date().toLocaleString('fr-FR')}</div><div class="print-grid">`;
+      
+      Object.keys(selectedMap).forEach(cmdId => {
+        const cmd = commandes.find(c => c.id === Number(cmdId));
+        if (!cmd) return;
+        const bPrint = cmd.boutique ? `[Boutique ${cmd.boutique}] ` : '';
+        let numP = String(cmd.numero || '').trim();
+        if (numP && !/^s-/i.test(numP)) numP = 'S-' + numP;
 
-        commandes = reordered;
+        html += `<div class="print-card"><h3>${bPrint}Réf: ${numP}</h3><div class="date">${cmd.date}</div><div class="print-photos-flex">`;
+        selectedMap[cmdId].forEach(art => {
+          html += `<div class="print-photo-print-item">
+            ${art.photo ? `<img src="${art.photo}">` : ''}
+            <div style="font-size:10px;">
+              ${art.fournisseur ? `<b>Fournisseur:</b> ${art.fournisseur}<br>` : ''}
+              <b>Réf:</b> ${art.ref}<br>
+              ${art.codeBarre ? `<b>EAN:</b> ${art.codeBarre}<br>` : ''}
+              ${art.dateDispo ? `<b>Dispo:</b> ${art.dateDispo}<br>` : ''}
+              ${art.delaiMsAppro ? `<b>Délai appro:</b> ${art.delaiMsAppro}<br>` : ''}
+              <b>Qté:</b> ${art.quantite || 1}
+              ${art.remarqueArticle ? `<br><b>Désignation:</b> ${art.remarqueArticle}` : ''}
+            </div>
+          </div>`;
+        });
+        html += `</div></div>`;
       });
-    }
+      html += `</div>`;
+
+      const printArea = document.getElementById('print-area');
+      printArea.innerHTML = html;
+      setTimeout(() => { window.print(); printArea.innerHTML = ""; }, 300);
+    });
 
     let toutCoche = false;
     const btnSelectAll = document.getElementById('btnSelectAll');
@@ -1084,305 +1087,54 @@
       btnSelectAll.addEventListener('click', () => {
         toutCoche = !toutCoche;
         document.querySelectorAll('.commande-select-checkbox').forEach(cb => cb.checked = toutCoche);
-        btnSelectAll.innerHTML = toutCoche ? "☑️ Aucun" : "☑️ Tout";
+        btnSelectAll.innerHTML = toutCoche ? "☑️ Tout décocher" : "☑️ Tout cocher";
       });
     }
     
-    if (dateDebutFiltre) dateDebutFiltre.addEventListener('change', () => afficherGalerie(inputRecherche.value));
-    if (dateFinFiltre) dateFinFiltre.addEventListener('change', () => afficherGalerie(inputRecherche.value));
-    if (selectFiltreBoutique) selectFiltreBoutique.addEventListener('change', () => afficherGalerie(inputRecherche.value));
-
-    // --- FONCTION DE GÉNÉRATION DE PDF DIRECT VIA JS-PDF ---
-    function genererFichierPDF(titreDoc, listeArticlesPures) {
-      if (!listeArticlesPures || listeArticlesPures.length === 0) {
-        alert("Aucun article à exporter.");
-        return;
-      }
-
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF('p', 'mm', 'a4');
-      
-      let y = 15;
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(14);
-      doc.setTextColor(255, 107, 0);
-      doc.text(titreDoc, 15, y);
-      
-      y += 6;
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(9);
-      doc.setTextColor(100, 100, 100);
-      doc.text(`Généré le ${new Date().toLocaleString('fr-FR')} - Total articles : ${listeArticlesPures.length}`, 15, y);
-      
-      y += 10;
-      let x = 15;
-      const colWidth = 88;
-      const cardHeight = 42;
-      const marginX = 14;
-      const marginY = 8;
-
-      listeArticlesPures.forEach((art, index) => {
-        if (y + cardHeight > 280) {
-          doc.addPage();
-          y = 15;
-        }
-
-        // Cadre de l'article
-        doc.setDrawColor(200, 200, 200);
-        doc.setFillColor(248, 250, 252);
-        doc.roundedRect(x, y, colWidth, cardHeight, 3, 3, 'FD');
-
-        // Image si disponible
-        if (art.photo) {
-          try {
-            doc.addImage(art.photo, 'JPEG', x + 3, y + 3, 32, 36);
-          } catch(err) {}
-        }
-
-        // Textes descriptifs
-        doc.setFontSize(8);
-        doc.setTextColor(0, 0, 0);
-        let textX = x + 38;
-        let textY = y + 6;
-
-        if (art.titreEntete) {
-          doc.setFont("helvetica", "bold");
-          doc.setTextColor(255, 107, 0);
-          doc.text(doc.splitTextToSize(art.titreEntete, 48), textX, textY);
-          textY += 5;
-        }
-
-        doc.setFont("helvetica", "normal");
-        doc.setTextColor(0, 0, 0);
-
-        if (art.fournisseur) {
-          doc.text(doc.splitTextToSize(`Fournisseur: ${art.fournisseur}`, 48), textX, textY);
-          textY += 4;
-        }
-        if (art.ref) {
-          doc.text(doc.splitTextToSize(`Réf: ${art.ref}`, 48), textX, textY);
-          textY += 4;
-        }
-        if (art.codeBarre) {
-          doc.text(doc.splitTextToSize(`EAN: ${art.codeBarre}`, 48), textX, textY);
-          textY += 4;
-        }
-        if (art.dateDispo) {
-          doc.text(doc.splitTextToSize(`Dispo: ${art.dateDispo}`, 48), textX, textY);
-          textY += 4;
-        }
-        doc.setFont("helvetica", "bold");
-        doc.text(`Qté: ${art.quantite || 1}`, textX, textY);
-        textY += 4;
-
-        if (art.remarqueArticle) {
-          doc.setFont("helvetica", "normal");
-          doc.setFontSize(7);
-          doc.setTextColor(80, 80, 80);
-          doc.text(doc.splitTextToSize(`Désig: ${art.remarqueArticle}`, 48), textX, textY);
-        }
-
-        // Alternance colonne gauche / colonne droite
-        if (x === 15) {
-          x = 15 + colWidth + marginX;
-        } else {
-          x = 15;
-          y += cardHeight + marginY;
-        }
-      });
-
-      doc.save(`reliquats_${Date.now()}.pdf`);
-    }
+    if (dateDebutFiltre) dateDebutFiltre.addEventListener('input', rafraichirAffichageActuel);
+    if (dateFinFiltre) dateFinFiltre.addEventListener('input', rafraichirAffichageActuel);
+    if (selectFiltreBoutique) selectFiltreBoutique.addEventListener('change', rafraichirAffichageActuel);
 
     window.ouvrirModal = function(cmd) {
       modal.style.display = "flex"; 
-      btnPrintModal.style.display = "inline-block"; 
       const bText = cmd.boutique ? `[Boutique ${cmd.boutique}] ` : '';
       let numCleanModal = String(cmd.numero || '').trim();
       if (numCleanModal && !/^s-/i.test(numCleanModal)) numCleanModal = 'S-' + numCleanModal;
-      modalTitleBadge.innerHTML = `📦 ${bText}N° ${numCleanModal} ${cmd.urgente ? '⚠️ (URGENT)' : ''} ${cmd.controle ? '🔍 (À CONTRÔLER)' : ''}`; 
+      modalTitleBadge.innerHTML = `📦 ${bText}N° ${numCleanModal}`; 
       modalImagesRow.innerHTML = "";
 
-      const boutiqueSelectionnee = selectFiltreBoutique.value;
-
       cmd.articles?.forEach(art => {
-        const artBoutique = String(art.boutique || '').trim() || String(cmd.boutique || '').trim();
-        const estAutreBoutique = boutiqueSelectionnee && artBoutique && artBoutique !== boutiqueSelectionnee;
-
         const box = document.createElement('div'); 
-        box.className = `modal-photo-box ${estAutreBoutique ? 'autre-boutique' : ''}`;
-        
-        let artBoutiqueBadge = artBoutique ? `<div class="modal-fournisseur-badge" style="${estAutreBoutique ? 'background: #f43f5e; color: white; font-weight: bold;' : ''}">Boutique: ${artBoutique} ${estAutreBoutique ? '(Autre)' : ''}</div>` : '';
-
+        box.className = `modal-photo-box`;
         box.innerHTML = `
           ${art.photo ? `<img src="${art.photo}">` : ''}
-          ${artBoutiqueBadge}
           ${art.fournisseur ? `<div class="modal-fournisseur-badge">Fournisseur: ${art.fournisseur}</div>` : ''}
           ${art.ref ? `<div class="modal-ref-badge">Réf: ${art.ref}</div>` : ''}
-          <div style="display:flex;gap:0.5rem;flex-wrap:wrap;justify-content:center;">
+          <div style="display:flex;gap:0.4rem;flex-wrap:wrap;justify-content:center;">
             ${art.codeBarre ? `<span class="modal-barcode-badge">EAN: ${art.codeBarre}</span>` : ''}
             <span class="modal-qty-badge">Qte: ${art.quantite||1}</span>
           </div>
           ${art.dateDispo ? `<div class="modal-dispo-badge">📅 Dispo: ${art.dateDispo}</div>` : ''}
+          ${art.delaiMsAppro ? `<div class="modal-delai-badge">⏱️ Délai appro: ${art.delaiMsAppro}</div>` : ''}
           ${art.remarqueArticle ? `<div class="modal-article-remarque-box">💬 ${art.remarqueArticle}</div>` : ''}
         `;
         modalImagesRow.appendChild(box);
       });
-
-      // Télécharger le PDF de cette commande spécifique
-      btnPrintModal.onclick = () => {
-        let listePures = [];
-        cmd.articles?.forEach(art => {
-          listePures.push({
-            titreEntete: `${bText}N° ${numCleanModal}`,
-            photo: art.photo || '',
-            fournisseur: art.fournisseur || '',
-            ref: art.ref || '',
-            codeBarre: art.codeBarre || '',
-            dateDispo: art.dateDispo || '',
-            quantite: art.quantite || 1,
-            remarqueArticle: art.remarqueArticle || ''
-          });
-        });
-        genererFichierPDF(`Reliquat N° ${numCleanModal}`, listePures);
-      };
     };
-
-    // --- BOUTON APERÇU GLOBAL CLASSÉ PAR FOURNISSEUR ---
-    const btnApercuGlobal = document.getElementById('btnApercuGlobal');
-    if (btnApercuGlobal) {
-      btnApercuGlobal.addEventListener('click', () => {
-        const checked = document.querySelectorAll('.commande-select-checkbox:checked');
-        let list = checked.length > 0 ? commandes.filter(c => Array.from(checked).map(cb => Number(cb.getAttribute('data-id'))).includes(c.id)) : getFilteredCommandes(inputRecherche.value);
-        if (list.length === 0) { alert("Aucun reliquat trouvé pour cet aperçu."); return; }
-
-        let articlesMap = {};
-        list.forEach(cmd => {
-          cmd.articles?.forEach(art => {
-            const refKey = String(art.ref || 'Sans réf').trim().toLowerCase();
-            if (!articlesMap[refKey]) {
-              articlesMap[refKey] = {
-                ref: art.ref || 'Sans réf',
-                fournisseur: art.fournisseur || 'Sans fournisseur',
-                codeBarre: art.codeBarre || '',
-                remarqueArticle: art.remarqueArticle || '',
-                photo: art.photo || '',
-                quantiteTotale: 0,
-                boutiques: new Set()
-              };
-            }
-            articlesMap[refKey].quantiteTotale += (Number(art.quantite) || 1);
-            if (art.boutique) articlesMap[refKey].boutiques.add(art.boutique);
-            else if (cmd.boutique) articlesMap[refKey].boutiques.add(cmd.boutique);
-            if (!articlesMap[refKey].photo && art.photo) articlesMap[refKey].photo = art.photo;
-            if (art.fournisseur && articlesMap[refKey].fournisseur === 'Sans fournisseur') {
-              articlesMap[refKey].fournisseur = art.fournisseur;
-            }
-          });
-        });
-
-        let consolidatedList = Object.values(articlesMap);
-
-        consolidatedList.sort((a, b) => {
-          const fA = String(a.fournisseur || '').trim().toLowerCase();
-          const fB = String(b.fournisseur || '').trim().toLowerCase();
-          return fA.localeCompare(fB);
-        });
-
-        modal.style.display = "flex";
-        btnPrintModal.style.display = "inline-block"; 
-        const boutiqueActive = selectFiltreBoutique.value ? ` [Boutique ${selectFiltreBoutique.value}]` : '';
-        modalTitleBadge.innerHTML = `🔍 Aperçu global par Fournisseur${boutiqueActive} (${consolidatedList.length} articles)`;
-        modalImagesRow.innerHTML = "";
-
-        consolidatedList.forEach(art => {
-          const box = document.createElement('div');
-          box.className = `modal-photo-box`;
-          
-          const boutiquesStr = art.boutiques.size > 0 ? Array.from(art.boutiques).join(', ') : '';
-          let boutiqueBadge = boutiquesStr ? `<div class="modal-fournisseur-badge">Boutique(s): ${boutiquesStr}</div>` : '';
-
-          box.innerHTML = `
-            ${art.photo ? `<img src="${art.photo}">` : ''}
-            ${boutiqueBadge}
-            ${art.fournisseur ? `<div class="modal-fournisseur-badge" style="background: var(--primary); color: white;">🏭 Fournisseur: ${art.fournisseur}</div>` : ''}
-            ${art.ref ? `<div class="modal-ref-badge">Réf: ${art.ref}</div>` : ''}
-            <div style="display:flex;gap:0.5rem;flex-wrap:wrap;justify-content:center;">
-              ${art.codeBarre ? `<span class="modal-barcode-badge">EAN: ${art.codeBarre}</span>` : ''}
-              <span class="modal-qty-badge" style="background-color: #16a34a; font-size: 1rem;">Total Qté: ${art.quantiteTotale}</span>
-            </div>
-            ${art.remarqueArticle ? `<div class="modal-article-remarque-box">💬 ${art.remarqueArticle}</div>` : ''}
-          `;
-          modalImagesRow.appendChild(box);
-        });
-
-        // Télécharger le PDF de l'aperçu global
-        btnPrintModal.onclick = () => {
-          let listePures = [];
-          consolidatedList.forEach(art => {
-            const boutiquesStr = art.boutiques.size > 0 ? Array.from(art.boutiques).join(', ') : '';
-            listePures.push({
-              titreEntete: art.fournisseur ? `Fournisseur: ${art.fournisseur}` : 'Article',
-              photo: art.photo || '',
-              fournisseur: boutiquesStr ? `Boutique(s): ${boutiquesStr}` : '',
-              ref: art.ref || '',
-              codeBarre: art.codeBarre || '',
-              dateDispo: '',
-              quantite: art.quantiteTotale,
-              remarqueArticle: art.remarqueArticle || ''
-            });
-          });
-          genererFichierPDF(`Aperçu Global par Fournisseur${boutiqueActive}`, listePures);
-        };
-      });
-    }
 
     if (closeModal) closeModal.addEventListener('click', () => modal.style.display = "none");
     if (modal) modal.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = "none"; });
 
-    function executerRecherche() { afficherGalerie(inputRecherche.value.trim()); }
+    function executerRecherche() { rafraichirAffichageActuel(); }
     if (btnLancerRecherche) btnLancerRecherche.addEventListener('click', executerRecherche);
     if (inputRecherche) {
       inputRecherche.addEventListener('input', executerRecherche);
       inputRecherche.addEventListener('keypress', (e) => { if (e.key === 'Enter') executerRecherche(); });
     }
 
-    // --- BOUTON PDF PRINCIPAL (DEPUIS LA LISTE) ---
-    const btnExportPDF = document.getElementById('btnExportPDF');
-    if (btnExportPDF) {
-      btnExportPDF.addEventListener('click', () => {
-        const checked = document.querySelectorAll('.commande-select-checkbox:checked');
-        let list = checked.length > 0 ? commandes.filter(c => Array.from(checked).map(cb => Number(cb.getAttribute('data-id'))).includes(c.id)) : getFilteredCommandes(inputRecherche.value);
-        if (list.length === 0) { alert("Rien à exporter."); return; }
-
-        let listePures = [];
-        list.forEach(cmd => {
-          const bPrint = cmd.boutique ? `[Boutique ${cmd.boutique}] ` : '';
-          let numP = String(cmd.numero || '').trim();
-          if (numP && !/^s-/i.test(numP)) numP = 'S-' + numP;
-
-          cmd.articles?.forEach(art => {
-            listePures.push({
-              titreEntete: `${bPrint}N° ${numP}`,
-              photo: art.photo || '',
-              fournisseur: art.fournisseur || '',
-              ref: art.ref || '',
-              codeBarre: art.codeBarre || '',
-              dateDispo: art.dateDispo || '',
-              quantite: art.quantite || 1,
-              remarqueArticle: art.remarqueArticle || ''
-            });
-          });
-        });
-
-        genererFichierPDF(`Export Reliquats`, listePures);
-      });
-    }
-
     // --- COLLAGE EXCEL ---
     const pasteModal = document.getElementById('pasteModal');
     const btnOpenPasteModal = document.getElementById('btnOpenPasteModal');
-
     if (btnOpenPasteModal) {
       btnOpenPasteModal.addEventListener('click', () => {
         dropdownMenu.classList.remove('show');
@@ -1391,7 +1143,6 @@
         setTimeout(() => document.getElementById('pasteTextarea').focus(), 50);
       });
     }
-
     const btnCancelPaste = document.getElementById('btnCancelPaste');
     if (btnCancelPaste) btnCancelPaste.addEventListener('click', () => { pasteModal.style.display = 'none'; });
 
@@ -1406,21 +1157,14 @@
         db.ref('commandes').once('value').then(snap => {
           let existingData = snap.val() || {};
           let groupCommandes = {};
-          
           Object.keys(existingData).forEach(k => { 
-            if (existingData[k]?.numero) {
-              let numKey = String(existingData[k].numero).trim();
-              groupCommandes[numKey] = existingData[k]; 
-            }
+            if (existingData[k]?.numero) groupCommandes[String(existingData[k].numero).trim()] = existingData[k]; 
           });
           
-          let parsedCount = 0;
-          let photoLinkedCount = 0;
-
+          let parsedCount = 0, photoLinkedCount = 0;
           lines.forEach((line, i) => {
             const cleanLine = line.trim();
             if (!cleanLine) return;
-
             const sep = cleanLine.includes('\t') ? '\t' : (cleanLine.includes(';') ? ';' : ',');
             let parts = cleanLine.split(sep).map(c => c.trim().replace(/^"|"$/g, ''));
             if (parts.length < 8) return;
@@ -1434,6 +1178,7 @@
             const qteRaw = parts[6];
             const qteCSV = !isNaN(qteRaw) && qteRaw !== '' ? Number(qteRaw) : 1;
             const boutiqueCSV = String(parts[7] || '').trim();
+            const delaiApproCSV = String(parts[8] || '').trim();
 
             if (!refCSV) return;
             parsedCount++;
@@ -1441,132 +1186,56 @@
             let photoAuto = "";
             const cleanRefKey = refCSV.trim();
             const cleNorm = "REF_" + cleanRefKey.replace(/[.#$\/\[\]]/g, "_");
-            
-            if (catalogueArticles[cleanRefKey]?.photo) {
-              photoAuto = catalogueArticles[cleanRefKey].photo;
-            } else if (catalogueArticles[cleNorm]?.photo) {
-              photoAuto = catalogueArticles[cleNorm].photo;
-            } else if (eanCSV && catalogueArticles[eanCSV]?.photo) {
-              photoAuto = catalogueArticles[eanCSV].photo;
-            } else {
-              for (let c of Object.values(groupCommandes)) {
-                if (c.articles) {
-                  const foundArt = c.articles.find(a => String(a.ref).trim() === cleanRefKey || (eanCSV && String(a.codeBarre).trim() === eanCSV));
-                  if (foundArt && foundArt.photo) { photoAuto = foundArt.photo; break; }
-                }
-              }
-            }
+            if (catalogueArticles[cleanRefKey]?.photo) photoAuto = catalogueArticles[cleanRefKey].photo;
+            else if (catalogueArticles[cleNorm]?.photo) photoAuto = catalogueArticles[cleNorm].photo;
+            else if (eanCSV && catalogueArticles[eanCSV]?.photo) photoAuto = catalogueArticles[eanCSV].photo;
             if (photoAuto) photoLinkedCount++;
 
             if (!groupCommandes[numeroClean]) {
               groupCommandes[numeroClean] = { id: Date.now() + i, boutique: boutiqueCSV, numero: numeroClean, date: dateCSV, urgente: false, controle: false, articles: [] };
-            } else if (boutiqueCSV && !groupCommandes[numeroClean].boutique) {
-              groupCommandes[numeroClean].boutique = boutiqueCSV;
             }
-
-            if (!groupCommandes[numeroClean].articles) {
-              groupCommandes[numeroClean].articles = [];
-            }
+            if (!groupCommandes[numeroClean].articles) groupCommandes.articles = [];
 
             const existingArtIndex = groupCommandes[numeroClean].articles.findIndex(a => String(a.ref).trim() === cleanRefKey);
             if (existingArtIndex === -1) {
               groupCommandes[numeroClean].articles.push({ 
-                photo: photoAuto, fournisseur: fournisseurCSV, ref: cleanRefKey, codeBarre: eanCSV, quantite: qteCSV, dateDispo: "", remarqueArticle: designationCSV, boutique: boutiqueCSV 
+                photo: photoAuto, fournisseur: fournisseurCSV, ref: cleanRefKey, codeBarre: eanCSV, quantite: qteCSV, dateDispo: "", delaiMsAppro: delaiApproCSV, remarqueArticle: designationCSV, boutique: boutiqueCSV 
               });
-            } else {
-              if (boutiqueCSV) {
-                groupCommandes[numeroClean].articles[existingArtIndex].boutique = boutiqueCSV;
-              }
             }
           });
 
           const keys = Object.keys(groupCommandes);
-          if (keys.length > 0) {
-            const msg = `📊 RAPPORT COLLAGE EXCEL :\n` +
-                        `- ${parsedCount} lignes analysées\n` +
-                        `- 🖼️ ${photoLinkedCount} photos rattachées\n` +
-                        `- 📦 ${keys.length} commandes\n\n` +
-                        `Enregistrer ?`;
-            if (confirm(msg)) {
-              let updates = {}; 
-              keys.forEach(k => {
-                let cmdObj = groupCommandes[k];
-                updates[cmdObj.id] = cmdObj;
-              });
-              db.ref('commandes').update(updates).then(() => { 
-                alert("✅ Import réussi !"); 
-                pasteModal.style.display = 'none';
-              });
-            }
-          } else {
-            alert("⚠️ Impossible de lire les colonnes.");
+          if (keys.length > 0 && confirm(`Import de ${parsedCount} lignes (${photoLinkedCount} photos trouvées). Enregistrer ?`)) {
+            let updates = {}; 
+            keys.forEach(k => { updates[groupCommandes[k].id] = groupCommandes[k]; });
+            db.ref('commandes').update(updates).then(() => { alert("✅ Import réussi !"); pasteModal.style.display = 'none'; });
           }
         });
       });
     }
 
-    // --- EXPORT EXCEL ---
-    const btnExportSheets = document.getElementById('btnExportSheets');
-    if(btnExportSheets) {
-      btnExportSheets.addEventListener('click', () => {
-        let listeAExporter = getFilteredCommandes(inputRecherche.value);
-        if (listeAExporter.length === 0) { alert(`Aucun reliquat trouvé pour cette période.`); return; }
-
-        let tableHTML = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
-        <head><meta charset="UTF-8"><style>table { border-collapse: collapse; } th, td { border: 1px solid #cbd5e1; padding: 6px 10px; font-family: Arial, sans-serif; font-size: 11pt; } th { background-color: #ff6b00; color: #ffffff; font-weight: bold; }</style></head>
-        <body>
-        <table>
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Référence interne doc.</th>
-              <th>Fournisseur en contremarque</th>
-              <th>Code à barres ligne</th>
-              <th>Code article</th>
-              <th>Désignation</th>
-              <th>Qté restante ligne</th>
-              <th>Date dispo</th>
-              <th>Boutique de référence ligne doc</th>
-              <th>Urgent</th>
-              <th>À Contrôler</th>
-            </tr>
-          </thead>
-          <tbody>`;
-
-        listeAExporter.forEach(cmd => {
-          const date = cmd.date || "";
-          const boutiqueCmd = cmd.boutique || "";
-          const numero = cmd.numero || "";
-          const statutUrgent = cmd.urgente ? "OUI" : "NON";
-          const statutControle = cmd.controle ? "OUI" : "NON";
+    // Export PDF Classique (par commande)
+    const btnExportPDF = document.getElementById('btnExportPDF');
+    if (btnExportPDF) {
+      btnExportPDF.addEventListener('click', () => {
+        const checked = document.querySelectorAll('.commande-select-checkbox:checked');
+        let list = checked.length > 0 ? commandes.filter(c => Array.from(checked).map(cb => Number(cb.getAttribute('data-id'))).includes(c.id)) : getFilteredCommandes(inputRecherche.value);
+        if (list.length === 0) { alert("Rien à exporter."); return; }
+        let html = `<div class="print-title">Export Reliquats</div><div class="print-subtitle">Généré le ${new Date().toLocaleString('fr-FR')}</div><div class="print-grid">`;
+        list.forEach(cmd => {
+          const bPrint = cmd.boutique ? `[Boutique ${cmd.boutique}] ` : '';
+          let numP = String(cmd.numero || '').trim();
+          if (numP && !/^s-/i.test(numP)) numP = 'S-' + numP;
+          html += `<div class="print-card"><h3>${bPrint}Réf: ${numP}</h3><div class="date">${cmd.date}</div><div class="print-photos-flex">`;
           cmd.articles?.forEach(art => {
-            const boutiqueArt = art.boutique || boutiqueCmd;
-            tableHTML += `<tr>
-              <td>${date}</td>
-              <td>${numero}</td>
-              <td>${art.fournisseur || ""}</td>
-              <td>${art.codeBarre || ""}</td>
-              <td>${art.ref || ""}</td>
-              <td>${art.remarqueArticle || ""}</td>
-              <td>${art.quantite !== undefined ? art.quantite : 1}</td>
-              <td>${art.dateDispo || ""}</td>
-              <td>${boutiqueArt}</td>
-              <td>${statutUrgent}</td>
-              <td>${statutControle}</td>
-            </tr>`;
+            html += `<div class="print-photo-print-item">${art.photo?`<img src="${art.photo}">`:''}<div style="font-size:10px;">${art.fournisseur?`<b>Fournisseur:</b> ${art.fournisseur}<br>`:''}<b>Réf:</b> ${art.ref}<br>${art.codeBarre?`<b>EAN:</b> ${art.codeBarre}<br>`:''}${art.dateDispo?`<b>Dispo:</b> ${art.dateDispo}<br>`:''}${art.delaiMsAppro?`<b>Délai appro:</b> ${art.delaiMsAppro}<br>`:''}<b>Qté:</b> ${art.quantite||1}${art.remarqueArticle?`<br><b>Désignation:</b> ${art.remarqueArticle}`:''}</div></div>`;
           });
+          html += `</div></div>`;
         });
-
-        tableHTML += `</tbody></table></body></html>`;
-
-        const blob = new Blob([tableHTML], { type: 'application/vnd.ms-excel;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `reliquats_export.xls`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+        html += `</div>`;
+        const printArea = document.getElementById('print-area');
+        printArea.innerHTML = html;
+        setTimeout(() => { window.print(); printArea.innerHTML = ""; }, 300);
       });
     }
 
