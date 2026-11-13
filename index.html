@@ -139,7 +139,8 @@
     .global-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; margin-top: 1rem; }
     .global-card { background: var(--container-bg); border: 1px solid var(--border); border-radius: 12px; padding: 1rem; display: flex; flex-direction: column; gap: 0.6rem; position: relative; }
     .global-card img { width: 100%; height: 180px; object-fit: contain; border-radius: 8px; background: rgba(0,0,0,0.1); }
-    .global-card-checkbox { position: absolute; top: 12px; right: 12px; width: 22px; height: 22px; accent-color: var(--primary); cursor: pointer; z-index: 5; }
+    .global-card-top-row { display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 0.5rem; }
+    .global-article-checkbox { width: 20px; height: 20px; accent-color: var(--primary); cursor: pointer; flex-shrink: 0; }
 
     @media (min-width: 900px) {
       .main-layout-desktop { display: grid; grid-template-columns: 440px 1fr; gap: 1.5rem; align-items: start; }
@@ -992,7 +993,7 @@
       });
     }
 
-    // Vue d'ensemble par Fournisseur avec tri alphabétique par fournisseur
+    // Vue d'ensemble par Fournisseur avec case à cocher à côté du numéro de commande
     function afficherVueGlobale() {
       globalGridContainer.innerHTML = "";
       const liste = getFilteredCommandes(inputRecherche.value);
@@ -1021,9 +1022,11 @@
         const artBoutique = art.boutique || cmd.boutique || '';
 
         card.innerHTML = `
-          <input type="checkbox" class="global-article-checkbox" data-cmd-id="${cmd.id}" data-art-idx="${artIdx}">
           ${art.photo ? `<img src="${art.photo}">` : ''}
-          <div style="font-size:0.85rem; font-weight:bold; color:var(--primary);">N° ${numClean}</div>
+          <div class="global-card-top-row">
+            <div style="font-size:0.9rem; font-weight:bold; color:var(--primary);">N° ${numClean}</div>
+            <input type="checkbox" class="global-article-checkbox" data-cmd-id="${cmd.id}" data-art-idx="${artIdx}">
+          </div>
           ${artBoutique ? `<div style="font-size:0.8rem; color:var(--subtext);">Boutique: ${artBoutique}</div>` : ''}
           ${art.fournisseur ? `<div style="font-size:0.8rem; font-weight:600;">Fournisseur: ${art.fournisseur}</div>` : ''}
           ${art.ref ? `<div style="font-size:0.8rem;">Réf: ${art.ref}</div>` : ''}
