@@ -134,7 +134,7 @@
     .section-header-flex { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
     .badge-count { background: rgba(255, 107, 0, 0.15); color: var(--primary); border: 1px solid rgba(255, 107, 0, 0.4); padding: 0.35rem 0.75rem; border-radius: 30px; font-size: 0.95rem; font-weight: 800; }
 
-    /* Vue Globale par Fournisseur */
+    /* Vue d'ensemble par Fournisseur */
     #global-view-container { display: none; margin-top: 1rem; }
     .global-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; margin-top: 1rem; }
     .global-card { background: var(--container-bg); border: 1px solid var(--border); border-radius: 12px; padding: 1rem; display: flex; flex-direction: column; gap: 0.6rem; position: relative; }
@@ -151,7 +151,7 @@
       .commande-actions { flex-direction: column; align-items: stretch; gap: 0.3rem; }
     }
 
-    /* --- Modale optimisée & Alerte de boutique différente --- */
+    /* --- Modale optimisée --- */
     .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.85); flex-direction: column; overflow-y: auto; padding: 1rem; }
     .modal-content-container { display: flex; flex-direction: column; align-items: center; gap: 1.25rem; max-width: 95%; width: 100%; margin: auto; padding-top: 4rem; }
     
@@ -306,7 +306,7 @@
           <div class="section-header-flex">
             <h2>Historique Reliquats</h2>
             <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
-              <button class="btn-vue-globale" id="btnToggleVueGlobale" type="button">📊 Vue par Fournisseur</button>
+              <button class="btn-vue-globale" id="btnToggleVueGlobale" type="button">📊 Vue d'ensemble</button>
               <button class="btn-sort" id="btnTrierDate" type="button" title="Inverser l'ordre de tri">🔄 Trier : Récent</button>
               <span id="badgeCount" class="badge-count">0</span>
             </div>
@@ -333,7 +333,7 @@
             <p style="text-align:center; color:var(--subtext); padding:1rem;">Chargement en cours...</p>
           </div>
 
-          <!-- Vue Globale par Fournisseur avec sélections d'articles -->
+          <!-- Vue d'ensemble par Fournisseur avec sélections d'articles -->
           <div id="global-view-container">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; flex-wrap: wrap; gap: 0.5rem; background: var(--input-bg); padding: 0.75rem; border-radius: 10px; border: 1px solid var(--border);">
               <span id="globalViewTitle" style="font-weight: bold; color: var(--primary);">Aperçu global par Fournisseur</span>
@@ -812,7 +812,7 @@
         globalViewContainer.style.display = 'block';
         afficherVueGlobale();
       } else {
-        btnToggleVueGlobale.innerHTML = "📊 Vue par Fournisseur";
+        btnToggleVueGlobale.innerHTML = "📊 Vue d'ensemble";
         globalViewContainer.style.display = 'none';
         galerieCommandes.style.display = 'flex';
         afficherGalerie(inputRecherche.value);
@@ -878,7 +878,7 @@
           const newVal = !item.urgente;
           const updates = { urgente: newVal };
           if (newVal) updates.controle = false;
-          db.ref('commandes/' + id).update(updates).then(() => { item.urgente = newVal; if (newVal) item.controle = false; rafraichirAfficherGalerie(); });
+          db.ref('commandes/' + id).update(updates).then(() => { item.urgente = newVal; if (newVal) item.controle = false; rafraichirAffichageActuel(); });
         }
       });
     };
@@ -992,38 +992,49 @@
       });
     }
 
-    // Vue Globale par Fournisseur avec sélection individuelle des articles
+    // Vue d'ensemble par Fournisseur avec tri alphabétique par fournisseur
     function afficherVueGlobale() {
       globalGridContainer.innerHTML = "";
       const liste = getFilteredCommandes(inputRecherche.value);
-      let totalArticlesCount = 0;
+      let allArticles = [];
 
       liste.forEach(cmd => {
         cmd.articles?.forEach((art, artIdx) => {
-          totalArticlesCount++;
-          const card = document.createElement('div');
-          card.className = 'global-card';
-          
-          let numClean = String(cmd.numero || '').trim();
-          if (numClean && !/^s-/i.test(numClean)) numClean = 'S-' + numClean;
-          const artBoutique = art.boutique || cmd.boutique || '';
-
-          card.innerHTML = `
-            <input type="checkbox" class="global-article-checkbox" data-cmd-id="${cmd.id}" data-art-idx="${artIdx}">
-            ${art.photo ? `<img src="${art.photo}">` : ''}
-            <div style="font-size:0.85rem; font-weight:bold; color:var(--primary);">N° ${numClean}</div>
-            ${artBoutique ? `<div style="font-size:0.8rem; color:var(--subtext);">Boutique: ${artBoutique}</div>` : ''}
-            ${art.fournisseur ? `<div style="font-size:0.8rem; font-weight:600;">Fournisseur: ${art.fournisseur}</div>` : ''}
-            ${art.ref ? `<div style="font-size:0.8rem;">Réf: ${art.ref}</div>` : ''}
-            ${art.codeBarre ? `<div style="font-size:0.8rem; font-family:monospace;">EAN: ${art.codeBarre}</div>` : ''}
-            <div style="font-size:0.8rem; color:#16a34a; font-weight:bold;">Qté: ${art.quantite || 1}</div>
-            ${art.dateDispo ? `<div style="font-size:0.8rem; color:#d97706;">Dispo: ${art.dateDispo}</div>` : ''}
-            ${art.remarqueArticle ? `<div style="font-size:0.8rem; background:rgba(255,107,0,0.1); padding:0.3rem; border-radius:4px;">💬 ${art.remarqueArticle}</div>` : ''}
-          `;
-          globalGridContainer.appendChild(card);
+          allArticles.push({ cmd, art, artIdx });
         });
       });
-      document.getElementById('globalViewTitle').textContent = `Aperçu global par Fournisseur (${totalArticlesCount} articles)`;
+
+      // Tri alphabétique par fournisseur
+      allArticles.sort((a, b) => {
+        const fA = String(a.art.fournisseur || '').toLowerCase();
+        const fB = String(b.art.fournisseur || '').toLowerCase();
+        return fA.localeCompare(fB);
+      });
+
+      allArticles.forEach(item => {
+        const { cmd, art, artIdx } = item;
+        const card = document.createElement('div');
+        card.className = 'global-card';
+        
+        let numClean = String(cmd.numero || '').trim();
+        if (numClean && !/^s-/i.test(numClean)) numClean = 'S-' + numClean;
+        const artBoutique = art.boutique || cmd.boutique || '';
+
+        card.innerHTML = `
+          <input type="checkbox" class="global-article-checkbox" data-cmd-id="${cmd.id}" data-art-idx="${artIdx}">
+          ${art.photo ? `<img src="${art.photo}">` : ''}
+          <div style="font-size:0.85rem; font-weight:bold; color:var(--primary);">N° ${numClean}</div>
+          ${artBoutique ? `<div style="font-size:0.8rem; color:var(--subtext);">Boutique: ${artBoutique}</div>` : ''}
+          ${art.fournisseur ? `<div style="font-size:0.8rem; font-weight:600;">Fournisseur: ${art.fournisseur}</div>` : ''}
+          ${art.ref ? `<div style="font-size:0.8rem;">Réf: ${art.ref}</div>` : ''}
+          ${art.codeBarre ? `<div style="font-size:0.8rem; font-family:monospace;">EAN: ${art.codeBarre}</div>` : ''}
+          <div style="font-size:0.8rem; color:#16a34a; font-weight:bold;">Qté: ${art.quantite || 1}</div>
+          ${art.dateDispo ? `<div style="font-size:0.8rem; color:#d97706;">Dispo: ${art.dateDispo}</div>` : ''}
+          ${art.remarqueArticle ? `<div style="font-size:0.8rem; background:rgba(255,107,0,0.1); padding:0.3rem; border-radius:4px;">💬 ${art.remarqueArticle}</div>` : ''}
+        `;
+        globalGridContainer.appendChild(card);
+      });
+      document.getElementById('globalViewTitle').textContent = `Aperçu global par Fournisseur (${allArticles.length} articles)`;
     }
 
     let toutCocheGlobal = false;
@@ -1214,7 +1225,6 @@
       });
     }
 
-    // Export PDF Classique (par commande)
     const btnExportPDF = document.getElementById('btnExportPDF');
     if (btnExportPDF) {
       btnExportPDF.addEventListener('click', () => {
