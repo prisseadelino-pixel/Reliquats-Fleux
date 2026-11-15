@@ -334,7 +334,7 @@
             <p style="text-align:center; color:var(--subtext); padding:1rem;">Chargement en cours...</p>
           </div>
 
-          <!-- Vue d'ensemble par Fournisseur avec sélections d'articles -->
+          <!-- Vue d'ensemble par Fournisseur avec regroupement des articles identiques -->
           <div id="global-view-container">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; flex-wrap: wrap; gap: 0.5rem; background: var(--input-bg); padding: 0.75rem; border-radius: 10px; border: 1px solid var(--border);">
               <span id="globalViewTitle" style="font-weight: bold; color: var(--primary);">Aperçu global par Fournisseur</span>
@@ -993,51 +993,80 @@
       });
     }
 
-    // Vue d'ensemble par Fournisseur avec case à cocher à côté du numéro de commande
+    // Vue d'ensemble par Fournisseur avec regroupement des articles identiques (somme des quantités et fusion des numéros de commande)
     function afficherVueGlobale() {
       globalGridContainer.innerHTML = "";
       const liste = getFilteredCommandes(inputRecherche.value);
-      let allArticles = [];
+      let mapArticles = {};
 
       liste.forEach(cmd => {
-        cmd.articles?.forEach((art, artIdx) => {
-          allArticles.push({ cmd, art, artIdx });
+        cmd.articles?.forEach(art => {
+          const refClean = String(art.ref || '').trim().toLowerCase();
+          const fournisseurClean = String(art.fournisseur || '').trim().toLowerCase();
+          const key = `${fournisseurClean}_${refClean}`;
+
+          let numClean = String(cmd.numero || '').trim();
+          if (numClean && !/^s-/i.test(numClean)) numClean = 'S-' + numClean;
+
+          if (!mapArticles[key]) {
+            mapArticles[key] = {
+              fournisseur: art.fournisseur || '',
+              ref: art.ref || '',
+              codeBarre: art.codeBarre || '',
+              photo: art.photo || '',
+              dateDispo: art.dateDispo || '',
+              delaiMsAppro: art.delaiMsAppro || '',
+              remarqueArticle: art.remarqueArticle || '',
+              boutique: art.boutique || cmd.boutique || '',
+              quantiteTotale: Number(art.quantite) || 1,
+              commandesSet: new Set(numClean ? [numClean] : []),
+              sources: [{ cmdId: cmd.id, articleRef: art.ref }]
+            };
+          } else {
+            mapArticles[key].quantiteTotale += Number(art.quantite) || 1;
+            if (numClean) mapArticles[key].commandesSet.add(numClean);
+            mapArticles[key].sources.push({ cmdId: cmd.id, articleRef: art.ref });
+            if (!mapArticles[key].photo && art.photo) mapArticles[key].photo = art.photo;
+            if (!mapArticles[key].dateDispo && art.dateDispo) mapArticles[key].dateDispo = art.dateDispo;
+            if (!mapArticles[key].delaiMsAppro && art.delaiMsAppro) mapArticles[key].delaiMsAppro = art.delaiMsAppro;
+            if (!mapArticles[key].remarqueArticle && art.remarqueArticle) mapArticles[key].remarqueArticle = art.remarqueArticle;
+          }
         });
       });
 
+      let groupedList = Object.values(mapArticles);
+
       // Tri alphabétique par fournisseur
-      allArticles.sort((a, b) => {
-        const fA = String(a.art.fournisseur || '').toLowerCase();
-        const fB = String(b.art.fournisseur || '').toLowerCase();
-        return fA.localeCompare(fB);
+      groupedList.sort((a, b) => {
+        return String(a.fournisseur || '').toLowerCase().localeCompare(String(b.fournisseur || '').toLowerCase());
       });
 
-      allArticles.forEach(item => {
-        const { cmd, art, artIdx } = item;
+      groupedList.forEach((item, index) => {
         const card = document.createElement('div');
         card.className = 'global-card';
         
-        let numClean = String(cmd.numero || '').trim();
-        if (numClean && !/^s-/i.test(numClean)) numClean = 'S-' + numClean;
-        const artBoutique = art.boutique || cmd.boutique || '';
+        const numsArray = Array.from(item.commandesSet);
+        const displayNums = numsArray.join(', ') || 'Vrac';
 
         card.innerHTML = `
-          ${art.photo ? `<img src="${art.photo}">` : ''}
+          ${item.photo ? `<img src="${item.photo}">` : ''}
           <div class="global-card-top-row">
-            <div style="font-size:0.9rem; font-weight:bold; color:var(--primary);">N° ${numClean}</div>
-            <input type="checkbox" class="global-article-checkbox" data-cmd-id="${cmd.id}" data-art-idx="${artIdx}">
+            <div style="font-size:0.85rem; font-weight:bold; color:var(--primary); word-break:break-all;">Commandes: ${displayNums}</div>
+            <input type="checkbox" class="global-article-checkbox" data-group-index="${index}">
           </div>
-          ${artBoutique ? `<div style="font-size:0.8rem; color:var(--subtext);">Boutique: ${artBoutique}</div>` : ''}
-          ${art.fournisseur ? `<div style="font-size:0.8rem; font-weight:600;">Fournisseur: ${art.fournisseur}</div>` : ''}
-          ${art.ref ? `<div style="font-size:0.8rem;">Réf: ${art.ref}</div>` : ''}
-          ${art.codeBarre ? `<div style="font-size:0.8rem; font-family:monospace;">EAN: ${art.codeBarre}</div>` : ''}
-          <div style="font-size:0.8rem; color:#16a34a; font-weight:bold;">Qté: ${art.quantite || 1}</div>
-          ${art.dateDispo ? `<div style="font-size:0.8rem; color:#d97706;">Dispo: ${art.dateDispo}</div>` : ''}
-          ${art.remarqueArticle ? `<div style="font-size:0.8rem; background:rgba(255,107,0,0.1); padding:0.3rem; border-radius:4px;">💬 ${art.remarqueArticle}</div>` : ''}
+          ${item.boutique ? `<div style="font-size:0.8rem; color:var(--subtext);">Boutique: ${item.boutique}</div>` : ''}
+          ${item.fournisseur ? `<div style="font-size:0.8rem; font-weight:600;">Fournisseur: ${item.fournisseur}</div>` : ''}
+          ${item.ref ? `<div style="font-size:0.8rem;">Réf: ${item.ref}</div>` : ''}
+          ${item.codeBarre ? `<div style="font-size:0.8rem; font-family:monospace;">EAN: ${item.codeBarre}</div>` : ''}
+          <div style="font-size:0.85rem; color:#16a34a; font-weight:bold;">Quantité totale : ${item.quantiteTotale}</div>
+          ${item.dateDispo ? `<div style="font-size:0.8rem; color:#d97706;">Dispo: ${item.dateDispo}</div>` : ''}
+          ${item.remarqueArticle ? `<div style="font-size:0.8rem; background:rgba(255,107,0,0.1); padding:0.3rem; border-radius:4px;">💬 ${item.remarqueArticle}</div>` : ''}
         `;
+        card._groupData = item; // Stocke les données pour l'export PDF
         globalGridContainer.appendChild(card);
       });
-      document.getElementById('globalViewTitle').textContent = `Aperçu global par Fournisseur (${allArticles.length} articles)`;
+
+      document.getElementById('globalViewTitle').textContent = `Aperçu global par Fournisseur (${groupedList.length} articles uniques)`;
     }
 
     let toutCocheGlobal = false;
@@ -1048,45 +1077,40 @@
     });
 
     document.getElementById('btnExportPDFGlobal').addEventListener('click', () => {
-      const checkedBoxes = document.querySelectorAll('.global-article-checkbox:checked');
-      if (checkedBoxes.length === 0) { alert("Veuillez sélectionner au moins un article."); return; }
-
-      let selectedMap = {};
-      checkedBoxes.forEach(cb => {
-        const cmdId = Number(cb.getAttribute('data-cmd-id'));
-        const artIdx = Number(cb.getAttribute('data-art-idx'));
-        if (!selectedMap[cmdId]) selectedMap[cmdId] = [];
-        const cmd = commandes.find(c => c.id === cmdId);
-        if (cmd && cmd.articles && cmd.articles[artIdx]) {
-          selectedMap[cmdId].push(cmd.articles[artIdx]);
+      const checkedCards = document.querySelectorAll('.global-card');
+      let selectedGroups = [];
+      checkedCards.forEach(card => {
+        const cb = card.querySelector('.global-article-checkbox');
+        if (cb && cb.checked && card._groupData) {
+          selectedGroups.push(card._groupData);
         }
       });
 
-      let html = `<div class="print-title">Export Reliquats (Sélection)</div><div class="print-subtitle">Généré le ${new Date().toLocaleString('fr-FR')}</div><div class="print-grid">`;
-      
-      Object.keys(selectedMap).forEach(cmdId => {
-        const cmd = commandes.find(c => c.id === Number(cmdId));
-        if (!cmd) return;
-        const bPrint = cmd.boutique ? `[Boutique ${cmd.boutique}] ` : '';
-        let numP = String(cmd.numero || '').trim();
-        if (numP && !/^s-/i.test(numP)) numP = 'S-' + numP;
+      if (selectedGroups.length === 0) { alert("Veuillez sélectionner au moins un article."); return; }
 
-        html += `<div class="print-card"><h3>${bPrint}Réf: ${numP}</h3><div class="date">${cmd.date}</div><div class="print-photos-flex">`;
-        selectedMap[cmdId].forEach(art => {
-          html += `<div class="print-photo-print-item">
-            ${art.photo ? `<img src="${art.photo}">` : ''}
-            <div style="font-size:10px;">
-              ${art.fournisseur ? `<b>Fournisseur:</b> ${art.fournisseur}<br>` : ''}
-              <b>Réf:</b> ${art.ref}<br>
-              ${art.codeBarre ? `<b>EAN:</b> ${art.codeBarre}<br>` : ''}
-              ${art.dateDispo ? `<b>Dispo:</b> ${art.dateDispo}<br>` : ''}
-              ${art.delaiMsAppro ? `<b>Délai appro:</b> ${art.delaiMsAppro}<br>` : ''}
-              <b>Qté:</b> ${art.quantite || 1}
-              ${art.remarqueArticle ? `<br><b>Désignation:</b> ${art.remarqueArticle}` : ''}
+      let html = `<div class="print-title">Export Reliquats - Vue d'ensemble (Sélection)</div><div class="print-subtitle">Généré le ${new Date().toLocaleString('fr-FR')}</div><div class="print-grid">`;
+      
+      selectedGroups.forEach(item => {
+        const bPrint = item.boutique ? `[Boutique ${item.boutique}] ` : '';
+        const numsStr = Array.from(item.commandesSet).join(', ');
+
+        html += `<div class="print-card">
+          <h3>${bPrint}Commandes: ${numsStr}</h3>
+          <div class="print-photos-flex">
+            <div class="print-photo-print-item" style="width:100%;">
+              ${item.photo ? `<img src="${item.photo}" style="height:120px;">` : ''}
+              <div style="font-size:11px;">
+                ${item.fournisseur ? `<b>Fournisseur:</b> ${item.fournisseur}<br>` : ''}
+                <b>Réf:</b> ${item.ref}<br>
+                ${item.codeBarre ? `<b>EAN:</b> ${item.codeBarre}<br>` : ''}
+                ${item.dateDispo ? `<b>Dispo:</b> ${item.dateDispo}<br>` : ''}
+                ${item.delaiMsAppro ? `<b>Délai appro:</b> ${item.delaiMsAppro}<br>` : ''}
+                <b style="color:#16a34a; font-size:12px;">Quantité totale: ${item.quantiteTotale}</b>
+                ${item.remarqueArticle ? `<br><b>Désignation:</b> ${item.remarqueArticle}` : ''}
+              </div>
             </div>
-          </div>`;
-        });
-        html += `</div></div>`;
+          </div>
+        </div>`;
       });
       html += `</div>`;
 
