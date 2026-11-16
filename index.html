@@ -88,7 +88,7 @@
     .export-filter-container { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.75rem; background: var(--container-bg); padding: 0.75rem; border-radius: 10px; border: 1px solid var(--border); }
     .export-filter-label { font-size: 0.85rem; font-weight: 700; color: var(--subtext); }
     .export-actions-row { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
-    .input-date-custom { flex: 1; min-width: 120px; border: 1px solid var(--border); border-radius: 8px; padding: 0.5rem; font-size: 0.85rem; color: var(--text); background: var(--input-bg); text-align: center; }
+    .input-date-custom { flex: 1; min-width: 140px; border: 1px solid var(--border); border-radius: 8px; padding: 0.5rem; font-size: 0.9rem; color: var(--text); background: var(--input-bg); }
     button.btn-pdf { background-color: #0284c7; color: white; border: none; padding: 0.6rem 0.85rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
     button.btn-select-all { background-color: var(--secondary); color: var(--text); border: 1px solid var(--border); padding: 0.6rem 0.85rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
     button.btn-sheets { background-color: #16a34a; color: white; border: none; padding: 0.6rem 0.85rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
@@ -314,11 +314,11 @@
           </div>
 
           <div class="export-filter-container">
-            <span class="export-filter-label">📅 Filtrer par période (JJ/MM/AAAA) :</span>
+            <span class="export-filter-label">📅 Filtrer par période :</span>
             <div class="export-actions-row">
-              <input type="text" id="dateDebutFiltre" class="input-date-custom" placeholder="JJ/MM/AAAA" autocomplete="off">
+              <input type="date" id="dateDebutFiltre" class="input-date-custom">
               <span style="font-size:0.8rem; color:var(--subtext);">au</span>
-              <input type="text" id="dateFinFiltre" class="input-date-custom" placeholder="JJ/MM/AAAA" autocomplete="off">
+              <input type="date" id="dateFinFiltre" class="input-date-custom">
               <button class="btn-select-all" id="btnSelectAll" type="button">☑️ Tout cocher</button>
               <button class="btn-pdf" id="btnExportPDF" type="button">📄 Exporter PDF</button>
               
@@ -766,14 +766,9 @@
       return str;
     }
 
-    function parserDateSaisie(val) {
+    function parserDateSaisieInputDate(val) {
       if (!val) return null;
-      let clean = val.trim();
-      if (clean.includes('/')) {
-        const p = clean.split('/');
-        if (p.length === 3 && p[2].length === 4) return new Date(`${p[2]}-${p[1]}-${p[0]}`).setHours(0,0,0,0);
-      }
-      let d = new Date(clean);
+      let d = new Date(val);
       if (!isNaN(d.getTime())) { d.setHours(0,0,0,0); return d.getTime(); }
       return null;
     }
@@ -905,8 +900,8 @@
       const finVal = dateFinFiltre ? dateFinFiltre.value : "";
       const boutiqueFiltreSelect = selectFiltreBoutique ? selectFiltreBoutique.value : "";
       
-      const timeDebut = parserDateSaisie(debutVal);
-      let timeFin = parserDateSaisie(finVal);
+      const timeDebut = parserDateSaisieInputDate(debutVal);
+      let timeFin = parserDateSaisieInputDate(finVal);
       if (timeFin) timeFin += 86399999;
 
       return commandes.filter(c => {
@@ -993,7 +988,6 @@
       });
     }
 
-    // Vue d'ensemble par Fournisseur avec regroupement des articles identiques (somme des quantités et fusion des numéros de commande)
     function afficherVueGlobale() {
       globalGridContainer.innerHTML = "";
       const liste = getFilteredCommandes(inputRecherche.value);
@@ -1036,7 +1030,6 @@
 
       let groupedList = Object.values(mapArticles);
 
-      // Tri alphabétique par fournisseur
       groupedList.sort((a, b) => {
         return String(a.fournisseur || '').toLowerCase().localeCompare(String(b.fournisseur || '').toLowerCase());
       });
@@ -1062,7 +1055,7 @@
           ${item.dateDispo ? `<div style="font-size:0.8rem; color:#d97706;">Dispo: ${item.dateDispo}</div>` : ''}
           ${item.remarqueArticle ? `<div style="font-size:0.8rem; background:rgba(255,107,0,0.1); padding:0.3rem; border-radius:4px;">💬 ${item.remarqueArticle}</div>` : ''}
         `;
-        card._groupData = item; // Stocke les données pour l'export PDF
+        card._groupData = item;
         globalGridContainer.appendChild(card);
       });
 
@@ -1129,8 +1122,8 @@
       });
     }
     
-    if (dateDebutFiltre) dateDebutFiltre.addEventListener('input', rafraichirAffichageActuel);
-    if (dateFinFiltre) dateFinFiltre.addEventListener('input', rafraichirAffichageActuel);
+    if (dateDebutFiltre) dateDebutFiltre.addEventListener('change', rafraichirAffichageActuel);
+    if (dateFinFiltre) dateFinFiltre.addEventListener('change', rafraichirAffichageActuel);
     if (selectFiltreBoutique) selectFiltreBoutique.addEventListener('change', rafraichirAffichageActuel);
 
     window.ouvrirModal = function(cmd) {
@@ -1170,7 +1163,6 @@
       inputRecherche.addEventListener('keypress', (e) => { if (e.key === 'Enter') executerRecherche(); });
     }
 
-    // --- COLLAGE EXCEL ---
     const pasteModal = document.getElementById('pasteModal');
     const btnOpenPasteModal = document.getElementById('btnOpenPasteModal');
     if (btnOpenPasteModal) {
