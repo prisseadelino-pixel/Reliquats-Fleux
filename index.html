@@ -1266,15 +1266,47 @@
     if (btnExportPDF) {
       btnExportPDF.addEventListener('click', () => {
         const checked = document.querySelectorAll('.commande-select-checkbox:checked');
+        const boutiqueFiltreSelect = selectFiltreBoutique ? selectFiltreBoutique.value.trim() : "";
         let list = checked.length > 0 ? commandes.filter(c => Array.from(checked).map(cb => Number(cb.getAttribute('data-id'))).includes(c.id)) : getFilteredCommandes(inputRecherche.value);
+        if (boutiqueFiltreSelect && checked.length > 0) {
+          list = list.filter(c => {
+            const matchCmdBoutique = String(c.boutique || '').trim() === boutiqueFiltreSelect;
+            const matchArtBoutique = c.articles?.some(a => String(a.boutique || '').trim() === boutiqueFiltreSelect);
+            return matchCmdBoutique || matchArtBoutique;
+          });
+        }
         if (list.length === 0) { alert("Rien à exporter."); return; }
         let html = `<div class="print-title">Export Reliquats</div><div class="print-subtitle">Généré le ${new Date().toLocaleString('fr-FR')}</div><div class="print-grid">`;
         list.forEach(cmd => {
-          const bPrint = cmd.boutique ? `[Boutique ${cmd.boutique}] ` : '';
+          const articlesFiltres = (cmd.articles || []).filter(art => {
+            if (!boutiqueFiltreSelect) return true;
+            const artBoutique = String(art.boutique || cmd.boutique || '').trim();
+            return artBoutique === boutiqueFiltreSelect;
+          });
+          if (articlesFiltres.length === 0) return;
+
+          const cmdBoutiqueClean = String(cmd.boutique || '').trim();
+          const autresBoutiquesSet = new Set();
+          articlesFiltres.forEach(a => {
+            const artB = String(a.boutique || '').trim();
+            if (artB && artB !== cmdBoutiqueClean) {
+              autresBoutiquesSet.add(artB);
+            }
+          });
+          const autresBoutiquesList = Array.from(autresBoutiquesSet);
+          let bPrint = '';
+          if (cmdBoutiqueClean && autresBoutiquesList.length > 0) {
+            bPrint = `[Boutique ${cmdBoutiqueClean} • +Boutique ${autresBoutiquesList.join(', ')}] `;
+          } else if (cmdBoutiqueClean) {
+            bPrint = `[Boutique ${cmdBoutiqueClean}] `;
+          } else if (autresBoutiquesList.length > 0) {
+            bPrint = `[Boutique ${autresBoutiquesList.join(', ')}] `;
+          }
+
           let numP = String(cmd.numero || '').trim();
           if (numP && !/^s-/i.test(numP)) numP = 'S-' + numP;
           html += `<div class="print-card"><h3>${bPrint}Réf: ${numP}</h3><div class="date">${cmd.date}</div><div class="print-photos-flex">`;
-          cmd.articles?.forEach(art => {
+          articlesFiltres.forEach(art => {
             html += `<div class="print-photo-print-item">${art.photo?`<img src="${art.photo}">`:''}<div style="font-size:10px;">${art.fournisseur?`<b>Fournisseur:</b> ${art.fournisseur}<br>`:''}<b>Réf:</b> ${art.ref}<br>${art.codeBarre?`<b>EAN:</b> ${art.codeBarre}<br>`:''}${art.dateDispo?`<b>Dispo:</b> ${art.dateDispo}<br>`:''}<b>Qté:</b> ${art.quantite||1}${art.remarqueArticle?`<br><b>Désignation:</b> ${art.remarqueArticle}`:''}</div></div>`;
           });
           html += `</div></div>`;
