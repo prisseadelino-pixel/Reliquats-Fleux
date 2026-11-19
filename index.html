@@ -203,7 +203,6 @@
     .modal-barcode-badge { background-color: #0284c7; color: #ffffff; font-weight: 700; padding: 0.25rem 0.65rem; border-radius: 6px; font-size: 0.8rem; font-family: monospace; }
     .modal-qty-badge { background-color: #16a34a; color: #ffffff; font-weight: 700; padding: 0.25rem 0.65rem; border-radius: 6px; font-size: 0.85rem; }
     .modal-dispo-badge { background-color: #d97706; color: #ffffff; font-weight: 700; padding: 0.25rem 0.65rem; border-radius: 6px; font-size: 0.85rem; }
-    .modal-delai-badge { background-color: #6366f1; color: #ffffff; font-weight: 700; padding: 0.25rem 0.65rem; border-radius: 6px; font-size: 0.85rem; }
     .modal-article-remarque-box { background: rgba(255, 107, 0, 0.15); color: var(--text); padding: 0.35rem 0.6rem; border-radius: 6px; font-size: 0.85rem; font-weight: 600; text-align: center; border: 1px dashed var(--primary); width: 100%; word-break: break-word; }
     .modal-close { position: fixed; top: 15px; right: 15px; color: white; font-size: 1.8rem; font-weight: bold; cursor: pointer; z-index: 1010; background: rgba(0,0,0,0.5); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); }
 
@@ -640,7 +639,6 @@
       const barcodeInit = dataArticle?.codeBarre || "";
       const qteInit = dataArticle?.quantite !== undefined ? dataArticle.quantite : 1;
       const dateDispoInit = dataArticle?.dateDispo || "";
-      const delaiMsApproInit = dataArticle?.delaiMsAppro || "";
       const remArticleInit = dataArticle?.remarqueArticle || "";
       const boutiqueArtInit = dataArticle?.boutique || "";
 
@@ -665,7 +663,6 @@
         <div class="form-group"><label>Code-barres ligne (EAN)</label><input type="text" class="input-barcode" value="${barcodeInit}"></div>
         <div class="form-group"><label>Quantité</label><input type="number" min="1" class="input-qte" value="${qteInit}"></div>
         <div class="form-group"><label>📅 Date prévue de disponibilité</label><input type="text" class="input-date-dispo" value="${dateDispoInit}" placeholder="Ex: Semaine 45 ou 15/11/2026"></div>
-        <div class="form-group"><label>⏱️ Délai ms appro</label><input type="text" class="input-delai-appro" value="${delaiMsApproInit}" placeholder="Ex: 2 semaines, 10 jours..."></div>
         <div class="form-group" style="margin-bottom: 0;"><label>💬 Remarque / Désignation spécifique article</label><input type="text" class="input-article-remarque" value="${remArticleInit}"></div>
       `;
 
@@ -674,7 +671,6 @@
       const inputBarcode = bloc.querySelector('.input-barcode');
       const inputQte = bloc.querySelector('.input-qte');
       const inputDateDispo = bloc.querySelector('.input-date-dispo');
-      const inputDelaiAppro = bloc.querySelector('.input-delai-appro');
       const inputArtRemarque = bloc.querySelector('.input-article-remarque');
       const inputArtBoutique = bloc.querySelector('.input-article-boutique');
       const previewWrapper = bloc.querySelector('.previewWrapper');
@@ -692,7 +688,6 @@
         if (item && item.codeBarre && !inputBarcode.value.trim()) inputBarcode.value = item.codeBarre;
         if (item && item.quantite !== undefined && inputQte.value == "1") inputQte.value = item.quantite;
         if (item && item.dateDispo && !inputDateDispo.value.trim()) inputDateDispo.value = item.dateDispo;
-        if (item && item.delaiMsAppro && !inputDelaiAppro.value.trim()) inputDelaiAppro.value = item.delaiMsAppro;
         if (item && item.remarqueArticle && !inputArtRemarque.value.trim()) inputArtRemarque.value = item.remarqueArticle;
       }
       inputRef.addEventListener('input', verifierAutocompletion);
@@ -711,7 +706,7 @@
               const ref = inputRef.value.trim();
               if (ref) {
                 db.ref('catalogue_photos/REF_' + ref.replace(/[.#$\/\[\]]/g, "_")).update({
-                  refOriginale: ref, photo: photoData, fournisseur: inputFournisseur.value.trim(), codeBarre: inputBarcode.value.trim(), quantite: Number(inputQte.value) || 1, dateDispo: inputDateDispo.value.trim(), delaiMsAppro: inputDelaiAppro.value.trim(), remarqueArticle: inputArtRemarque.value.trim()
+                  refOriginale: ref, photo: photoData, fournisseur: inputFournisseur.value.trim(), codeBarre: inputBarcode.value.trim(), quantite: Number(inputQte.value) || 1, dateDispo: inputDateDispo.value.trim(), remarqueArticle: inputArtRemarque.value.trim()
                 }).catch(() => {});
               }
             });
@@ -725,7 +720,7 @@
       bloc.querySelector('.btn-retirer-article').addEventListener('click', () => { bloc.remove(); mettreAJourIndiceArticles(); });
 
       bloc.getArticleData = () => ({
-        photo: photoData, fournisseur: inputFournisseur.value.trim(), ref: inputRef.value.trim(), codeBarre: inputBarcode.value.trim(), quantite: Number(inputQte.value) || 1, dateDispo: inputDateDispo.value.trim(), delaiMsAppro: inputDelaiAppro.value.trim(), remarqueArticle: inputArtRemarque.value.trim(), boutique: inputArtBoutique.value.trim()
+        photo: photoData, fournisseur: inputFournisseur.value.trim(), ref: inputRef.value.trim(), codeBarre: inputBarcode.value.trim(), quantite: Number(inputQte.value) || 1, dateDispo: inputDateDispo.value.trim(), remarqueArticle: inputArtRemarque.value.trim(), boutique: inputArtBoutique.value.trim()
       });
 
       articlesContainer.appendChild(bloc);
@@ -937,8 +932,7 @@
             String(a.codeBarre||'').toLowerCase().includes(fStr) ||
             String(a.remarqueArticle||'').toLowerCase().includes(fStr) ||
             String(a.boutique||'').toLowerCase().includes(fStr) ||
-            String(a.dateDispo||'').toLowerCase().includes(fStr) ||
-            String(a.delaiMsAppro||'').toLowerCase().includes(fStr)
+            String(a.dateDispo||'').toLowerCase().includes(fStr)
           );
           if (!matchBoutique && !matchNum && !matchArt) return false;
         }
@@ -963,7 +957,24 @@
         let numClean = String(cmd.numero || '').trim();
         if (numClean && !/^s-/i.test(numClean)) numClean = 'S-' + numClean;
         const displayNum = numClean || 'Sans numéro';
-        const displayBoutique = cmd.boutique ? `[Boutique ${cmd.boutique}] ` : '';
+
+        const cmdBoutiqueClean = String(cmd.boutique || '').trim();
+        const autresBoutiquesSet = new Set();
+        cmd.articles?.forEach(a => {
+          const artB = String(a.boutique || '').trim();
+          if (artB && artB !== cmdBoutiqueClean) {
+            autresBoutiquesSet.add(artB);
+          }
+        });
+        const autresBoutiquesList = Array.from(autresBoutiquesSet);
+        let displayBoutique = '';
+        if (cmdBoutiqueClean && autresBoutiquesList.length > 0) {
+          displayBoutique = `[Boutique ${cmdBoutiqueClean} • +Boutique ${autresBoutiquesList.join(', ')}] `;
+        } else if (cmdBoutiqueClean) {
+          displayBoutique = `[Boutique ${cmdBoutiqueClean}] `;
+        } else if (autresBoutiquesList.length > 0) {
+          displayBoutique = `[Boutique ${autresBoutiquesList.join(', ')}] `;
+        }
 
         item.innerHTML = `
           <div class="commande-row-top">
@@ -1021,7 +1032,6 @@
               codeBarre: art.codeBarre || '',
               photo: art.photo || '',
               dateDispo: art.dateDispo || '',
-              delaiMsAppro: art.delaiMsAppro || '',
               remarqueArticle: art.remarqueArticle || '',
               boutique: artBoutique,
               quantiteTotale: Number(art.quantite) || 1,
@@ -1034,7 +1044,6 @@
             mapArticles[key].sources.push({ cmdId: cmd.id, articleRef: art.ref });
             if (!mapArticles[key].photo && art.photo) mapArticles[key].photo = art.photo;
             if (!mapArticles[key].dateDispo && art.dateDispo) mapArticles[key].dateDispo = art.dateDispo;
-            if (!mapArticles[key].delaiMsAppro && art.delaiMsAppro) mapArticles[key].delaiMsAppro = art.delaiMsAppro;
             if (!mapArticles[key].remarqueArticle && art.remarqueArticle) mapArticles[key].remarqueArticle = art.remarqueArticle;
           }
         });
@@ -1109,7 +1118,6 @@
                 <b>Réf:</b> ${item.ref}<br>
                 ${item.codeBarre ? `<b>EAN:</b> ${item.codeBarre}<br>` : ''}
                 ${item.dateDispo ? `<b>Dispo:</b> ${item.dateDispo}<br>` : ''}
-                ${item.delaiMsAppro ? `<b>Délai appro:</b> ${item.delaiMsAppro}<br>` : ''}
                 <b style="color:#16a34a; font-size:12px;">Quantité totale: ${item.quantiteTotale}</b>
                 ${item.remarqueArticle ? `<br><b>Désignation:</b> ${item.remarqueArticle}` : ''}
               </div>
@@ -1158,7 +1166,6 @@
             <span class="modal-qty-badge">Qte: ${art.quantite||1}</span>
           </div>
           ${art.dateDispo ? `<div class="modal-dispo-badge">📅 Dispo: ${art.dateDispo}</div>` : ''}
-          ${art.delaiMsAppro ? `<div class="modal-delai-badge">⏱️ Délai appro: ${art.delaiMsAppro}</div>` : ''}
           ${art.remarqueArticle ? `<div class="modal-article-remarque-box">💬 ${art.remarqueArticle}</div>` : ''}
         `;
         modalImagesRow.appendChild(box);
@@ -1220,7 +1227,6 @@
             const qteRaw = parts[6];
             const qteCSV = !isNaN(qteRaw) && qteRaw !== '' ? Number(qteRaw) : 1;
             const boutiqueCSV = String(parts[7] || '').trim();
-            const delaiApproCSV = String(parts[8] || '').trim();
 
             if (!refCSV) return;
             parsedCount++;
@@ -1241,7 +1247,7 @@
             const existingArtIndex = groupCommandes[numeroClean].articles.findIndex(a => String(a.ref).trim() === cleanRefKey);
             if (existingArtIndex === -1) {
               groupCommandes[numeroClean].articles.push({ 
-                photo: photoAuto, fournisseur: fournisseurCSV, ref: cleanRefKey, codeBarre: eanCSV, quantite: qteCSV, dateDispo: "", delaiMsAppro: delaiApproCSV, remarqueArticle: designationCSV, boutique: boutiqueCSV 
+                photo: photoAuto, fournisseur: fournisseurCSV, ref: cleanRefKey, codeBarre: eanCSV, quantite: qteCSV, dateDispo: "", remarqueArticle: designationCSV, boutique: boutiqueCSV 
               });
             }
           });
@@ -1269,7 +1275,7 @@
           if (numP && !/^s-/i.test(numP)) numP = 'S-' + numP;
           html += `<div class="print-card"><h3>${bPrint}Réf: ${numP}</h3><div class="date">${cmd.date}</div><div class="print-photos-flex">`;
           cmd.articles?.forEach(art => {
-            html += `<div class="print-photo-print-item">${art.photo?`<img src="${art.photo}">`:''}<div style="font-size:10px;">${art.fournisseur?`<b>Fournisseur:</b> ${art.fournisseur}<br>`:''}<b>Réf:</b> ${art.ref}<br>${art.codeBarre?`<b>EAN:</b> ${art.codeBarre}<br>`:''}${art.dateDispo?`<b>Dispo:</b> ${art.dateDispo}<br>`:''}${art.delaiMsAppro?`<b>Délai appro:</b> ${art.delaiMsAppro}<br>`:''}<b>Qté:</b> ${art.quantite||1}${art.remarqueArticle?`<br><b>Désignation:</b> ${art.remarqueArticle}`:''}</div></div>`;
+            html += `<div class="print-photo-print-item">${art.photo?`<img src="${art.photo}">`:''}<div style="font-size:10px;">${art.fournisseur?`<b>Fournisseur:</b> ${art.fournisseur}<br>`:''}<b>Réf:</b> ${art.ref}<br>${art.codeBarre?`<b>EAN:</b> ${art.codeBarre}<br>`:''}${art.dateDispo?`<b>Dispo:</b> ${art.dateDispo}<br>`:''}<b>Qté:</b> ${art.quantite||1}${art.remarqueArticle?`<br><b>Désignation:</b> ${art.remarqueArticle}`:''}</div></div>`;
           });
           html += `</div></div>`;
         });
